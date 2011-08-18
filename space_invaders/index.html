@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>HTML5 SVG Demo</title>
+</head>
+
+<body>
+
+        <div id="container" style="margin: auto auto; text-align: center;" >
+                <svg id="svg" width="500" height="500" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                        <defs>
+                                <linearGradient id="background" x1="0" x2="0" y1="0" y2="1"><!-- y1, y2 determines position -->
+                                        <stop offset="0%" stop-color="#444" />
+                                        <stop offset="70%" stop-color="#000" />
+                                </linearGradient>
+                        </defs>
+                        
+                        <rect rx="0" ry="0" width="500" height="500" fill="url(#background)" />
+                </svg>
+                <p>Arrow keys or mouse to move. Space or click to shoot.</p>
+                <p><em>Runs best in <strong>Google Chrome</strong>.<em></p>
+        </div>
+        
+        <script type="text/javascript" src="jquery.min.js"></script>
+        <script type="text/javascript" src="game.js"></script>
+</body>
+</html>

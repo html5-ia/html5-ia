@@ -16,6 +16,42 @@
                         </defs>
                         
                         <rect rx="0" ry="0" width="500" height="500" fill="url(#background)" />
+                        
+                        <g id="screenWelcome">
+                                <text x="110" y="140" fill="#ddd" style="font: bold 80px arial;">SPACE</text>
+                                <text x="110" y="190" fill="#3f0" style="font: bold 53px arial;">INVADERS</text>
+                                
+                                <image x="200" y="220" width="30" height="20" xlink:href="invader2a.svg">
+                                        <animate
+                                                attributeName="xlink:href"
+                                                attributeType="XML"
+                                                begin="0s"
+                                                from="invader2a.svg"
+                                                to="invader2b.svg"
+                                                dur="1s"
+                                                repeatCount="indefinite"
+                                        />
+                                </image>
+                                <text x="238" y="237" fill="#ddd" style="font: bold 20px arial">= 1pt</text>
+                                
+                                <image x="185" y="260" width="40" height="20" xlink:href="redship.svg" />
+                                <text x="233" y="277" fill="#ddd" style="font: bold 20px arial">= 10pts</text>
+                                
+                                <text x="145" y="318" fill="#ddd" style="font: bold 20px arial">+1</text>
+                                <path class="life" d="M 175 305 v 13 h 35 v -13 h -2 v -2 h -12 v -4 h -2 v -2 h -3 v 2 h -2 v 4 h -12 v 2 l -2 0" fill="#33ff00" />
+                                <text x="217" y="318" fill="#ddd" style="font: bold 20px arial">life = 100pts</text>
+                                        
+                                <text x="130" y="400" fill="#ddd" style="font: 28px 'Courier New', Courier, monospace">
+                                        <animate
+                                                attributeType="CSS"
+                                                attributeName="opacity"
+                                                from="0"
+                                                to="1"
+                                                dur="5s"
+                                        />
+                                        Click To Play
+                                </text>
+                        </g>
                 </svg>
                 <p>Arrow keys or mouse to move. Space or click to shoot.</p>
                 <p><em>Runs best in <strong>Google Chrome</strong>.<em></p>

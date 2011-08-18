@@ -1,6 +1,6 @@
 /*
 Name: Space Invaders
-Version: Beta .1
+Version: Beta .2
 Author: Ashton Blue
 Author URL: http://twitter.com/#!/ashbluewd
 Publisher: Manning
@@ -9,7 +9,16 @@ Known bugs:
 - Text styling doesn't render correctly in Chrome and IE
 - Red ship shoots off the screen in IE
 - When down to last 3 invaders they go too far off of the right edge
+- Fix images, rect, and paths with /> at the end
+- Invader 2 is slightly snipped on the width
+
+Features to integrate:
 - Respawning delay for player
+- Game over screen with click to restart
+-- Use animation to rotate Invader back and forth
+- Extra life every 100 points
+- Consildate and clean code
+- Use and creat functions to cut down code
 */
 
 /********
@@ -112,7 +121,15 @@ var score;
 /********
 Core Logic
 ********/
-if (svgSupport){
+if (svgSupport){      
+        var welcome = document.getElementById('screenWelcome');
+        welcome.addEventListener('click', runGame, false);
+}
+
+function runGame() {
+        welcome.removeEventListener('click', init, false);
+        svg.removeChild(welcome);
+        
         init();
 }
 
@@ -670,7 +687,7 @@ $('#svg').mousemove(function(e){
 });
 
 $('#svg').click(function(){
-        if (! $('.' + laserCG)[0]) {
+        if (! $('.' + laserCG)[0] && $('.player')[0]) {
                 laserInit(shipX + (shipW / 2), shipY, laserCG);
         }
 });

@@ -17,11 +17,34 @@
                         
                         <rect rx="0" ry="0" width="500" height="500" fill="url(#background)" />
                         
+                        <g id="screenGameover" style="display: none">
+                                <g id="textGameover">
+                                        <text x="110" y="199" fill="#c00" style="font: bold 45px arial;">GAME OVER</text>
+                                        <text x="165" y="224" fill="#ddd" style="font: 20px 'Courier New', Courier, monospace">Click To Retry</text>
+                                </g>
+                                
+                                <image x="145" y="289" width="60" height="40" xlink:href="invader2a.svg">
+                                        <animate
+                                                attributeName="xlink:href"
+                                                attributeType="XML"
+                                                begin="0s"
+                                                from="invader2a.svg"
+                                                to="invader2b.svg"
+                                                dur="1s"
+                                                repeatCount="indefinite"
+                                        />
+                                </image>
+                                <rect x="230" y="249" width="123" height="50" fill="#ddd" />
+                                <path d="M 231 274 l -20 20 L 231 289 L 231 284" fill="#ddd" />
+                                <text x="240" y="269" fill="#000" style="font: bold 12px arial;">Rdy to be powned</text>
+                                <text x="240" y="286" fill="#000" style="font: bold 12px arial;">again human?</text>
+                        </g>
+                        
                         <g id="screenWelcome">
                                 <text x="110" y="140" fill="#ddd" style="font: bold 80px arial;">SPACE</text>
                                 <text x="110" y="190" fill="#3f0" style="font: bold 53px arial;">INVADERS</text>
                                 
-                                <image x="200" y="220" width="30" height="20" xlink:href="invader2a.svg">
+                                <image x="200" y="220" width="30" height="20" xlink:href="invader2a.svg" />
                                         <animate
                                                 attributeName="xlink:href"
                                                 attributeType="XML"

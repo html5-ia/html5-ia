@@ -14,8 +14,6 @@ Known bugs:
 
 Features to integrate:
 - Respawning delay for player
-- Game over screen with click to restart
--- Use animation to rotate Invader back and forth
 - Extra life every 100 points
 - Consildate and clean code
 - Use and creat functions to cut down code
@@ -31,6 +29,10 @@ var svgH = svg.getAttribute('height');
 var svgPosLeft = Math.round($("#svg").position().left);
 var svgSupport = document.implementation.hasFeature("http://www.w3.org/TR/SVG11/feature#Shape", "1.1");
 var svgNS = 'http://www.w3.org/2000/svg';
+
+// Screens
+var welcome = document.getElementById('screenWelcome');
+var restart = document.getElementById('screenGameover');
 
 // Timers
 var svgRun;
@@ -107,8 +109,8 @@ var invUpdate = 800;
 // Text
 var text = document.createElementNS(svgNS,'text');
 var score = 0;
-var lives = 3;
-var level = 1;
+var lives = 0;
+var level = 0;
 
 // Controls
 var keyL;
@@ -122,18 +124,28 @@ var score;
 Core Logic
 ********/
 if (svgSupport){      
-        var welcome = document.getElementById('screenWelcome');
-        welcome.addEventListener('click', runGame, false);
+        svg.addEventListener('click', runGame, false);
 }
 
 function runGame() {
-        welcome.removeEventListener('click', init, false);
+        svg.removeEventListener('click', runGame, false);
         svg.removeChild(welcome);
         
         init();
 }
 
+function restartGame() {
+        svg.removeEventListener('click', restartGame, false);
+        restart.setAttribute('style', 'display: none');
+        
+        init();
+}
+
 function init() {
+        score = 0;
+        lives = 3;
+        level = 1;
+        
         shieldInit();
         invInit();
         textInit();
@@ -240,18 +252,18 @@ function laserAnimate(laserClass,speed) {
         lasers = document.getElementsByClassName(laserClass);
         
         if (lasers.length){
-                for (i=0; i<lasers.length; i++) {
-                        x1 = lasers[i].getAttribute('x');
+                for (n=0; n<lasers.length; n++) {
+                        x1 = lasers[n].getAttribute('x');
                         x1 = parseInt(x1);
-                        y1 = lasers[i].getAttribute('y');
+                        y1 = lasers[n].getAttribute('y');
                         y1 = parseInt(y1);
                         
                         if (y1 < 0 || y1 > svgH) {
-                                svg.removeChild(lasers[i]);
+                                svg.removeChild(lasers[n]);
                         }
                         else {
                                 y1 += speed;
-                                lasers[i].setAttribute('y',y1);
+                                lasers[n].setAttribute('y',y1);
                         }
                         
                         collide = document.getElementsByClassName('active');
@@ -271,7 +283,7 @@ function laserAnimate(laserClass,speed) {
                                         
                                         // test if shield
                                         if (objClass === 'shield active') {
-                                                svg.removeChild(lasers[i]);
+                                                svg.removeChild(lasers[n]);
                                                 hp = collide[j].getAttribute('hp');
                                                 hp = parseInt(hp);
                                                 hp -= 1;
@@ -291,14 +303,14 @@ function laserAnimate(laserClass,speed) {
                                         }
                                         // test if redship
                                         else if (objClass === 'active') {
-                                                svg.removeChild(lasers[i]);
+                                                svg.removeChild(lasers[n]);
                                                 svg.removeChild(collide[j]);
                                                 scoreDraw(10);
                                         }
                                         // if so extra points
                                         // else normal points and remove
                                         else {
-                                                svg.removeChild(lasers[i]);
+                                                svg.removeChild(lasers[n]);
                                                 svg.removeChild(collide[j]);
                                                 scoreDraw(1);
                                                 levelUp();
@@ -308,7 +320,7 @@ function laserAnimate(laserClass,speed) {
                         
                         // test if ship
                         if ((x1 >= shipX && x1 <= (shipX + shipW) && y1 >= shipY && y1 <= (shipY + shipH)) && shipPlayer[0]) {
-                                svg.removeChild(lasers[i]);
+                                svg.removeChild(lasers[n]);
                                 
                                 lifeDraw();
                         }
@@ -650,7 +662,11 @@ function gameOver() {
         clearInterval(rshipTimer);
         clearInterval(invTimer);
         clearInterval(svgRun);
-        alert('game over');
+        
+        $('.shield, #redShip, .life, .invader, .player, #textScore, #textLives, .laserEvil, .laserGood').detach();
+
+        restart.setAttribute('style', 'display: inline');
+        svg.addEventListener('click', restartGame, false);
 }
 
 // Movement controls
@@ -695,8 +711,12 @@ $('#svg').click(function(){
 
 // Misc
 function elementClean(name) {
-        element = document.getElementsByClassName(name);
-        for (i=0; i<element.length; i++) {
-                svg.removeChild(element[i]);
+        element = svg.getElementsByClassName(name);
+        
+        for (a=0; a<element.length; a++) {
+                alert(element.length);
+                svg.removeChild(element[a]);
         }
+
+        
 }

@@ -5,7 +5,6 @@
 </head>
 
 <body>
-
         <div id="container" style="margin: auto auto; text-align: center;" >
                 <svg id="svg" width="500" height="500" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
                         <defs>
@@ -17,43 +16,12 @@
                         
                         <rect rx="0" ry="0" width="500" height="500" fill="url(#background)" />
                         
-                        <g id="screenGameover" style="display: none">
-                                <g id="textGameover">
-                                        <text x="110" y="199" fill="#c00" style="font: bold 45px arial;">GAME OVER</text>
-                                        <text x="165" y="224" fill="#ddd" style="font: 20px 'Courier New', Courier, monospace">Click To Retry</text>
-                                </g>
-                                
-                                <image x="145" y="289" width="60" height="40" xlink:href="invader2a.svg">
-                                        <animate
-                                                attributeName="xlink:href"
-                                                attributeType="XML"
-                                                begin="0s"
-                                                from="invader2a.svg"
-                                                to="invader2b.svg"
-                                                dur="1s"
-                                                repeatCount="indefinite"
-                                        />
-                                </image>
-                                <rect x="230" y="249" width="123" height="50" fill="#ddd" />
-                                <path d="M 231 274 l -20 20 L 231 289 L 231 284" fill="#ddd" />
-                                <text x="240" y="269" fill="#000" style="font: bold 12px arial;">Rdy to be powned</text>
-                                <text x="240" y="286" fill="#000" style="font: bold 12px arial;">again human?</text>
-                        </g>
-                        
                         <g id="screenWelcome">
                                 <text x="110" y="140" fill="#ddd" style="font: bold 80px arial;">SPACE</text>
                                 <text x="110" y="190" fill="#3f0" style="font: bold 53px arial;">INVADERS</text>
                                 
                                 <image x="200" y="220" width="30" height="20" xlink:href="invader2a.svg">
-                                        <animate
-                                                attributeName="xlink:href"
-                                                attributeType="XML"
-                                                begin="0s"
-                                                from="invader2a.svg"
-                                                to="invader2b.svg"
-                                                dur="1s"
-                                                repeatCount="indefinite"
-                                        />
+                                        <animate attributeName="xlink:href" attributeType="XML" begin="0s" from="invader2a.svg" to="invader2b.svg" dur="1s" repeatCount="indefinite" />
                                 </image>
                                 <text x="238" y="237" fill="#ddd" style="font: bold 20px arial">= 1pt</text>
                                 
@@ -65,17 +33,28 @@
                                 <text x="217" y="318" fill="#ddd" style="font: bold 20px arial">life = 100pts</text>
                                         
                                 <text x="130" y="400" fill="#ddd" style="font: 28px 'Courier New', Courier, monospace">
-                                        <animate
-                                                attributeType="CSS"
-                                                attributeName="opacity"
-                                                from="0"
-                                                to="1"
-                                                dur="5s"
-                                        />
+                                        <animate attributeType="CSS" attributeName="opacity" from="0" to="1" dur="5s" />
                                         Click To Play
                                 </text>
                         </g>
+                        
+                        <g id="screenGameover" style="display: none">
+                                <g id="textGameover">
+                                        <text x="110" y="199" fill="#c00" style="font: bold 45px arial;">GAME OVER</text>
+                                        <text x="165" y="224" fill="#ddd" style="font: 20px 'Courier New', Courier, monospace">Click To Retry</text>
+                                </g>
+                                
+                                <image x="145" y="289" width="60" height="40" xlink:href="invader2a.svg">
+                                        <animate attributeName="xlink:href" attributeType="XML" begin="0s" from="invader2a.svg" to="invader2b.svg" dur="1s" repeatCount="indefinite" />
+                                </image>
+                                
+                                <rect x="230" y="249" width="123" height="50" fill="#ddd" />
+                                <path d="M 231 274 l -20 20 L 231 289 L 231 284" fill="#ddd" />
+                                <text x="240" y="269" fill="#000" style="font: bold 12px arial;">Rdy to be powned</text>
+                                <text x="240" y="286" fill="#000" style="font: bold 12px arial;">again human?</text>
+                        </g>
                 </svg>
+                
                 <p>Arrow keys or mouse to move. Space or click to shoot.</p>
                 <p><em>Runs best in <strong>Google Chrome</strong>.<em></p>
         </div>

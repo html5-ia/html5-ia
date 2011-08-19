@@ -6,9 +6,7 @@ Author URL: http://twitter.com/#!/ashbluewd
 Publisher: Manning
 
 Known bugs:
-- Text styling doesn't render correctly in Chrome and IE
 - When down to last 3 invaders they go too far off of the right edge
-- Invader 2 is slightly snipped on the width
 
 Features to integrate:
 - Consildate and clean code
@@ -417,7 +415,7 @@ function invInit() {
         invCol = 11;
         invGap = 10;
         invW = 25;
-        invH = 20;
+        invH = 19;
         invX = 64;
         invY = 90;
         invSpeedX = 0;
@@ -448,24 +446,31 @@ function invInit() {
 
 function invDraw() {
         // Wrap all content in test for timer
-                invLastX = 0;
                 invFirstX = svgW;
+                invLastX = 0;
                 
                 invs = document.getElementsByClassName('invader');
                 
                 // Loop through invaders
-                for (i=0; i<invs.length; i++) {
-                        // Get first and last value
-                        x = invs[i].getAttribute('x');
+                // Extra test here makes sure that the first and laster invader test doesn't crash with one invader
+                if (invs.length > 1) { 
+                        for (i=0; i<invs.length; i++) {
+                                // Get first and last x value
+                                x = parseInt(invs[i].getAttribute('x'));
+                                
+                                if (invFirstX > x) {
+                                        invFirstX = x;
+                                }
+                                else if (invLastX < x) {
+                                        invLastX = x;  
+                                }
+                        }
+                }
+                else {
+                        x = invs[0].getAttribute('x');
                         x = parseInt(x);
-                        
-                        // Set x and y based on those values
-                        if (invFirstX > x) {
-                                invFirstX = x;
-                        }
-                        else if (invLastX < x) {
-                                invLastX = x;  
-                        }
+                        invFirstX = x;
+                        invLastX = x;
                 }
                 
                 // Set speed based upon loop results
@@ -592,8 +597,7 @@ function textCreate(write,x,y,textName,color) {
         text.setAttribute('y', y);
         text.setAttribute('id', textName);
         text.setAttribute('fill', '#ddd');
-        text.setAttribute('font-weight', 'bold');
-        text.setAttribute('font-size', '14px');
+        text.setAttribute('style', 'font: bold 14px Arial, Helvetica');
         text.appendChild(document.createTextNode(write));
         svg.appendChild(text);
         

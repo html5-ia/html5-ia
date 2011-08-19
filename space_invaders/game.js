@@ -7,16 +7,12 @@ Publisher: Manning
 
 Known bugs:
 - Text styling doesn't render correctly in Chrome and IE
-- Red ship shoots off the screen in IE
 - When down to last 3 invaders they go too far off of the right edge
-- Fix images, rect, and paths with /> at the end
 - Invader 2 is slightly snipped on the width
 
 Features to integrate:
-- Respawning delay for player
-- Extra life every 100 points
 - Consildate and clean code
-- Use and creat functions to cut down code
+- Use and create functions to cut down code
 */
 
 /********
@@ -109,15 +105,13 @@ var invUpdate = 800;
 // Text
 var text = document.createElementNS(svgNS,'text');
 var score = 0;
+var scoreLife = 0;
 var lives = 0;
 var level = 0;
 
 // Controls
 var keyL;
 var keyR;
-
-// Misc
-var score;
 
 
 /********
@@ -517,7 +511,7 @@ function invDraw() {
                         
                         // Game over test
                         if (y > shieldY - 20 - invH) {
-                                return gameOver(); // Exit everything and shut down the game
+                                return setTimeout('gameOver()', 3000); // Exit everything and shut down the game
                         }
                 }
                 
@@ -587,6 +581,7 @@ function invShoot () {
 // Text
 function textInit() {
         score = 0;
+        scoreLife = 0;
         
         textCreate('Lives:',310,30,'textLives');
         textCreate('Score: ' + score,20,30,'textScore');
@@ -606,7 +601,7 @@ function textCreate(write,x,y,textName,color) {
 }
 
 function scoreDraw(amount) {
-        score += amount;
+        scoreCount(amount);
         element = document.getElementById('textScore');
         element.removeChild(element.firstChild);
         element.appendChild(document.createTextNode('Score: ' + score));
@@ -651,10 +646,30 @@ function lifeDraw() {
         svg.removeChild(shipLives[lives]);
         
         if (lives > 0) {
-                shipCreate(shipX, shipY, 'player');
+                setTimeout('shipCreate(shipX, shipY, \'player\')', 1000);
         }
         else {
-                gameOver();
+                setTimeout('gameOver()', 5000);
+        }
+        
+        
+}
+
+function scoreCount(pts) {
+        score += pts;
+        scoreLife += pts;
+        
+        if (scoreLife >= 100) {
+                if (lives < 3) {
+                        x = shipLivesX + (shipW * lives) + (shipLivesGap * lives);
+                        shipCreate(x, shipLivesY, 'life');
+                        
+                        lives += 1;
+                        scoreLife = 0;
+                }
+                else {
+                        scoreLife = 0;
+                }
         }
 }
 

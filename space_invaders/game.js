@@ -13,9 +13,9 @@ Variables
 var svg = document.getElementById('svg');
 var svgW = svg.getAttribute('width');
 var svgH = svg.getAttribute('height');
-var svgPosLeft = Math.round($("#svg").position().left);
 var svgSupport = document.implementation.hasFeature("http://www.w3.org/TR/SVG11/feature#Shape", "1.1");
 var svgNS = 'http://www.w3.org/2000/svg'; // SVG naming scheme
+var xlink = 'http://www.w3.org/1999/xlink';
 
 // Screens
 var welcome = document.getElementById('screenWelcome');
@@ -352,7 +352,7 @@ function rshipInit() {
         rship.setAttribute('y', rshipY);
         rship.setAttribute('width', rshipW);
         rship.setAttribute('height', rshipH);
-        rship.setAttributeNS('http://www.w3.org/1999/xlink','xlink:href', 'redship.svg');
+        rship.setAttributeNS(xlink,'xlink:href', 'redship.svg');
         svg.appendChild(rship);
         
         rship = document.createElementNS('http://www.w3.org/2000/svg','image'); // Resets element creation
@@ -402,10 +402,10 @@ function invInit() {
                         inv.setAttribute('col', col);
                         inv.setAttribute('width', invW);
                         inv.setAttribute('height', invH);
-                        inv.setAttributeNS('http://www.w3.org/1999/xlink','xlink:href', invImage(row));
+                        inv.setAttributeNS(xlink,'xlink:href', invImage(row));
                         svg.appendChild(inv);
                         
-                        inv = document.createElementNS('http://www.w3.org/2000/svg','image'); // Resets element creation
+                        inv = document.createElementNS(svgNS,'image');
                 }
         }
 }
@@ -603,9 +603,7 @@ function lifeDraw() {
         }
         else {
                 setTimeout('gameOver()', 3000);
-        }
-        
-        
+        } 
 }
 
 function scoreCount(pts) {
@@ -660,6 +658,7 @@ $(document).keyup(function(evt) {
 });
 
 $('#svg').mousemove(function(e){
+        var svgPosLeft = Math.round($("#svg").position().left);
         var svgPos = e.pageX - svgPosLeft;
         var shipM = shipW / 2; // ship middle
         

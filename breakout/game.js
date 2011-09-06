@@ -41,17 +41,27 @@ var keyL;
 var keyR;
 var mouseX;
 
-// Screen transitions
-var start = false;
-
 
 /********
 Setup
 ********/
 if (canvas.getContext){
         var context = canvas.getContext('2d');
-        init();                                                       
+        
+        welcomeDraw();
+        canvas.addEventListener('click', runGame, false);                                                    
 }
+
+function runGame() {
+        canvas.removeEventListener('click', runGame, false);
+        init();
+}
+
+function restartGame() {
+        canvas.removeEventListener('click', restartGame, false);
+        clearInterval(canvasRun);
+        init();
+} 
 
 function init() {
         hudInit();
@@ -66,11 +76,9 @@ function draw() {
         background();
     
         brickDraw();
-        if (start) ballDraw();
+        ballDraw();
         padDraw();
-        hudDraw();
-        if (!start) welcomeDraw();
-        if (ballY > canvasH) goDraw();                             
+        hudDraw();                        
 }
 
 
@@ -93,37 +101,50 @@ function ballInit() {
 }
 
 function ballDraw() {
-        if (!(ballY > canvasH)) {
-                // Canvas edge detection
-                if (ballY < 1) {
-                    ballSY = - ballSY;
-                }
-                if (ballX < 1 || ballX > canvasW) {
-                    ballSX = - ballSX;
-                }
-                
-                // Paddle to ball collision
-                if (ballX >= padX && ballX <= (padX + padW) && ballY >= padY && ballY <= (padY + padW)) {
-                        ballSX = 7 * ((ballX - (padX+padW/2))/padW);
-                        ballSY = -ballSY;
-                }
-                
-                ballX += ballSX;
-                ballY += ballSY;
-                
-                // Create ball
-                context.beginPath();
-                context.arc(ballX, ballY, ballR, 0, 2 * Math.PI, false);
-                context.fillStyle = ballGrad();
-                context.fill();
+        // Canvas edge detection
+        if (ballY < 1) { // Top
+                ballY = 1; // Prevents the ball from getting stuck at fast speeds
+                ballSY = -ballSY;
         }
+        // Bottom
+        else if (ballY > canvasH) {
+                clearInterval(canvasRun);
+                canvasRun = setInterval(goDraw, 12);
+                canvas.addEventListener('click', restartGame, false);
+        }
+        
+        // Left
+        if (ballX < 1) {
+                ballX = 1; // Prevents the ball from getting stuck at fast speeds
+                ballSX = - ballSX;
+        }
+        // Right
+        else if (ballX > canvasW) {
+                ballX = canvasW - 1; // Prevents the ball from getting stuck at fast speeds
+                ballSX = - ballSX;
+        }
+        
+        // Paddle to ball collision
+        if (ballX >= padX && ballX <= (padX + padW) && ballY >= padY && ballY <= (padY + padW)) {
+                ballSX = 7 * ((ballX - (padX+padW/2))/padW);
+                ballSY = -ballSY;
+        }
+        
+        ballX += ballSX;
+        ballY += ballSY;
+        
+        // Create ball
+        context.beginPath();
+        context.arc(ballX, ballY, ballR, 0, 2 * Math.PI, false);
+        context.fillStyle = ballGrad();
+        context.fill();
 }
 
 function ballGrad() {
-    var ballG = context.createRadialGradient(ballX,ballY,2,ballX-4,ballY-3,10);                                                     
-    ballG.addColorStop(0, '#eee');                         
-    ballG.addColorStop(1, '#999');                         
-    return ballG;
+        var ballG = context.createRadialGradient(ballX,ballY,2,ballX-4,ballY-3,10);                                                     
+        ballG.addColorStop(0, '#eee');                         
+        ballG.addColorStop(1, '#999');                         
+        return ballG;
 }
 
 // Paddle
@@ -278,15 +299,6 @@ function welcomeDraw() {
         context.font = '20px helvetica, arial';
         context.fillText('Click To Start', canvasW/2, canvasH/2 + 30);
 }
-
-$('#canvas').click(function() { 
-        start = true;
-        
-        if (ballY > canvasH) {
-                clearInterval(canvasRun);                             
-                init();
-        }
-});
 
 function goDraw() {
         context.fillStyle = 'black';

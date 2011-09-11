@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>SVG as Inline Test</title>
+    <style>
+    body { font-family: "Droid Sans", sans-serif; }
+    section { display: block; }
+    figure {
+        display: inline-block;
+        width: 250px;
+        height: 200px;
+        overflow: hidden;
+        padding: 0;
+        margin: 5px;
+        border: 0;
+        outline: 1px solid #999;
+        vertical-align: top;
+    }
+    figcaption { display: inline-block; }
+    #constrainnone svg {}
+    #constrainwidth svg { max-width: 100%; }
+    #constrainheight svg { max-height: 66%; }
+    #constrainboth svg { max-width: 100%; max-height: 66%; }
+    </style>
+</head>
+<body>
+<section id="constrainnone">
+    <h1>No size constraints</h1>
+    <figure>
+        <figcaption>No size information</figcaption>
+        <svg xmlns="http://www.w3.org/2000/svg" id="logo" x="0px" y="0px">
+    <defs>
+        <filter
+            id="dropGlow"
+            width="1.5"
+            height="1.5"
+            x="-.25"
+            y="-.25">
+            <feGaussianBlur
+                id="feGaussianBlur5384"
+                in="SourceAlpha"
+                stdDeviation="15.000000"
+                result="blur" />
+            <feColorMatrix
+                id="feColorMatrix5386"
+                result="bluralpha"
+                type="matrix"
+                values="-1 0 0 0 1 0 -1 0 0 1 0 0 -1 0 1 0 0 0 0.800000 0 " />
+            <feOffset
+                id="feOffset5388"
+                in="bluralpha"
+                dx="0.000000"
+                dy="0.000000"
+                result="offsetBlur" />
+            <feMerge id="feMerge5390">
+                <feMergeNode
+                    id="feMergeNode5392"
+                    in="offsetBlur" />
+                <feMergeNode
+                    id="feMergeNode5394"
+                    in="SourceGraphic" />
+            </feMerge>
+        </filter>
+    </defs>
+    <g style="filter:url(#dropGlow)">
+            <ellipse fill="#FFFFFF" stroke="#000000" stroke-width="15" cx="96.563" cy="67.641" rx="89.063" ry="60.141"></ellipse>
+            <ellipse stroke="#000000" stroke-width="15" cx="96.563" cy="211.427" rx="89.063" ry="60.14"></ellipse>
+            <ellipse fill="#993399" stroke="#000000" stroke-width="15" cx="507.884" cy="211.427" rx="89.063" ry="60.14"></ellipse>
+            <ellipse fill="#339999" stroke="#000000" stroke-width="15" cx="302.224" cy="211.427" rx="89.063" ry="60.14"></ellipse>
+            <ellipse fill="#999933" stroke="#000000" stroke-width="15" cx="713.545" cy="211.427" rx="89.063" ry="60.14"></ellipse>
+            <ellipse fill="#FFFFFF" stroke="#000000" stroke-width="15" cx="713.545" cy="355.215" rx="89.063" ry="60.14"></ellipse>
+            <text xml:space="preserve"
+                    style="font-size:64px;text-align:start;text-anchor:start;fill:#000000;fill-opacity:1;font-family:Droid Sans;"
+                    x="3" y="415">
+                <tspan x="3 110 210 310 400 510" y="415">DESIGN</tspan>
+            </text>
+    </g>
+</svg>
+    </figure>
+    <figure>
+        <figcaption>Viewbox specified</figcaption>
+        <svg xmlns="http://www.w3.org/2000/svg" id="logo" x="0px" y="0px" viewBox="-15 -25 835 470">
+    <defs>
+        <filter
+            id="dropGlow"
+            width="1.5"
+            height="1.5"
+            x="-.25"
+            y="-.25">
+            <feGaussianBlur
+                id="feGaussianBlur5384"
+                in="SourceAlpha"
+                stdDeviation="15.000000"
+                result="blur" />
+            <feColorMatrix
+                id="feColorMatrix5386"
+                result="bluralpha"
+                type="matrix"
+                values="-1 0 0 0 1 0 -1 0 0 1 0 0 -1 0 1 0 0 0 0.800000 0 " />
+            <feOffset
+                id="feOffset5388"
+                in="bluralpha"
+                dx="0.000000"
+                dy="0.000000"
+                result="offsetBlur" />
+            <feMerge id="feMerge5390">
+                <feMergeNode
+                    id="feMergeNode5392"
+                    in="offsetBlur" />
+                <feMergeNode
+                    id="feMergeNode5394"
+                    in="SourceGraphic" />
+            </feMerge>
+        </filter>
+    </defs>
+    <g style="filter:url(#dropGlow)">
+            <ellipse fill="#FFFFFF" stroke="#000000" stroke-width="15" cx="96.563" cy="67.641" rx="89.063" ry="60.141"></ellipse>
+            <ellipse stroke="#000000" stroke-width="15" cx="96.563" cy="211.427" rx="89.063" ry="60.14"></ellipse>
+            <ellipse fill="#993399" stroke="#000000" stroke-width="15" cx="507.884" cy="211.427" rx="89.063" ry="60.14"></ellipse>
+            <ellipse fill="#339999" stroke="#000000" stroke-width="15" cx="302.224" cy="211.427" rx="89.063" ry="60.14"></ellipse>
+            <ellipse fill="#999933" stroke="#000000" stroke-width="15" cx="713.545" cy="211.427" rx="89.063" ry="60.14"></ellipse>
+            <ellipse fill="#FFFFFF" stroke="#000000" stroke-width="15" cx="713.545" cy="355.215" rx="89.063" ry="60.14"></ellipse>
+            <text xml:space="preserve"
+                    style="font-size:64px;text-align:start;text-anchor:start;fill:#000000;fill-opacity:1;font-family:Droid Sans;"
+                    x="3" y="415">
+                <tspan x="3 110 210 310 400 510" y="415">DESIGN</tspan>
+            </text>
+    </g>
+</svg>
+    </figure>
+    <figure>
+        <figcaption>Width and height specified</figcaption>
+        <svg xmlns="http://www.w3.org/2000/svg" id="logo" x="0px" y="0px" width="850px" height="495px">
+    <defs>
+        <filter
+            id="dropGlow"
+            width="1.5"
+            height="1.5"
+            x="-.25"
+            y="-.25">
+            <feGaussianBlur
+                id="feGaussianBlur5384"
+                in="SourceAlpha"
+                stdDeviation="15.000000"
+                result="blur" />
+            <feColorMatrix
+                id="feColorMatrix5386"
+                result="bluralpha"
+                type="matrix"
+                values="-1 0 0 0 1 0 -1 0 0 1 0 0 -1 0 1 0 0 0 0.800000 0 " />
+            <feOffset
+                id="feOffset5388"
+                in="bluralpha"
+                dx="0.000000"
+                dy="0.000000"
+                result="offsetBlur" />
+            <feMerge id="feMerge5390">
+                <feMergeNode
+                    id="feMergeNode5392"
+                    in="offsetBlur" />
+                <feMergeNode
+                    id="feMergeNode5394"
+                    in="SourceGraphic" />
+            </feMerge>
+        </filter>
+    </defs>
+    <g style="filter:url(#dropGlow)">
+            <ellipse fill="#FFFFFF" stroke="#000000" stroke-width="15" cx="96.563" cy="67.641" rx="89.063" ry="60.141"></ellipse>
+            <ellipse stroke="#000000" stroke-width="15" cx="96.563" cy="211.427" rx="89.063" ry="60.14"></ellipse>
+            <ellipse fill="#993399" stroke="#000000" stroke-width="15" cx="507.884" cy="211.427" rx="89.063" ry="60.14"></ellipse>
+            <ellipse fill="#339999" stroke="#000000" stroke-width="15" cx="302.224" cy="211.427" rx="89.063" ry="60.14"></ellipse>
+            <ellipse fill="#999933" stroke="#000000" stroke-width="15" cx="713.545" cy="211.427" rx="89.063" ry="60.14"></ellipse>
+            <ellipse fill="#FFFFFF" stroke="#000000" stroke-width="15" cx="713.545" cy="355.215" rx="89.063" ry="60.14"></ellipse>
+            <text xml:space="preserve"
+                    style="font-size:64px;text-align:start;text-anchor:start;fill:#000000;fill-opacity:1;font-family:Droid Sans;"
+                    x="3" y="415">
+                <tspan x="3 110 210 310 400 510" y="415">DESIGN</tspan>
+            </text>
+    </g>
+</svg>
+    </figure>
+    <figure>
+        <figcaption>Width, height and viewbox</figcaption>
+        <svg xmlns="http://www.w3.org/2000/svg" id="logo" x="0px" y="0px" width="850px" height="495px" viewBox="-15 -25 835 470">
+    <defs>
+        <filter
+            id="dropGlow"
+            width="1.5"
+            height="1.5"
+            x="-.25"
+            y="-.25">
+            <feGaussianBlur
+                id="feGaussianBlur5384"
+                in="SourceAlpha"
+                stdDeviation="15.000000"
+                result="blur" />
+            <feColorMatrix
+                id="feColorMatrix5386"
+                result="bluralpha"
+                type="matrix"
+                values="-1 0 0 0 1 0 -1 0 0 1 0 0 -1 0 1 0 0 0 0.800000 0 " />
+            <feOffset
+                id="feOffset5388"
+                in="bluralpha"
+                dx="0.000000"
+                dy="0.000000"
+                result="offsetBlur" />
+            <feMerge id="feMerge5390">
+                <feMergeNode
+                    id="feMergeNode5392"
+                    in="offsetBlur" />
+                <feMergeNode
+                    id="feMergeNode5394"
+                    in="SourceGraphic" />
+            </feMerge>
+        </filter>
+    </defs>
+    <g style="filter:url(#dropGlow)">
+            <ellipse fill="#FFFFFF" stroke="#000000" stroke-width="15" cx="96.563" cy="67.641" rx="89.063" ry="60.141"></ellipse>
+            <ellipse stroke="#000000" stroke-width="15" cx="96.563" cy="211.427" rx="89.063" ry="60.14"></ellipse>
+            <ellipse fill="#993399" stroke="#000000" stroke-width="15" cx="507.884" cy="211.427" rx="89.063" ry="60.14"></ellipse>
+            <ellipse fill="#339999" stroke="#000000" stroke-width="15" cx="302.224" cy="211.427" rx="89.063" ry="60.14"></ellipse>
+            <ellipse fill="#999933" stroke="#000000" stroke-width="15" cx="713.545" cy="211.427" rx="89.063" ry="60.14"></ellipse>
+            <ellipse fill="#FFFFFF" stroke="#000000" stroke-width="15" cx="713.545" cy="355.215" rx="89.063" ry="60.14"></ellipse>
+            <text xml:space="preserve"
+                    style="font-size:64px;text-align:start;text-anchor:start;fill:#000000;fill-opacity:1;font-family:Droid Sans;"
+                    x="3" y="415">
+                <tspan x="3 110 210 310 400 510" y="415">DESIGN</tspan>
+            </text>
+    </g>
+</svg>
+    </figure>
+</section>
+<section id="constrainwidth">
+    <h1>Width constrained</h1>
+    <figure>
+        <figcaption>No size information</figcaption>
+        <svg xmlns="http://www.w3.org/2000/svg" id="logo" x="0px" y="0px">
+    <defs>
+        <filter
+            id="dropGlow"
+            width="1.5"
+            height="1.5"
+            x="-.25"
+            y="-.25">
+            <feGaussianBlur
+                id="feGaussianBlur5384"
+                in="SourceAlpha"
+                stdDeviation="15.000000"
+                result="blur" />
+            <feColorMatrix
+                id="feColorMatrix5386"
+                result="bluralpha"
+                type="matrix"
+                values="-1 0 0 0 1 0 -1 0 0 1 0 0 -1 0 1 0 0 0 0.800000 0 " />
+            <feOffset
+                id="feOffset5388"
+                in="bluralpha"
+                dx="0.000000"
+                dy="0.000000"
+                result="offsetBlur" />
+            <feMerge id="feMerge5390">
+                <feMergeNode
+                    id="feMergeNode5392"
+                    in="offsetBlur" />
+                <feMergeNode
+                    id="feMergeNode5394"
+                    in="SourceGraphic" />
+            </feMerge>
+        </filter>
+    </defs>
+    <g style="filter:url(#dropGlow)">
+            <ellipse fill="#FFFFFF" stroke="#000000" stroke-width="15" cx="96.563" cy="67.641" rx="89.063" ry="60.141"></ellipse>
+            <ellipse stroke="#000000" stroke-width="15" cx="96.563" cy="211.427" rx="89.063" ry="60.14"></ellipse>
+            <ellipse fill="#993399" stroke="#000000" stroke-width="15" cx="507.884" cy="211.427" rx="89.063" ry="60.14"></ellipse>
+            <ellipse fill="#339999" stroke="#000000" stroke-width="15" cx="302.224" cy="211.427" rx="89.063" ry="60.14"></ellipse>
+            <ellipse fill="#999933" stroke="#000000" stroke-width="15" cx="713.545" cy="211.427" rx="89.063" ry="60.14"></ellipse>
+            <ellipse fill="#FFFFFF" stroke="#000000" stroke-width="15" cx="713.545" cy="355.215" rx="89.063" ry="60.14"></ellipse>
+            <text xml:space="preserve"
+                    style="font-size:64px;text-align:start;text-anchor:start;fill:#000000;fill-opacity:1;font-family:Droid Sans;"
+                    x="3" y="415">
+                <tspan x="3 110 210 310 400 510" y="415">DESIGN</tspan>
+            </text>
+    </g>
+</svg>
+    </figure>
+    <figure>
+        <figcaption>Viewbox specified</figcaption>
+        <svg xmlns="http://www.w3.org/2000/svg" id="logo" x="0px" y="0px" viewBox="-15 -25 835 470">
+    <defs>
+        <filter
+            id="dropGlow"
+            width="1.5"
+            height="1.5"
+            x="-.25"
+            y="-.25">
+            <feGaussianBlur
+                id="feGaussianBlur5384"
+                in="SourceAlpha"
+                stdDeviation="15.000000"
+                result="blur" />
+            <feColorMatrix
+                id="feColorMatrix5386"
+                result="bluralpha"
+                type="matrix"
+                values="-1 0 0 0 1 0 -1 0 0 1 0 0 -1 0 1 0 0 0 0.800000 0 " />
+            <feOffset
+                id="feOffset5388"
+                in="bluralpha"
+                dx="0.000000"
+                dy="0.000000"
+                result="offsetBlur" />
+            <feMerge id="feMerge5390">
+                <feMergeNode
+                    id="feMergeNode5392"
+                    in="offsetBlur" />
+                <feMergeNode
+                    id="feMergeNode5394"
+                    in="SourceGraphic" />
+            </feMerge>
+        </filter>
+    </defs>
+    <g style="filter:url(#dropGlow)">
+            <ellipse fill="#FFFFFF" stroke="#000000" stroke-width="15" cx="96.563" cy="67.641" rx="89.063" ry="60.141"></ellipse>
+            <ellipse stroke="#000000" stroke-width="15" cx="96.563" cy="211.427" rx="89.063" ry="60.14"></ellipse>
+            <ellipse fill="#993399" stroke="#000000" stroke-width="15" cx="507.884" cy="211.427" rx="89.063" ry="60.14"></ellipse>
+            <ellipse fill="#339999" stroke="#000000" stroke-width="15" cx="302.224" cy="211.427" rx="89.063" ry="60.14"></ellipse>
+            <ellipse fill="#999933" stroke="#000000" stroke-width="15" cx="713.545" cy="211.427" rx="89.063" ry="60.14"></ellipse>
+            <ellipse fill="#FFFFFF" stroke="#000000" stroke-width="15" cx="713.545" cy="355.215" rx="89.063" ry="60.14"></ellipse>
+            <text xml:space="preserve"
+                    style="font-size:64px;text-align:start;text-anchor:start;fill:#000000;fill-opacity:1;font-family:Droid Sans;"
+                    x="3" y="415">
+                <tspan x="3 110 210 310 400 510" y="415">DESIGN</tspan>
+            </text>
+    </g>
+</svg>
+    </figure>
+    <figure>
+        <figcaption>Width and height specified</figcaption>
+        <svg xmlns="http://www.w3.org/2000/svg" id="logo" x="0px" y="0px" width="850px" height="495px">
+    <defs>
+        <filter
+            id="dropGlow"
+            width="1.5"
+            height="1.5"
+            x="-.25"
+            y="-.25">
+            <feGaussianBlur
+                id="feGaussianBlur5384"
+                in="SourceAlpha"
+                stdDeviation="15.000000"
+                result="blur" />
+            <feColorMatrix
+                id="feColorMatrix5386"
+                result="bluralpha"
+                type="matrix"
+                values="-1 0 0 0 1 0 -1 0 0 1 0 0 -1 0 1 0 0 0 0.800000 0 " />
+            <feOffset
+                id="feOffset5388"
+                in="bluralpha"
+                dx="0.000000"
+                dy="0.000000"
+                result="offsetBlur" />
+            <feMerge id="feMerge5390">
+                <feMergeNode
+                    id="feMergeNode5392"
+                    in="offsetBlur" />
+                <feMergeNode
+                    id="feMergeNode5394"
+                    in="SourceGraphic" />
+            </feMerge>
+        </filter>
+    </defs>
+    <g style="filter:url(#dropGlow)">
+            <ellipse fill="#FFFFFF" stroke="#000000" stroke-width="15" cx="96.563" cy="67.641" rx="89.063" ry="60.141"></ellipse>
+            <ellipse stroke="#000000" stroke-width="15" cx="96.563" cy="211.427" rx="89.063" ry="60.14"></ellipse>
+            <ellipse fill="#993399" stroke="#000000" stroke-width="15" cx="507.884" cy="211.427" rx="89.063" ry="60.14"></ellipse>
+            <ellipse fill="#339999" stroke="#000000" stroke-width="15" cx="302.224" cy="211.427" rx="89.063" ry="60.14"></ellipse>
+            <ellipse fill="#999933" stroke="#000000" stroke-width="15" cx="713.545" cy="211.427" rx="89.063" ry="60.14"></ellipse>
+            <ellipse fill="#FFFFFF" stroke="#000000" stroke-width="15" cx="713.545" cy="355.215" rx="89.063" ry="60.14"></ellipse>
+            <text xml:space="preserve"
+                    style="font-size:64px;text-align:start;text-anchor:start;fill:#000000;fill-opacity:1;font-family:Droid Sans;"
+                    x="3" y="415">
+                <tspan x="3 110 210 310 400 510" y="415">DESIGN</tspan>
+            </text>
+    </g>
+</svg>
+    </figure>
+    <figure>
+        <figcaption>Width, height and viewbox specified</figcaption>
+        <svg xmlns="http://www.w3.org/2000/svg" id="logo" x="0px" y="0px" width="850px" height="495px" viewBox="-15 -25 835 470">
+    <defs>
+        <filter
+            id="dropGlow"
+            width="1.5"
+            height="1.5"
+            x="-.25"
+            y="-.25">
+            <feGaussianBlur
+                id="feGaussianBlur5384"
+                in="SourceAlpha"
+                stdDeviation="15.000000"
+                result="blur" />
+            <feColorMatrix
+                id="feColorMatrix5386"
+                result="bluralpha"
+                type="matrix"
+                values="-1 0 0 0 1 0 -1 0 0 1 0 0 -1 0 1 0 0 0 0.800000 0 " />
+            <feOffset
+                id="feOffset5388"
+                in="bluralpha"
+                dx="0.000000"
+                dy="0.000000"
+                result="offsetBlur" />
+            <feMerge id="feMerge5390">
+                <feMergeNode
+                    id="feMergeNode5392"
+                    in="offsetBlur" />
+                <feMergeNode
+                    id="feMergeNode5394"
+                    in="SourceGraphic" />
+            </feMerge>
+        </filter>
+    </defs>
+    <g style="filter:url(#dropGlow)">
+            <ellipse fill="#FFFFFF" stroke="#000000" stroke-width="15" cx="96.563" cy="67.641" rx="89.063" ry="60.141"></ellipse>
+            <ellipse stroke="#000000" stroke-width="15" cx="96.563" cy="211.427" rx="89.063" ry="60.14"></ellipse>
+            <ellipse fill="#993399" stroke="#000000" stroke-width="15" cx="507.884" cy="211.427" rx="89.063" ry="60.14"></ellipse>
+            <ellipse fill="#339999" stroke="#000000" stroke-width="15" cx="302.224" cy="211.427" rx="89.063" ry="60.14"></ellipse>
+            <ellipse fill="#999933" stroke="#000000" stroke-width="15" cx="713.545" cy="211.427" rx="89.063" ry="60.14"></ellipse>
+            <ellipse fill="#FFFFFF" stroke="#000000" stroke-width="15" cx="713.545" cy="355.215" rx="89.063" ry="60.14"></ellipse>
+            <text xml:space="preserve"
+                    style="font-size:64px;text-align:start;text-anchor:start;fill:#000000;fill-opacity:1;font-family:Droid Sans;"
+                    x="3" y="415">
+                <tspan x="3 110 210 310 400 510" y="415">DESIGN</tspan>
+            </text>
+    </g>
+</svg>
+    </figure>
+</section>
+<section id="constrainheight">
+    <h1>Height constrained</h1>
+    <figure>
+        <figcaption>No size information</figcaption>
+        <svg xmlns="http://www.w3.org/2000/svg" id="logo" x="0px" y="0px">
+    <defs>
+        <filter
+            id="dropGlow"
+            width="1.5"
+            height="1.5"
+            x="-.25"
+            y="-.25">
+            <feGaussianBlur
+                id="feGaussianBlur5384"
+                in="SourceAlpha"
+                stdDeviation="15.000000"
+                result="blur" />
+            <feColorMatrix
+                id="feColorMatrix5386"
+                result="bluralpha"
+                type="matrix"
+                values="-1 0 0 0 1 0 -1 0 0 1 0 0 -1 0 1 0 0 0 0.800000 0 " />
+            <feOffset
+                id="feOffset5388"
+                in="bluralpha"
+                dx="0.000000"
+                dy="0.000000"
+                result="offsetBlur" />
+            <feMerge id="feMerge5390">
+                <feMergeNode
+                    id="feMergeNode5392"
+                    in="offsetBlur" />
+                <feMergeNode
+                    id="feMergeNode5394"
+                    in="SourceGraphic" />
+            </feMerge>
+        </filter>
+    </defs>
+    <g style="filter:url(#dropGlow)">
+            <ellipse fill="#FFFFFF" stroke="#000000" stroke-width="15" cx="96.563" cy="67.641" rx="89.063" ry="60.141"></ellipse>
+            <ellipse stroke="#000000" stroke-width="15" cx="96.563" cy="211.427" rx="89.063" ry="60.14"></ellipse>
+            <ellipse fill="#993399" stroke="#000000" stroke-width="15" cx="507.884" cy="211.427" rx="89.063" ry="60.14"></ellipse>
+            <ellipse fill="#339999" stroke="#000000" stroke-width="15" cx="302.224" cy="211.427" rx="89.063" ry="60.14"></ellipse>
+            <ellipse fill="#999933" stroke="#000000" stroke-width="15" cx="713.545" cy="211.427" rx="89.063" ry="60.14"></ellipse>
+            <ellipse fill="#FFFFFF" stroke="#000000" stroke-width="15" cx="713.545" cy="355.215" rx="89.063" ry="60.14"></ellipse>
+            <text xml:space="preserve"
+                    style="font-size:64px;text-align:start;text-anchor:start;fill:#000000;fill-opacity:1;font-family:Droid Sans;"
+                    x="3" y="415">
+                <tspan x="3 110 210 310 400 510" y="415">DESIGN</tspan>
+            </text>
+    </g>
+</svg>
+    </figure>
+    <figure>
+        <figcaption>Viewbox specified</figcaption>
+        <svg xmlns="http://www.w3.org/2000/svg" id="logo" x="0px" y="0px" viewBox="-15 -25 835 470">
+    <defs>
+        <filter
+            id="dropGlow"
+            width="1.5"
+            height="1.5"
+            x="-.25"
+            y="-.25">
+            <feGaussianBlur
+                id="feGaussianBlur5384"
+                in="SourceAlpha"
+                stdDeviation="15.000000"
+                result="blur" />
+            <feColorMatrix
+                id="feColorMatrix5386"
+                result="bluralpha"
+                type="matrix"
+                values="-1 0 0 0 1 0 -1 0 0 1 0 0 -1 0 1 0 0 0 0.800000 0 " />
+            <feOffset
+                id="feOffset5388"
+                in="bluralpha"
+                dx="0.000000"
+                dy="0.000000"
+                result="offsetBlur" />
+            <feMerge id="feMerge5390">
+                <feMergeNode
+                    id="feMergeNode5392"
+                    in="offsetBlur" />
+                <feMergeNode
+                    id="feMergeNode5394"
+                    in="SourceGraphic" />
+            </feMerge>
+        </filter>
+    </defs>
+    <g style="filter:url(#dropGlow)">
+            <ellipse fill="#FFFFFF" stroke="#000000" stroke-width="15" cx="96.563" cy="67.641" rx="89.063" ry="60.141"></ellipse>
+            <ellipse stroke="#000000" stroke-width="15" cx="96.563" cy="211.427" rx="89.063" ry="60.14"></ellipse>
+            <ellipse fill="#993399" stroke="#000000" stroke-width="15" cx="507.884" cy="211.427" rx="89.063" ry="60.14"></ellipse>
+            <ellipse fill="#339999" stroke="#000000" stroke-width="15" cx="302.224" cy="211.427" rx="89.063" ry="60.14"></ellipse>
+            <ellipse fill="#999933" stroke="#000000" stroke-width="15" cx="713.545" cy="211.427" rx="89.063" ry="60.14"></ellipse>
+            <ellipse fill="#FFFFFF" stroke="#000000" stroke-width="15" cx="713.545" cy="355.215" rx="89.063" ry="60.14"></ellipse>
+            <text xml:space="preserve"
+                    style="font-size:64px;text-align:start;text-anchor:start;fill:#000000;fill-opacity:1;font-family:Droid Sans;"
+                    x="3" y="415">
+                <tspan x="3 110 210 310 400 510" y="415">DESIGN</tspan>
+            </text>
+    </g>
+</svg>
+    </figure>
+    <figure>
+        <figcaption>Width and height specified</figcaption>
+        <svg xmlns="http://www.w3.org/2000/svg" id="logo" x="0px" y="0px" width="850px" height="495px">
+    <defs>
+        <filter
+            id="dropGlow"
+            width="1.5"
+            height="1.5"
+            x="-.25"
+            y="-.25">
+            <feGaussianBlur
+                id="feGaussianBlur5384"
+                in="SourceAlpha"
+                stdDeviation="15.000000"
+                result="blur" />
+            <feColorMatrix
+                id="feColorMatrix5386"
+                result="bluralpha"
+                type="matrix"
+                values="-1 0 0 0 1 0 -1 0 0 1 0 0 -1 0 1 0 0 0 0.800000 0 " />
+            <feOffset
+                id="feOffset5388"
+                in="bluralpha"
+                dx="0.000000"
+                dy="0.000000"
+                result="offsetBlur" />
+            <feMerge id="feMerge5390">
+                <feMergeNode
+                    id="feMergeNode5392"
+                    in="offsetBlur" />
+                <feMergeNode
+                    id="feMergeNode5394"
+                    in="SourceGraphic" />
+            </feMerge>
+        </filter>
+    </defs>
+    <g style="filter:url(#dropGlow)">
+            <ellipse fill="#FFFFFF" stroke="#000000" stroke-width="15" cx="96.563" cy="67.641" rx="89.063" ry="60.141"></ellipse>
+            <ellipse stroke="#000000" stroke-width="15" cx="96.563" cy="211.427" rx="89.063" ry="60.14"></ellipse>
+            <ellipse fill="#993399" stroke="#000000" stroke-width="15" cx="507.884" cy="211.427" rx="89.063" ry="60.14"></ellipse>
+            <ellipse fill="#339999" stroke="#000000" stroke-width="15" cx="302.224" cy="211.427" rx="89.063" ry="60.14"></ellipse>
+            <ellipse fill="#999933" stroke="#000000" stroke-width="15" cx="713.545" cy="211.427" rx="89.063" ry="60.14"></ellipse>
+            <ellipse fill="#FFFFFF" stroke="#000000" stroke-width="15" cx="713.545" cy="355.215" rx="89.063" ry="60.14"></ellipse>
+            <text xml:space="preserve"
+                    style="font-size:64px;text-align:start;text-anchor:start;fill:#000000;fill-opacity:1;font-family:Droid Sans;"
+                    x="3" y="415">
+                <tspan x="3 110 210 310 400 510" y="415">DESIGN</tspan>
+            </text>
+    </g>
+</svg>
+    </figure>
+    <figure>
+        <figcaption>Width, height and viewbox</figcaption>
+        <svg xmlns="http://www.w3.org/2000/svg" id="logo" x="0px" y="0px" width="850px" height="495px" viewBox="-15 -25 835 470">
+    <defs>
+        <filter
+            id="dropGlow"
+            width="1.5"
+            height="1.5"
+            x="-.25"
+            y="-.25">
+            <feGaussianBlur
+                id="feGaussianBlur5384"
+                in="SourceAlpha"
+                stdDeviation="15.000000"
+                result="blur" />
+            <feColorMatrix
+                id="feColorMatrix5386"
+                result="bluralpha"
+                type="matrix"
+                values="-1 0 0 0 1 0 -1 0 0 1 0 0 -1 0 1 0 0 0 0.800000 0 " />
+            <feOffset
+                id="feOffset5388"
+                in="bluralpha"
+                dx="0.000000"
+                dy="0.000000"
+                result="offsetBlur" />
+            <feMerge id="feMerge5390">
+                <feMergeNode
+                    id="feMergeNode5392"
+                    in="offsetBlur" />
+                <feMergeNode
+                    id="feMergeNode5394"
+                    in="SourceGraphic" />
+            </feMerge>
+        </filter>
+    </defs>
+    <g style="filter:url(#dropGlow)">
+            <ellipse fill="#FFFFFF" stroke="#000000" stroke-width="15" cx="96.563" cy="67.641" rx="89.063" ry="60.141"></ellipse>
+            <ellipse stroke="#000000" stroke-width="15" cx="96.563" cy="211.427" rx="89.063" ry="60.14"></ellipse>
+            <ellipse fill="#993399" stroke="#000000" stroke-width="15" cx="507.884" cy="211.427" rx="89.063" ry="60.14"></ellipse>
+            <ellipse fill="#339999" stroke="#000000" stroke-width="15" cx="302.224" cy="211.427" rx="89.063" ry="60.14"></ellipse>
+            <ellipse fill="#999933" stroke="#000000" stroke-width="15" cx="713.545" cy="211.427" rx="89.063" ry="60.14"></ellipse>
+            <ellipse fill="#FFFFFF" stroke="#000000" stroke-width="15" cx="713.545" cy="355.215" rx="89.063" ry="60.14"></ellipse>
+            <text xml:space="preserve"
+                    style="font-size:64px;text-align:start;text-anchor:start;fill:#000000;fill-opacity:1;font-family:Droid Sans;"
+                    x="3" y="415">
+                <tspan x="3 110 210 310 400 510" y="415">DESIGN</tspan>
+            </text>
+    </g>
+</svg>
+    </figure>
+</section>
+<section id="constrainboth">
+    <h1>Width and height constrained</h1>
+    <figure>
+        <figcaption>No size information</figcaption>
+        <svg xmlns="http://www.w3.org/2000/svg" id="logo" x="0px" y="0px">
+    <defs>
+        <filter
+            id="dropGlow"
+            width="1.5"
+            height="1.5"
+            x="-.25"
+            y="-.25">
+            <feGaussianBlur
+                id="feGaussianBlur5384"
+                in="SourceAlpha"
+                stdDeviation="15.000000"
+                result="blur" />
+            <feColorMatrix
+                id="feColorMatrix5386"
+                result="bluralpha"
+                type="matrix"
+                values="-1 0 0 0 1 0 -1 0 0 1 0 0 -1 0 1 0 0 0 0.800000 0 " />
+            <feOffset
+                id="feOffset5388"
+                in="bluralpha"
+                dx="0.000000"
+                dy="0.000000"
+                result="offsetBlur" />
+            <feMerge id="feMerge5390">
+                <feMergeNode
+                    id="feMergeNode5392"
+                    in="offsetBlur" />
+                <feMergeNode
+                    id="feMergeNode5394"
+                    in="SourceGraphic" />
+            </feMerge>
+        </filter>
+    </defs>
+    <g style="filter:url(#dropGlow)">
+            <ellipse fill="#FFFFFF" stroke="#000000" stroke-width="15" cx="96.563" cy="67.641" rx="89.063" ry="60.141"></ellipse>
+            <ellipse stroke="#000000" stroke-width="15" cx="96.563" cy="211.427" rx="89.063" ry="60.14"></ellipse>
+            <ellipse fill="#993399" stroke="#000000" stroke-width="15" cx="507.884" cy="211.427" rx="89.063" ry="60.14"></ellipse>
+            <ellipse fill="#339999" stroke="#000000" stroke-width="15" cx="302.224" cy="211.427" rx="89.063" ry="60.14"></ellipse>
+            <ellipse fill="#999933" stroke="#000000" stroke-width="15" cx="713.545" cy="211.427" rx="89.063" ry="60.14"></ellipse>
+            <ellipse fill="#FFFFFF" stroke="#000000" stroke-width="15" cx="713.545" cy="355.215" rx="89.063" ry="60.14"></ellipse>
+            <text xml:space="preserve"
+                    style="font-size:64px;text-align:start;text-anchor:start;fill:#000000;fill-opacity:1;font-family:Droid Sans;"
+                    x="3" y="415">
+                <tspan x="3 110 210 310 400 510" y="415">DESIGN</tspan>
+            </text>
+    </g>
+</svg>
+    </figure>
+    <figure>
+        <figcaption>Viewbox specified</figcaption>
+        <svg xmlns="http://www.w3.org/2000/svg" id="logo" x="0px" y="0px" viewBox="-15 -25 835 470">
+    <defs>
+        <filter
+            id="dropGlow"
+            width="1.5"
+            height="1.5"
+            x="-.25"
+            y="-.25">
+            <feGaussianBlur
+                id="feGaussianBlur5384"
+                in="SourceAlpha"
+                stdDeviation="15.000000"
+                result="blur" />
+            <feColorMatrix
+                id="feColorMatrix5386"
+                result="bluralpha"
+                type="matrix"
+                values="-1 0 0 0 1 0 -1 0 0 1 0 0 -1 0 1 0 0 0 0.800000 0 " />
+            <feOffset
+                id="feOffset5388"
+                in="bluralpha"
+                dx="0.000000"
+                dy="0.000000"
+                result="offsetBlur" />
+            <feMerge id="feMerge5390">
+                <feMergeNode
+                    id="feMergeNode5392"
+                    in="offsetBlur" />
+                <feMergeNode
+                    id="feMergeNode5394"
+                    in="SourceGraphic" />
+            </feMerge>
+        </filter>
+    </defs>
+    <g style="filter:url(#dropGlow)">
+            <ellipse fill="#FFFFFF" stroke="#000000" stroke-width="15" cx="96.563" cy="67.641" rx="89.063" ry="60.141"></ellipse>
+            <ellipse stroke="#000000" stroke-width="15" cx="96.563" cy="211.427" rx="89.063" ry="60.14"></ellipse>
+            <ellipse fill="#993399" stroke="#000000" stroke-width="15" cx="507.884" cy="211.427" rx="89.063" ry="60.14"></ellipse>
+            <ellipse fill="#339999" stroke="#000000" stroke-width="15" cx="302.224" cy="211.427" rx="89.063" ry="60.14"></ellipse>
+            <ellipse fill="#999933" stroke="#000000" stroke-width="15" cx="713.545" cy="211.427" rx="89.063" ry="60.14"></ellipse>
+            <ellipse fill="#FFFFFF" stroke="#000000" stroke-width="15" cx="713.545" cy="355.215" rx="89.063" ry="60.14"></ellipse>
+            <text xml:space="preserve"
+                    style="font-size:64px;text-align:start;text-anchor:start;fill:#000000;fill-opacity:1;font-family:Droid Sans;"
+                    x="3" y="415">
+                <tspan x="3 110 210 310 400 510" y="415">DESIGN</tspan>
+            </text>
+    </g>
+</svg>
+    </figure>
+    <figure>
+        <figcaption>Width and height specified</figcaption>
+        <svg xmlns="http://www.w3.org/2000/svg" id="logo" x="0px" y="0px" width="850px" height="495px">
+    <defs>
+        <filter
+            id="dropGlow"
+            width="1.5"
+            height="1.5"
+            x="-.25"
+            y="-.25">
+            <feGaussianBlur
+                id="feGaussianBlur5384"
+                in="SourceAlpha"
+                stdDeviation="15.000000"
+                result="blur" />
+            <feColorMatrix
+                id="feColorMatrix5386"
+                result="bluralpha"
+                type="matrix"
+                values="-1 0 0 0 1 0 -1 0 0 1 0 0 -1 0 1 0 0 0 0.800000 0 " />
+            <feOffset
+                id="feOffset5388"
+                in="bluralpha"
+                dx="0.000000"
+                dy="0.000000"
+                result="offsetBlur" />
+            <feMerge id="feMerge5390">
+                <feMergeNode
+                    id="feMergeNode5392"
+                    in="offsetBlur" />
+                <feMergeNode
+                    id="feMergeNode5394"
+                    in="SourceGraphic" />
+            </feMerge>
+        </filter>
+    </defs>
+    <g style="filter:url(#dropGlow)">
+            <ellipse fill="#FFFFFF" stroke="#000000" stroke-width="15" cx="96.563" cy="67.641" rx="89.063" ry="60.141"></ellipse>
+            <ellipse stroke="#000000" stroke-width="15" cx="96.563" cy="211.427" rx="89.063" ry="60.14"></ellipse>
+            <ellipse fill="#993399" stroke="#000000" stroke-width="15" cx="507.884" cy="211.427" rx="89.063" ry="60.14"></ellipse>
+            <ellipse fill="#339999" stroke="#000000" stroke-width="15" cx="302.224" cy="211.427" rx="89.063" ry="60.14"></ellipse>
+            <ellipse fill="#999933" stroke="#000000" stroke-width="15" cx="713.545" cy="211.427" rx="89.063" ry="60.14"></ellipse>
+            <ellipse fill="#FFFFFF" stroke="#000000" stroke-width="15" cx="713.545" cy="355.215" rx="89.063" ry="60.14"></ellipse>
+            <text xml:space="preserve"
+                    style="font-size:64px;text-align:start;text-anchor:start;fill:#000000;fill-opacity:1;font-family:Droid Sans;"
+                    x="3" y="415">
+                <tspan x="3 110 210 310 400 510" y="415">DESIGN</tspan>
+            </text>
+    </g>
+</svg>
+    </figure>
+    <figure>
+        <figcaption>Width, height and viewbox</figcaption>
+        <svg xmlns="http://www.w3.org/2000/svg" id="logo" x="0px" y="0px" width="850px" height="495px" viewBox="-15 -25 835 470">
+    <defs>
+        <filter
+            id="dropGlow"
+            width="1.5"
+            height="1.5"
+            x="-.25"
+            y="-.25">
+            <feGaussianBlur
+                id="feGaussianBlur5384"
+                in="SourceAlpha"
+                stdDeviation="15.000000"
+                result="blur" />
+            <feColorMatrix
+                id="feColorMatrix5386"
+                result="bluralpha"
+                type="matrix"
+                values="-1 0 0 0 1 0 -1 0 0 1 0 0 -1 0 1 0 0 0 0.800000 0 " />
+            <feOffset
+                id="feOffset5388"
+                in="bluralpha"
+                dx="0.000000"
+                dy="0.000000"
+                result="offsetBlur" />
+            <feMerge id="feMerge5390">
+                <feMergeNode
+                    id="feMergeNode5392"
+                    in="offsetBlur" />
+                <feMergeNode
+                    id="feMergeNode5394"
+                    in="SourceGraphic" />
+            </feMerge>
+        </filter>
+    </defs>
+    <g style="filter:url(#dropGlow)">
+            <ellipse fill="#FFFFFF" stroke="#000000" stroke-width="15" cx="96.563" cy="67.641" rx="89.063" ry="60.141"></ellipse>
+            <ellipse stroke="#000000" stroke-width="15" cx="96.563" cy="211.427" rx="89.063" ry="60.14"></ellipse>
+            <ellipse fill="#993399" stroke="#000000" stroke-width="15" cx="507.884" cy="211.427" rx="89.063" ry="60.14"></ellipse>
+            <ellipse fill="#339999" stroke="#000000" stroke-width="15" cx="302.224" cy="211.427" rx="89.063" ry="60.14"></ellipse>
+            <ellipse fill="#999933" stroke="#000000" stroke-width="15" cx="713.545" cy="211.427" rx="89.063" ry="60.14"></ellipse>
+            <ellipse fill="#FFFFFF" stroke="#000000" stroke-width="15" cx="713.545" cy="355.215" rx="89.063" ry="60.14"></ellipse>
+            <text xml:space="preserve"
+                    style="font-size:64px;text-align:start;text-anchor:start;fill:#000000;fill-opacity:1;font-family:Droid Sans;"
+                    x="3" y="415">
+                <tspan x="3 110 210 310 400 510" y="415">DESIGN</tspan>
+            </text>
+    </g>
+</svg>
+    </figure>
+</section>
+</body>
+</html>

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Invader test</title>
+    <style>
+    #svg {
+        display: block;
+        margin: 0 auto;
+        width: 60%;
+    }
+    #svg .invaderopen, #svg .invaderclosed {
+        fill: #ddd;
+    }
+    #svg .closed .invaderopen, #svg .open .invaderclosed {
+        display: none;
+    }
+    #svg .closed .invaderclosed, #svg .open .invaderopen {
+        display: inherit;
+    }
+    #svg:hover .invaderopen, #svg:hover .invaderclosed {
+        fill: #16e;
+    }
+    </style>
+</head>
+<body>
+    <svg id="svg" class="open" viewBox="0 0 400 300" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    </svg>
+    <script>
+    var svg = document.getElementById('svg');
+    var svgNS = 'http://www.w3.org/2000/svg'; // SVG naming scheme
+    var xlink = 'http://www.w3.org/1999/xlink';
+    var row_g = document.createElementNS(svgNS,'g');
+    for (col=0; col<8; col++) {
+            var inv = get_invader();
+            inv.setAttribute('x', 50 * col);
+            inv.setAttribute('y', 50);
+            inv.setAttribute('width', 45);
+            inv.setAttribute('height', 45);
+            row_g.appendChild(inv);
+    }
+    row_g.setAttribute('class','open');
+    svg.appendChild(row_g);
+    window.setInterval(fliprow,500);
+    function fliprow() {
+        var c = row_g.getAttribute('class');
+        if (c == 'open') {
+            row_g.setAttribute('class','closed');
+        } else {
+            row_g.setAttribute('class','open');
+        }
+    }
+    function get_invader() {
+        var inv_path_a = "m 8.96,72 c 3.06,0 6.11,0 9.17,0 0,-3.05 0,-6.11 0,-9.16 -3.06,0 -6.11,0 -9.17,0 0,3.05 0,6.11 0,9.16 z M 9.17,53.67 c -3.06,0 -6.11,0 -9.17,0 0,3.05 0,6.11 0,9.16 3.06,0 6.11,0 9.17,0 0,-3.05 0,-6.11 0,-9.16 z m 45.18,18.5 c 3.06,0 6.11,0 9.17,0 0,-3.06 0,-6.11 0,-9.17 -3.06,0 -6.11,0 -9.17,0 0,3.06 0,6.11 0,9.17 z M 72.16,44.83 c 0,-6 0,-12 0,-18 -2.89,0 -5.78,0 -8.67,0 0,-2.83 0,-5.67 0,-8.5 -3.11,0 -6.22,0 -9.33,0 0,-3.05 0,-6.11 0,-9.16 -2.94,0 -5.89,0 -8.83,0 0,-3.06 0,-6.11 0,-9.17 -6.06,0 -12.11,0 -18.17,0 0,3.06 0,6.11 0,9.17 -3,0 -6,0 -9,0 0,3.05 0,6.11 0,9.16 -2.95,0 -5.89,0 -8.84,0 0,2.83 0,5.67 0,8.5 -2.94,0 -5.89,0 -8.83,0 0,6 0,12 0,18 2.91,0 5.81,0 8.72,0 0,3.06 0,6.11 0,9.17 3.06,0 6.11,0 9.17,0 0,-3.05 0,-6.11 0,-9.16 11.92,0 23.85,0 35.77,0 0,3.05 0,6.11 0,9.16 2.94,0 5.88,0 8.82,0 0,3 0,6 0,9 3.06,0 6.11,0 9.17,0 0,-3.05 0,-6.11 0,-9.16 -2.94,0 -5.89,0 -8.83,0 0,-3 0,-6 0,-9 2.95,0 5.92,0 8.85,0 z M 27.32,37.49 c -3.05,0 -6.11,0 -9.16,0 0,-3.06 0,-6.11 0,-9.17 3.06,0 6.11,0 9.17,0 0,3.05 0,6.13 0,9.17 z m 24.95,0 c -3.06,0 -6.11,0 -9.17,0 0,-3.06 0,-6.11 0,-9.17 3.06,0 6.11,0 9.17,0 0,3.06 0,6.11 0,9.17 z";
+        var inv_path_b = "m 0,72 c 3.06,0 6.11,0 9.17,0 0,-3.05 0,-6.11 0,-9.16 -3.06,0 -6.11,0 -9.17,0 0,3.05 0,6.11 0,9.16 z M 63,53.83 c -3,0 -6,0 -9,0 0,-3 0,-6 0,-9 6,0 12,0 18,0 0,-6 0,-12 0,-18 -2.9,0 -5.8,0 -8.7,0 0,-2.83 0,-5.67 0,-8.5 -3.1,0 -6.2,0 -9.3,0 0,-3.05 0,-6.11 0,-9.16 -2.9,0 -5.9,0 -8.8,0 0,-3.06 0,-6.11 0,-9.17 -6.1,0 -12.1,0 -18.2,0 0,3.06 0,6.11 0,9.17 -3,0 -6,0 -9,0 0,3.05 0,6.11 0,9.16 -2.94,0 -5.89,0 -8.83,0 0,2.83 0,5.67 0,8.5 -2.95,0 -5.89,0 -8.84,0 0,6 0,12 0,18 5.89,0 11.78,0 17.67,0 0,2.95 0,5.89 0,8.84 -2.94,0 -5.89,0 -8.83,0 0,3.05 0,6.11 0,9.16 2.94,0 5.89,0 8.83,0 0,2.95 0,5.89 0,8.84 3.1,0 6.1,0 9.2,0 0,-3.06 0,-6.11 0,-9.17 -3,0 -5.9,0 -8.87,0 0,-2.83 0,-5.67 0,-8.5 2.97,0 5.87,0 8.87,0 0,-3.05 0,-6.11 0,-9.16 5.9,0 11.7,0 17.6,0 0,3.05 0,6.11 0,9.16 3,0 6,0 9,0 0,2.89 0,5.78 0,8.67 -2.9,0 -5.9,0 -8.8,0 0,3.05 0,6.11 0,9.16 3.1,0 6.1,0 9.2,0 0,-2.94 0,-5.89 0,-8.83 2.9,0 5.9,0 8.8,0 0,-3.06 0,-6.11 0,-9.17 z M 27.2,37.49 c -3.1,0 -6.1,0 -9.2,0 0,-3.06 0,-6.11 0,-9.17 3.1,0 6.1,0 9.2,0 0,3.06 0,6.11 0,9.17 z m 24.9,0 c -3.1,0 -6.1,0 -9.2,0 0,-3.06 0,-6.11 0,-9.17 3.1,0 6.1,0 9.2,0 0,3.06 0,6.11 0,9.17 z M 63,63 c 0,3.06 0,6.11 0,9.17 3.1,0 6.1,0 9.2,0 0,-3.06 0,-6.11 0,-9.17 -3.1,0 -6.1,0 -9.2,0 z";
+        var inv_svg = document.createElementNS(svgNS,'svg');
+        inv_svg.setAttribute('width','72.168px');
+        inv_svg.setAttribute('height','72.167px');
+        inv_svg.setAttribute('viewBox','0 0 72.168 72.167');
+        inv_svg.setAttribute('enable-background','new 0 0 72.168 72.167');
+        var inv_a = document.createElementNS(svgNS,'path');
+        var inv_b = document.createElementNS(svgNS, 'path');
+        inv_a.setAttribute('d', inv_path_a);
+        inv_a.setAttribute('class','invaderopen');
+        inv_b.setAttribute('d', inv_path_b);
+        inv_b.setAttribute('class','invaderclosed');
+        inv_svg.appendChild(inv_b);
+        inv_svg.appendChild(inv_a);
+        return inv_svg;
+    }
+    </script>
+</body>
+</html>

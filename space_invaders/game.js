@@ -1,6 +1,6 @@
 /*
 Name: Space Invaders
-Version: Beta .2
+Version: Beta .3
 Author: Ashton Blue
 Author URL: http://twitter.com/#!/ashbluewd
 Publisher: Manning
@@ -9,13 +9,15 @@ Publisher: Manning
 /********
 Variables
 ********/
-// SVG
-var svg = document.getElementById('svg');
-var svgW = svg.getAttribute('width');
-var svgH = svg.getAttribute('height');
-var svgSupport = document.implementation.hasFeature("http://www.w3.org/TR/SVG11/feature#Shape", "1.1");
-var svgNS = 'http://www.w3.org/2000/svg'; // SVG naming scheme
-var xlink = 'http://www.w3.org/1999/xlink';
+// Default setup
+var svg = {};
+svg.id = document.getElementById('svg');
+svg.width = 500;
+svg.height = 500;
+svg.support = document.implementation.hasFeature("http://www.w3.org/TR/SVG11/feature#Shape", "1.1");
+svg.ns = 'http://www.w3.org/2000/svg';
+
+var xlink = 'http://www.w3.org/1999/xlink'; 
 
 // Screens
 var welcome = document.getElementById('screenWelcome');
@@ -26,65 +28,17 @@ var svgRun;
 var rshipTimer;
 var invTimer;
 
-// Shields
-var shield = document.createElementNS(svgNS,'rect');
-var shieldArray;
-var shieldX;
-var shieldY;
-var shieldGap;
-var shieldHp;
-var shieldNum;
-var shieldP;
-var shieldPX;
-var shieldPY;
-var shieldPSize;
-
-// Laser
-var laser = document.createElementNS(svgNS,'rect');
-var laserSpeed;
-var laserCG = 'laserGood';
-var laserCE = 'laserEvil';
-var lasers;
-
-// Ship
-var ship = document.createElementNS(svgNS,'path');
-var shipX;
-var shipY;
-var shipW;
-var shipH;
-var shipLives;
-var shipLivesX;
-var shipLivesY;
-var shipLivesGap;
-var shipPath;
-var shipSpeed;
-var shipPlayer;
-
-// Red Ship
-var rship = document.createElementNS(svgNS,'image');
-var rshipW = 45;
-var rshipH = 20;
-var rshipElem;
-
-// Invaders
-var inv = document.createElementNS(svgNS,'image');
-var invArray;
-var invRow;
-var invCol;
-var invGap;
-var invW;
-var invH;
-var invX;
-var invY;
-var invSpeed;
-var invSpeedY;
-var invSpeedX;
-var invCounter;
-var invUpdate;
-var invs;
+// Entities
+var shield = {};
+var laser = {};
+laser.good = 'laserGood'; // A way to get rid of this?
+laser.evil = 'laserEvil';
+var ship = {};
+var rship = {};
+var inv = {};
 
 // Text
-var text = document.createElementNS(svgNS,'text');
+var text = document.createElementNS(svg.ns,'text');
 var score;
 var scoreLife;
 var lives;
@@ -98,8 +52,8 @@ var keyR;
 /********
 Core Logic
 ********/
-if (svgSupport){      
-        svg.addEventListener('click', runGame, false);
+if (svg.support){      
+        svg.id.addEventListener('click', runGame, false);
 }
 else {
         // IE 9 can't run some of the JS here, but it does run SVG so this won't prevent an error message there.
@@ -107,14 +61,14 @@ else {
 }
 
 function runGame() {
-        svg.removeEventListener('click', runGame, false);
-        svg.removeChild(welcome);
+        svg.id.removeEventListener('click', runGame, false);
+        svg.id.removeChild(welcome);
         
         init();
 }
 
 function restartGame() {
-        svg.removeEventListener('click', restartGame, false);
+        svg.id.removeEventListener('click', restartGame, false);
         restart.setAttribute('style', 'display: none');
         
         init();
@@ -125,8 +79,8 @@ function init() {
         score = 0;
         lives = 3;
         level = 1;
-        invUpdate = 800;
-        invCounter = 0;
+        inv.update = 800;
+        inv.counter = 0;
         
         shieldInit();
         invInit();
@@ -134,7 +88,7 @@ function init() {
         shipInit();
         svgRun = setInterval(draw, 12);
         rshipTimer = setInterval(rshipInit, 30000);
-        invTimer = setInterval(invDraw, invUpdate);
+        invTimer = setInterval(invDraw, inv.update);
 }
 
 function draw() {
@@ -149,79 +103,82 @@ Function Library
 ********/
 // Shield
 function shieldInit() {
-        // Set variables
-        shieldX = 64;
-        shieldY = 390;
-        shieldHp = 3;
-        shieldNum = 4;
-        shieldP = 8;
-        shieldPSize= 15;
+        shield.x = 64;
+        shield.y = 390;
+        shield.hp = 3;
+        shield.num = 4;
+        shield.p = 8;
+        shield.pSize = 15;
         
         // Create a shield array
-        shieldArray = new Array(shieldNum);
-        for (i=0; i<shieldNum; i++) {
-                shieldArray[i] = new Array(shieldP);
+        shieldArray = new Array(shield.num);
+        for (i=0; i<shield.num; i++) {
+                shieldArray[i] = new Array(shield.p);
         }
         
         // Build the shields
-        for (i=0; i<shieldNum; i++) {
-                for (j=0; j<shieldP; j++) {
+        for (i=0; i<shield.num; i++) {
+                for (j=0; j<shield.p; j++) {
                         shieldBuild(i,j);
                 }
         }
 }
 
 function shieldBuild(buildLoc, buildPiece) {
-        shield = document.createElementNS('http://www.w3.org/2000/svg','rect');
-        shieldPX = shieldX + (buildLoc * shieldX) + (buildLoc * (shieldPSize * 3));
+        shield.create = document.createElementNS(svg.ns,'rect');
+        shield.pX = shield.x + (buildLoc * shield.x) + (buildLoc * (shield.pSize * 3));
         
         shieldBuildXY(buildPiece);
         
-        shield.setAttribute('x', shieldPX);
-        shield.setAttribute('y', shieldPY);
-        shield.setAttribute('class', 'shield active');
-        shield.setAttribute('hp', shieldHp);
-        shield.setAttribute('width', shieldPSize);
-        shield.setAttribute('height', shieldPSize);
-        shield.setAttribute('fill', '#33ff00');
-        shield.setAttribute('fill-opacity', 1);
-        svg.appendChild(shield);
+        shield.create.setAttribute('x', shield.pX);
+        shield.create.setAttribute('y', shield.pY);
+        shield.create.setAttribute('class', 'shield active');
+        shield.create.setAttribute('hp', shield.hp);
+        shield.create.setAttribute('width', shield.pSize);
+        shield.create.setAttribute('height', shield.pSize);
+        shield.create.setAttribute('fill', '#33ff00');
+        shield.create.setAttribute('fill-opacity', 1);
+        svg.id.appendChild(shield.create);
 }
 
 function shieldBuildXY(piece) {
         switch(piece) {
-                case 0: shieldPX = shieldPX; shieldPY = shieldY; break;
-                case 1: shieldPX = shieldPX; shieldPY = shieldY + shieldPSize; break;
-                case 2: shieldPX = shieldPX; shieldPY = shieldY + (shieldPSize * 2); break;
-                case 3: shieldPX = shieldPX + shieldPSize; shieldPY = shieldY; break;
-                case 4: shieldPX = shieldPX + shieldPSize; shieldPY = shieldY + shieldPSize; break;
-                case 5: shieldPX = shieldPX + (shieldPSize * 2); shieldPY = shieldY; break;
-                case 6: shieldPX = shieldPX + (shieldPSize * 2); shieldPY = shieldY + shieldPSize; break;
-                case 7: shieldPX = shieldPX + (shieldPSize * 2); shieldPY = shieldY + (shieldPSize * 2); break;
+                case 0: shield.pX = shield.pX; shield.pY = shield.y; break;
+                case 1: shield.pX = shield.pX; shield.pY = shield.y + shield.pSize; break;
+                case 2: shield.pX = shield.pX; shield.pY = shield.y + (shield.pSize * 2); break;
+                case 3: shield.pX = shield.pX + shield.pSize; shield.pY = shield.y; break;
+                case 4: shield.pX = shield.pX + shield.pSize; shield.pY = shield.y + shield.pSize; break;
+                case 5: shield.pX = shield.pX + (shield.pSize * 2); shield.pY = shield.y; break;
+                case 6: shield.pX = shield.pX + (shield.pSize * 2); shield.pY = shield.y + shield.pSize; break;
+                case 7: shield.pX = shield.pX + (shield.pSize * 2); shield.pY = shield.y + (shield.pSize * 2); break;
         }
 }
 
 
 // Laser
-function laserInit(x, y, laserName) {     
-        laserSpeed = 5;
+function laserInit(x, y, laserName) {
+        laser.create = document.createElementNS(svg.ns,'rect'); // Resets element creation
+        laser.speed = 5;
+        laser.width = 2;
+        laser.height = 10;
         
-        laser.setAttribute('class', laserName);
-        laser.setAttribute('x', x);
-        laser.setAttribute('y', y);
-        laser.setAttribute('width', 2);
-        laser.setAttribute('height', 10);
-        laser.setAttribute('fill', '#ddd');
-        svg.appendChild(laser);
+        laser.create.setAttribute('class', laserName);
+        laser.create.setAttribute('x', x);
+        laser.create.setAttribute('y', y);
+        laser.create.setAttribute('width', laser.width);
+        laser.create.setAttribute('height', laser.height);
+        laser.create.setAttribute('fill', '#ddd');
+        svg.id.appendChild(laser.create);
         
-        laser = document.createElementNS('http://www.w3.org/2000/svg','rect'); // Resets element creation
+        
 }
 
 function laserDraw() {
-        laserAnimate(laserCG,-laserSpeed);
-        laserAnimate(laserCE,laserSpeed);
+        laserAnimate(laser.good,-laser.speed);
+        laserAnimate(laser.evil,laser.speed);
 }
 
+// Where is the laser width and height in all this?
 function laserAnimate(laserClass,speed) {
         lasers = document.getElementsByClassName(laserClass);
         
@@ -230,8 +187,8 @@ function laserAnimate(laserClass,speed) {
                         x1 = parseInt(lasers[n].getAttribute('x'));
                         y1 = parseInt(lasers[n].getAttribute('y'));
                         
-                        if (y1 < 0 || y1 > svgH) {
-                                svg.removeChild(lasers[n]);
+                        if (y1 < 0 || y1 > svg.height) {
+                                svg.id.removeChild(lasers[n]);
                         }
                         else {
                                 y1 += speed;
@@ -251,7 +208,7 @@ function laserAnimate(laserClass,speed) {
                                         
                                         // test if shield
                                         if (objClass === 'shield active') {
-                                                if (lasers.length) svg.removeChild(lasers[n]);
+                                                if (lasers.length) svg.id.removeChild(lasers[n]);
                                                 hp = parseInt(collide[j].getAttribute('hp'));
                                                 hp -= 1;
                                                 
@@ -265,19 +222,19 @@ function laserAnimate(laserClass,speed) {
                                                         collide[j].setAttribute('fill-opacity', opacity);
                                                 }
                                                 else {
-                                                        svg.removeChild(collide[j]);
+                                                        svg.id.removeChild(collide[j]);
                                                 }
                                         }
                                         // test if redship
                                         else if (objClass === 'active') {
-                                                svg.removeChild(lasers[n]);
-                                                svg.removeChild(collide[j]);
+                                                svg.id.removeChild(lasers[n]);
+                                                svg.id.removeChild(collide[j]);
                                                 scoreDraw(10);
                                         }
                                         // else normal points and remove
                                         else {
-                                                svg.removeChild(lasers[n]);
-                                                svg.removeChild(collide[j]);
+                                                svg.id.removeChild(lasers[n]);
+                                                svg.id.removeChild(collide[j]);
                                                 scoreDraw(1);
                                                 levelUp();
                                         }
@@ -285,8 +242,8 @@ function laserAnimate(laserClass,speed) {
                         }
                         
                         // Test if ship
-                        if ((x1 >= shipX && x1 <= (shipX + shipW) && y1 >= shipY && y1 <= (shipY + shipH)) && shipPlayer[0]) {
-                                svg.removeChild(lasers[n]);
+                        if ((x1 >= ship.x && x1 <= (ship.x + ship.w) && y1 >= ship.y && y1 <= (ship.y + ship.h)) && ship.player[0]) {
+                                svg.id.removeChild(lasers[n]);
                                 lifeDraw();
                         }
                 } 
@@ -296,79 +253,78 @@ function laserAnimate(laserClass,speed) {
 
 // Ship
 function shipInit() {
-        shipW = 35;
-        shipH = 15;
-        shipX = 220;
-        shipY = 460;
-        shipSpeed = 3;
-        shipLivesX = 360;
-        shipLivesY = 10;
-        shipLivesGap = 10;
-        
-        shipCreate(shipX, shipY, 'player');
+        ship.w = 35;
+        ship.h = 15;
+        ship.x = 220;
+        ship.y = 460;
+        ship.speed = 3;
+        ship.livesX = 360;
+        ship.livesY = 10;
+        ship.livesGap = 10;
+        shipCreate(ship.x, ship.y, 'player');
         
         for (i=0; i<lives; i++) {
-                x = shipLivesX + (shipW * i) + (shipLivesGap * i);
+                x = ship.livesX + (ship.w * i) + (ship.livesGap * i);
                 
-                shipCreate(x, shipLivesY, 'life');
+                shipCreate(x, ship.livesY, 'life');
         }
-        
-        shipPlayer = document.getElementsByClassName('player');
-        shipLives = document.getElementsByClassName('life');
+        ship.lives = document.getElementsByClassName('life');
+        ship.player = document.getElementsByClassName('player');
 }
 
 function shipDraw() {
-        if (keyL && shipX <= (svgW - shipW)) {
-                shipX += shipSpeed;
+        if (keyL && ship.x <= (svg.width - ship.w)) {
+                ship.x -= ship.speed;
         }
-        else if (keyR && shipX >= 0) { 
-                shipX -= shipSpeed;
+        else if (keyR && ship.x >= 0) {
+                ship.x += ship.speed;
         }
         
-        shipPath = 'M' + shipX + ' ' + (shipY + 8) + 'v 13 h 35 v -13 h -2 v -2 h -12 v -4 h -2 v -2 h -3 v 2 h -2 v 4 h -12 v 2 l -2 0'; // No easy way to create a resizable ship equation
-        if (shipPlayer[0]) shipPlayer[0].setAttribute('d', shipPath);
+        ship.path = 'M' + ship.x + ' ' + (ship.y + 8) + 'v 13 h 35 v -13 h -2 v -2 h -12 v -4 h -2 v -2 h -3 v 2 h -2 v 4 h -12 v 2 l -2 0'; // No easy way to create a resizable ship equation
+        if (ship.player[0]) ship.player[0].setAttribute('d', ship.path);
 }
 
 function shipCreate(x,y,shipName) {
         // Drawing this here gives you the flexibility to reuse it to redraw ships for lives
-        ship = document.createElementNS('http://www.w3.org/2000/svg','path'); // Resets element creation
-        shipPath = 'M' + x + ' ' + (y + 8) + 'v 13 h 35 v -13 h -2 v -2 h -12 v -4 h -2 v -2 h -3 v 2 h -2 v 4 h -12 v 2 l -2 0';
+        ship.create = document.createElementNS('http://www.w3.org/2000/svg','path'); // Resets element creation
+        ship.path = 'M' + x + ' ' + (y + 8) + 'v 13 h 35 v -13 h -2 v -2 h -12 v -4 h -2 v -2 h -3 v 2 h -2 v 4 h -12 v 2 l -2 0';
         
-        ship.setAttribute('class', shipName);
-        ship.setAttribute('d', shipPath);
-        ship.setAttribute('fill', '#33ff00');
-        svg.appendChild(ship);
+        ship.create.setAttribute('class', shipName);
+        ship.create.setAttribute('d', ship.path);
+        ship.create.setAttribute('fill', '#33ff00');
+        svg.id.appendChild(ship.create);
 }
 
 
 // Red Ship
 function rshipInit() {
-        rshipX = -rshipW;
-        rshipY = 50;
+        rship.create = document.createElementNS(svg.ns,'image');
+        rship.w = 45;
+        rship.h = 20;
+        rship.x = -rship.w;
+        rship.y = 50;
         
-        rship.setAttribute('id', 'redShip');
-        rship.setAttribute('class', 'active');
-        rship.setAttribute('x', rshipX);
-        rship.setAttribute('y', rshipY);
-        rship.setAttribute('width', rshipW);
-        rship.setAttribute('height', rshipH);
-        rship.setAttributeNS(xlink,'xlink:href', 'redship.svg');
-        svg.appendChild(rship);
-        
-        rship = document.createElementNS('http://www.w3.org/2000/svg','image'); // Resets element creation
+        rship.create.setAttribute('id', 'redShip');
+        rship.create.setAttribute('class', 'active');
+        rship.create.setAttribute('x', rship.x);
+        rship.create.setAttribute('y', rship.y);
+        rship.create.setAttribute('width', rship.w);
+        rship.create.setAttribute('height', rship.h);
+        rship.create.setAttributeNS(xlink,'xlink:href', 'redship.svg');
+        svg.id.appendChild(rship.create);
 }
 
 function rshipDraw() {
-        rshipElem = document.getElementById('redShip');
+        rship.id = document.getElementById('redShip');
 
-        if (rshipElem) {
-                x = parseInt(rshipElem.getAttribute('x'));
+        if (rship.id) {
+                x = parseInt(rship.id.getAttribute('x'));
                 
-                if (x > svgW) {                
-                        svg.removeChild(rshipElem);
+                if (x > svg.width) {                
+                        svg.id.removeChild(rship.id);
                 }
                 else {
-                        rshipElem.setAttribute('x', x + 1);
+                        rship.id.setAttribute('x', x + 1);
                 }
         }
 }
@@ -376,42 +332,41 @@ function rshipDraw() {
 
 // Invaders
 function invInit() {
-        invRow = 5;
-        invCol = 11;
-        invGap = 10;
-        invW = 25;
-        invH = 19;
-        invX = 64;
-        invY = 90;
-        invSpeed = 10;
-        invSpeedX = 0;
-        invSpeedY = 0;
+        inv.row = 5;
+        inv.col = 11;
+        inv.gap = 10;
+        inv.w = 25;
+        inv.h = 19;
+        inv.x = 64;
+        inv.y = 90;
+        inv.speed = 10;
+        inv.speedX = 0;
+        inv.speedY = 0;
         
         // Creating the invader array
-        invArray = new Array(invRow);
-        for (row=0; row<invRow; row++) {
-                invArray[row] = new Array(invCol);
+        invArray = new Array(inv.row);
+        for (row=0; row<inv.row; row++) {
+                invArray[row] = new Array(inv.col);
         }
         
-        for (row=0; row<invRow; row++) {
-                for (col=0; col<invCol; col++) {
-                        inv.setAttribute('x', invPosX(col));
-                        inv.setAttribute('y', invPosY(row));
-                        inv.setAttribute('class', 'invader active');
-                        inv.setAttribute('row', row);
-                        inv.setAttribute('col', col);
-                        inv.setAttribute('width', invW);
-                        inv.setAttribute('height', invH);
-                        inv.setAttributeNS(xlink,'xlink:href', invImage(row));
-                        svg.appendChild(inv);
-                        
-                        inv = document.createElementNS(svgNS,'image');
+        for (row=0; row<inv.row; row++) {
+                for (col=0; col<inv.col; col++) {
+                        inv.create = document.createElementNS(svg.ns,'image');
+                        inv.create.setAttribute('x', invPosX(col));
+                        inv.create.setAttribute('y', invPosY(row));
+                        inv.create.setAttribute('class', 'invader active');
+                        inv.create.setAttribute('row', row);
+                        inv.create.setAttribute('col', col);
+                        inv.create.setAttribute('width', inv.w);
+                        inv.create.setAttribute('height', inv.h);
+                        inv.create.setAttributeNS(xlink,'xlink:href', invImage(row));
+                        svg.id.appendChild(inv.create);
                 }
         }
 }
 
 function invDraw() {
-        invFirstX = svgW;
+        invFirstX = svg.width;
         invLastX = 0;
         
         invs = document.getElementsByClassName('invader');
@@ -438,12 +393,12 @@ function invDraw() {
         }
         
         // Set speed based upon loop results
-        if ((invLastX >= (svgW - 20 - invW) && invSpeedY === 0) || (invFirstX < 21 && invSpeedY === 0)) {
-                invSpeedY = Math.abs(invSpeed);
+        if ((invLastX >= (svg.width - 20 - inv.w) && inv.speedY === 0) || (invFirstX < 21 && inv.speedY === 0)) {
+                inv.speedY = Math.abs(inv.speed);
         }
-        else if ((invLastX >= (svgW - 20 - invW)) || (invFirstX < 21) || invSpeedY > 0) {
-                invSpeed = -invSpeed;
-                invSpeedY = 0;
+        else if ((invLastX >= (svg.width - 20 - inv.w)) || (invFirstX < 21) || inv.speedY > 0) {
+                inv.speed = -inv.speed;
+                inv.speedY = 0;
         }
         
         // Loop through and update invaders position + visual element with previous tests and loops from this function
@@ -452,11 +407,11 @@ function invDraw() {
                 y = parseInt(invs[i].getAttribute('y'));
                 img = invs[i].getAttribute('xlink:href');
                 
-                newX = x + invSpeed;
-                newY = y + invSpeedY;
+                newX = x + inv.speed;
+                newY = y + inv.speedY;
                 
                 // Cycle speed
-                if (invSpeedY > 0) {
+                if (inv.speedY > 0) {
                         invs[i].setAttribute('y',newY);
                 }
                 else {
@@ -468,7 +423,7 @@ function invDraw() {
                 invs[i].setAttribute('xlink:href',img);
                 
                 // Game over test
-                if (y > shieldY - 20 - invH) {
+                if (y > shield.y - 20 - inv.h) {
                         return setTimeout('gameOver()', 2000); // Exit everything and shut down the game
                 }
         }
@@ -498,12 +453,12 @@ function invImageChange(image) {
 }
 
 function invPosX(row) {
-        x = invX + (row * invW) + (row * invGap);
+        x = inv.x + (row * inv.w) + (row * inv.gap);
         return x;
 }
 
 function invPosY(col) {
-        y = invY + (col * invH) + (col * invGap);
+        y = inv.y + (col * inv.h) + (col * inv.gap);
         return y;
 }
 
@@ -530,7 +485,7 @@ function invShoot () {
                 }
                 
                 // Shoot from bottom column
-                laserInit(x1 + (invW / 2), y1 + 20, laserCE);
+                laserInit(x1 + (inv.w / 2), y1 + 20, laser.evil);
         }
 }
 
@@ -553,7 +508,7 @@ function textCreate(write,x,y,textName,color) {
         text.setAttribute('fill', '#ddd');
         text.setAttribute('style', 'font: bold 14px Arial, Helvetica');
         text.appendChild(document.createTextNode(write));
-        svg.appendChild(text);
+        svg.id.appendChild(text);
 }
 
 function scoreDraw(amount) {
@@ -565,41 +520,41 @@ function scoreDraw(amount) {
 
 function levelUp() {
         // count invader kills
-        invCounter += 1;
-        invCount = invCol * invRow;
+        inv.counter += 1;
+        invCount = inv.col * inv.row;
         
         // Test to level up or increase invader speed
-        if (invCounter === invCount) {
+        if (inv.counter === invCount) {
                 level += 1;
-                invCounter = 0;
-                invUpdate = 800 - (20 * level);
+                inv.counter = 0;
+                inv.update = 800 - (20 * level);
                 
                 clearInterval(invTimer);
                 invInit();
-                invTimer = setInterval(invDraw, invUpdate);
+                invTimer = setInterval(invDraw, inv.update);
         }
-        else if (invCounter === Math.round(invCount / 2)) {
-                invUpdate -= 250;
+        else if (inv.counter === Math.round(invCount / 2)) {
+                inv.update -= 250;
                 
                 clearInterval(invTimer);
-                invTimer = setInterval(invDraw, invUpdate);
+                invTimer = setInterval(invDraw, inv.update);
         }
-        else if (invCounter === (invCol * invRow) - 3) {
-                invUpdate -= 300;
+        else if (inv.counter === (inv.col * inv.row) - 3) {
+                inv.update -= 300;
                 
                 clearInterval(invTimer);
-                invTimer = setInterval(invDraw, invUpdate);
+                invTimer = setInterval(invDraw, inv.update);
         }
 }
 
 function lifeDraw() {
         lives -= 1;
         
-        svg.removeChild(shipPlayer[0]);
-        svg.removeChild(shipLives[lives]);
+        svg.id.removeChild(ship.player[0]);
+        svg.id.removeChild(ship.lives[lives]);
         
         if (lives > 0) {
-                setTimeout('shipCreate(shipX, shipY, \'player\')', 1000);
+                setTimeout('shipCreate(ship.x, ship.y, \'player\')', 1000);
         }
         else {
                 setTimeout('gameOver()', 3000);
@@ -612,8 +567,8 @@ function scoreCount(pts) {
         
         if (scoreLife >= 100) {
                 if (lives < 3) {
-                        x = shipLivesX + (shipW * lives) + (shipLivesGap * lives);
-                        shipCreate(x, shipLivesY, 'life'); // Add an extra life
+                        x = ship.livesX + (ship.w * lives) + (ship.livesGap * lives);
+                        shipCreate(x, ship.livesY, 'life'); // Add an extra life
                         
                         lives += 1;
                         scoreLife = 0;
@@ -632,21 +587,21 @@ function gameOver() {
         $('.shield, #redShip, .life, .invader, .player, #textScore, #textLives, .laserEvil, .laserGood').detach();
 
         restart.setAttribute('style', 'display: inline');
-        svg.addEventListener('click', restartGame, false);
+        svg.id.addEventListener('click', restartGame, false);
 }
 
 // Movement controls
 $(document).keydown(function(evt) {
-        if (evt.keyCode === 39) { // left arrow
+        if (evt.keyCode === 39) { // right arrow
+                keyL = false;
+                keyR = true;
+        }
+        else if (evt.keyCode === 37) { // left arrow
                 keyL = true;
                 keyR = false;
         }
-        else if (evt.keyCode === 37) { // right arrow
-                keyR = true;
-                keyL = false;
-        }
-        else if (evt.keyCode === 32 && (! $('.' + laserCG)[0])) { // If clicking and laser doesn't already exist
-                laserInit(shipX + (shipW / 2), shipY, laserCG);
+        else if (evt.keyCode === 32 && (! $('.' + laser.good)[0])) { // If clicking and laser doesn't already exist
+                laserInit(ship.x + (ship.w / 2), ship.y, laser.good);
         }
 });
 
@@ -660,17 +615,17 @@ $(document).keyup(function(evt) {
 $('#svg').mousemove(function(e){
         var svgPosLeft = Math.round($("#svg").position().left);
         var svgPos = e.pageX - svgPosLeft;
-        var shipM = shipW / 2; // ship middle
+        var shipM = ship.w / 2; // ship middle
         
-        if (svgPos > shipM && svgPos < svgW - shipM) {
+        if (svgPos > shipM && svgPos < svg.width - shipM) {
                 mouseX = svgPos;
-                mouseX -= shipW / 2;
-                shipX = mouseX;
+                mouseX -= ship.w / 2;
+                ship.x = mouseX;
         }
 });
 
 $('#svg').click(function(){
-        if (! $('.' + laserCG)[0] && $('.player')[0]) {
-                laserInit(shipX + (shipW / 2), shipY, laserCG);
+        if (! $('.' + laser.good)[0] && $('.player')[0]) {
+                laserInit(ship.x + (ship.w / 2), ship.y, laser.good);
         }
 });

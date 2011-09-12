@@ -4,9 +4,9 @@
     <title>HTML5 SVG Demo</title>
 </head>
 
-<body>
-        <div id="container" style="margin: auto auto; text-align: center;" >
-                <svg id="svg" width="500" height="500" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<body style="background: black">
+        <div id="container" style="margin: auto auto; text-align: center" >
+                <svg id="svg" viewBox="0 0 500 500" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
                         <defs>
                                 <linearGradient id="background" x1="0" x2="0" y1="0" y2="1"><!-- y1, y2 determines position -->
                                         <stop offset="0%" stop-color="#444" />
@@ -52,7 +52,7 @@
                                 <text x="240" y="286" fill="#000" style="font: bold 12px arial;">again human?</text>
                         </g>
                 </svg>
-                
+                <br>
                 <p>Arrow keys or mouse to move. Space or click to shoot.</p>
                 <p><em>Runs best in <strong>Google Chrome</strong>.<em></p>
         </div>

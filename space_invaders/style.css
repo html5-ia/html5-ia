@@ -1,0 +1,5 @@
+body { margin: 0; background: black; color: #999 }
+#container { margin: auto auto; text-align: center;  }
+svg { overflow: hidden; display: block; height: 90%; position: absolute; top: 0%; width: 100%; min-height: 500px; min-width: 500px; /* cursor hack to remove it in all browsers and avoid bugs */ cursor: url(cursor.png), default }
+#instructions { position: absolute; display: block; bottom: 1%; width: 100%; height: 10% }
+        #instructions p { font-size: 1em; margin: 0 0 5px; padding: 0 }

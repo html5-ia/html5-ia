@@ -1,18 +1,24 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>HTML5 SVG Demo</title>
+        <title>SVG Invaders</title>
+        <link rel="stylesheet" type="text/css" href="style.css" />
 </head>
 
-<body style="background: black">
-        <div id="container" style="margin: auto auto; text-align: center" >
-                <svg id="svg" viewBox="0 0 500 500" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<body>
+        <div id="container">
+                <svg id="svg" viewBox="0 0 500 500" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" clip-path="url(#clip)">
                         <defs>
-                                <linearGradient id="background" x1="0" x2="0" y1="0" y2="1"><!-- y1, y2 determines position -->
-                                        <stop offset="0%" stop-color="#444" />
+                                <clipPath id="clip">
+                                        <rect x="0" y="0" width="100%" height="100%"  />
+                                </clipPath>
+                                <radialGradient id="background" cx="50%" cy="0.3" r="0.7"><!-- y1, y2 determines position -->
+                                        <stop offset="0%" stop-color="#333" />
                                         <stop offset="70%" stop-color="#000" />
-                                </linearGradient>
+                                </radialGradient>
                         </defs>
+                        
+                        
                         
                         <rect rx="0" ry="0" width="500" height="500" fill="url(#background)" />
                         
@@ -52,9 +58,11 @@
                                 <text x="240" y="286" fill="#000" style="font: bold 12px arial;">again human?</text>
                         </g>
                 </svg>
-                <br>
-                <p>Arrow keys or mouse to move. Space or click to shoot.</p>
-                <p><em>Runs best in <strong>Google Chrome</strong>.<em></p>
+                
+                <div id="instructions">
+                        <p>Arrow keys or mouse to move. Space or click to shoot.</p>
+                        <p><em>Runs best in <strong>Google Chrome</strong>.<em></p>
+                </div>
         </div>
         
         <script type="text/javascript" src="jquery.min.js"></script>

@@ -162,7 +162,7 @@ function laserInit(x, y, laserName) {
         laser.width = 2;
         laser.height = 10;
         
-        laser.create.setAttribute('class', laserName);
+        laser.create.setAttribute('class', laserName + ' laser');
         laser.create.setAttribute('x', x);
         laser.create.setAttribute('y', y);
         laser.create.setAttribute('width', laser.width);
@@ -173,25 +173,22 @@ function laserInit(x, y, laserName) {
         
 }
 
-function laserDraw() {
-        laserAnimate(laser.good,-laser.speed);
-        laserAnimate(laser.evil,laser.speed);
-}
-
 // Where is the laser width and height in all this?
-function laserAnimate(laserClass,speed) {
-        lasers = document.getElementsByClassName(laserClass);
+function laserDraw() {
+        lasers = document.getElementsByClassName('laser');
         
         if (lasers.length){
                 for (n=0; n<lasers.length; n++) {
                         x1 = parseInt(lasers[n].getAttribute('x'));
                         y1 = parseInt(lasers[n].getAttribute('y'));
+                        side = lasers[n].getAttribute('class');
                         
                         if (y1 < 0 || y1 > svg.height) {
                                 svg.id.removeChild(lasers[n]);
                         }
                         else {
-                                y1 += speed;
+                                if (side == laser.evil + ' laser') y1 += laser.speed;
+                                else y1 -= laser.speed;
                                 lasers[n].setAttribute('y',y1);
                         }
                         
@@ -227,13 +224,13 @@ function laserAnimate(laserClass,speed) {
                                         }
                                         // test if redship
                                         else if (objClass === 'active') {
-                                                svg.id.removeChild(lasers[n]);
+                                                if (lasers.length) svg.id.removeChild(lasers[n]);
                                                 svg.id.removeChild(collide[j]);
                                                 scoreDraw(10);
                                         }
                                         // else normal points and remove
                                         else {
-                                                svg.id.removeChild(lasers[n]);
+                                                if (lasers.length) svg.id.removeChild(lasers[n]);
                                                 svg.id.removeChild(collide[j]);
                                                 scoreDraw(1);
                                                 levelUp();
@@ -249,6 +246,9 @@ function laserAnimate(laserClass,speed) {
                 } 
         }
 }
+
+
+
 
 
 // Ship
@@ -273,10 +273,10 @@ function shipInit() {
 }
 
 function shipDraw() {
-        if (keyL && ship.x <= (svg.width - ship.w)) {
+        if (keyL && ship.x >= 0) {
                 ship.x -= ship.speed;
         }
-        else if (keyR && ship.x >= 0) {
+        else if (keyR && ship.x <= (svg.width - ship.w)) {
                 ship.x += ship.speed;
         }
         
@@ -612,14 +612,13 @@ $(document).keyup(function(evt) {
         }
 });
 
-$('#svg').mousemove(function(e){
-        var svgPosLeft = Math.round($("#svg").position().left);
-        var svgPos = e.pageX - svgPosLeft;
+$('#container').mousemove(function(e){
+        var svgPos = e.pageX;
         var shipM = ship.w / 2; // ship middle
         
         if (svgPos > shipM && svgPos < svg.width - shipM) {
                 mouseX = svgPos;
-                mouseX -= ship.w / 2;
+                mouseX -= shipM;
                 ship.x = mouseX;
         }
 });

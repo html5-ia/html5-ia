@@ -1,97 +1,86 @@
 /*
 Name: Space Invaders
-Version: Beta .3
+Version: .4
 Author: Ashton Blue
 Author URL: http://twitter.com/#!/ashbluewd
 Publisher: Manning
 */
 
 /********
-Variables
+Global variables and objects
 ********/
-// Default setup
+// Core elements
 var svg = {};
-svg.id = document.getElementById('svg');
-svg.width = 500;
-svg.height = 500;
-svg.support = document.implementation.hasFeature("http://www.w3.org/TR/SVG11/feature#Shape", "1.1");
-svg.ns = 'http://www.w3.org/2000/svg';
-
-var xlink = 'http://www.w3.org/1999/xlink'; 
-
-// Screens
-var welcome = document.getElementById('screenWelcome');
-var restart = document.getElementById('screenGameover');
-
-// Timers
-var svgRun;
-var rshipTimer;
-var invTimer;
+var screen = {};
+var timer = {};
+var hud = {};
+var control = {};
 
 // Entities
 var shield = {};
 var laser = {};
-laser.good = 'laserGood'; // A way to get rid of this?
-laser.evil = 'laserEvil';
 var ship = {};
-ship.x = 0;
-ship.posPrev = 50;
 var rship = {};
 var inv = {};
-
-// Text
-var text = document.createElementNS(svg.ns,'text');
-var score;
-var scoreLife;
-var lives;
-var level;
-
-// Controls
-var keyL;
-var keyR;
-var svgPosPrev;
 
 
 /********
 Core Logic
 ********/
-if (svg.support){      
+/* Check if the browser can run the game */
+svg.support = document.implementation.hasFeature("http://www.w3.org/TR/SVG11/feature#Shape", "1.1");
+if (svg.support){
+        setup();
         svg.id.addEventListener('click', runGame, false);
 }
 else {
-        // IE 9 can't run some of the JS here, but it does run SVG so this won't prevent an error message there.
         alert('Your browser does not support SVG. Try using Google Chrome.');
 }
 
+/* Store variables here that stay consistent throughout the game. Makes them easy to reference in multiple places. */
+function setup() {
+        svg.id = document.getElementById('svg');
+        svg.width = svg.height = 500;
+        svg.ns = 'http://www.w3.org/2000/svg';
+        svg.xlink = 'http://www.w3.org/1999/xlink';
+        
+        laser.good = 'laserGood';
+        laser.evil = 'laserEvil';
+}
+
 function runGame() {
+        screen.welcome = document.getElementById('screenWelcome');
+        screen.restart = document.getElementById('screenGameover');
+        
         svg.id.removeEventListener('click', runGame, false);
-        svg.id.removeChild(welcome);
+        svg.id.removeChild(screen.welcome);
+        
+        control.keys();
+        control.mouse();
         
         init();
 }
 
 function restartGame() {
         svg.id.removeEventListener('click', restartGame, false);
-        restart.setAttribute('style', 'display: none');
+        screen.restart.setAttribute('style', 'display: none');
         
         init();
 }
 
 function init() {
-        // Set these to prevent problems with the gameover
-        score = 0;
-        lives = 3;
-        level = 1;
+        // Set these to reset stats upon game over
         inv.update = 800;
         inv.counter = 0;
         
+        hudInit();
         shieldInit();
         invInit();
-        textInit();
         shipInit();
-        svgRun = setInterval(draw, 12);
-        rshipTimer = setInterval(rshipInit, 30000);
-        invTimer = setInterval(invDraw, inv.update);
+        
+        timer.svg = setInterval(draw, 12);
+        timer.rship = setInterval(rshipInit, 30000);
+        timer.inv = setInterval(invDraw, inv.update);
 }
 
 function draw() {
@@ -139,7 +128,6 @@ function shieldBuild(buildLoc, buildPiece) {
         shield.create.setAttribute('hp', shield.hp);
         shield.create.setAttribute('width', shield.pSize);
         shield.create.setAttribute('height', shield.pSize);
-        shield.create.setAttribute('fill', '#33ff00');
         shield.create.setAttribute('fill-opacity', 1);
         svg.id.appendChild(shield.create);
 }
@@ -170,7 +158,6 @@ function laserInit(x, y, laserName) {
         laser.create.setAttribute('y', y);
         laser.create.setAttribute('width', laser.width);
         laser.create.setAttribute('height', laser.height);
-        laser.create.setAttribute('fill', '#ddd');
         svg.id.appendChild(laser.create);
         
         
@@ -203,7 +190,7 @@ function laserDraw() {
                                 width = parseInt(collide[j].getAttribute('width'));
                                 height = parseInt(collide[j].getAttribute('height'));
                                 
-                                if (x1 >= x2 && x1 <= (x2 + width) && y1 >= y2 && y1 <= (y2 + height)) {
+                                if (x1 + laser.width >= x2 && x1 <= (x2 + width) && y1 + laser.height >= y2 && y1 <= (y2 + height)) {
                                         objClass = collide[j].getAttribute('class');
                                         
                                         // test if shield
@@ -251,9 +238,6 @@ function laserDraw() {
 }
 
 
-
-
-
 // Ship
 function shipInit() {
         ship.w = 35;
@@ -266,7 +250,7 @@ function shipInit() {
         ship.livesGap = 10;
         shipCreate(ship.x, ship.y, 'player');
         
-        for (i=0; i<lives; i++) {
+        for (i=0; i<hud.lives; i++) {
                 x = ship.livesX + (ship.w * i) + (ship.livesGap * i);
                 
                 shipCreate(x, ship.livesY, 'life');
@@ -276,10 +260,10 @@ function shipInit() {
 }
 
 function shipDraw() {
-        if (keyL && ship.x >= 0) {
+        if (control.keyL && ship.x >= 0) {
                 ship.x -= ship.speed;
         }
-        else if (keyR && ship.x <= (svg.width - ship.w)) {
+        else if (control.keyR && ship.x <= (svg.width - ship.w)) {
                 ship.x += ship.speed;
         }
         
@@ -294,7 +278,6 @@ function shipCreate(x,y,shipName) {
         
         ship.create.setAttribute('class', shipName);
         ship.create.setAttribute('d', ship.path);
-        ship.create.setAttribute('fill', '#33ff00');
         svg.id.appendChild(ship.create);
 }
 
@@ -313,7 +296,7 @@ function rshipInit() {
         rship.create.setAttribute('y', rship.y);
         rship.create.setAttribute('width', rship.w);
         rship.create.setAttribute('height', rship.h);
-        rship.create.setAttributeNS(xlink,'xlink:href', 'redship.svg');
+        rship.create.setAttributeNS(svg.xlink,'xlink:href', 'redship.svg');
         svg.id.appendChild(rship.create);
 }
 
@@ -335,8 +318,8 @@ function rshipDraw() {
 
 // Invaders
 function invInit() {
-        inv.row = 5; // default 5
-        inv.col = 11; // default 11
+        inv.row = 1; // default 5
+        inv.col = 1; // default 11
         inv.gap = 10;
         inv.w = 25;
         inv.h = 19;
@@ -347,7 +330,8 @@ function invInit() {
         inv.speedY = 0;
         inv.flock = 'flock';
         
-        // Invader paths
+        // Invader paths retrieved from Inkscape with SVG files saved from Adobe Illustrator
+        // Download Inkscape now http://inkscape.org/
         inv.a1 = 'M-0.174,18.136h2.437v-2.436h-2.437V18.136z M16.575,13.307h-2.395v-2.393h4.786V6.129h-2.305V3.87h-2.481    V1.431h-2.348v-2.437h-4.83v2.437H4.612V3.87H2.261v2.259h-2.349v4.786H4.61v2.349H2.259v2.438H4.61v2.348h2.438v-2.438H4.698 v-2.26h2.349v-2.438h4.697v2.438h2.392v2.304h-2.348v2.437h2.437v-2.348h2.352L16.575,13.307L16.575,13.307z M7.049,8.962H4.612 V6.525h2.438V8.962z M13.679,8.962h-2.438V6.525h2.438V8.962z M16.575,15.745v2.437h2.437v-2.437H16.575z';
         inv.a2 = 'M2.181,18.17h2.442V15.73H2.181V18.17z M2.236,13.286h-2.442v2.443h2.442V13.286z M14.275,18.215h2.44 v-2.441h-2.44V18.215L14.275,18.215z M19.018,10.932V6.136h-2.309V3.873h-2.487V1.429h-2.354V-1.01h-4.84v2.439H4.631v2.443     H2.279v2.264h-2.354v4.795h2.324v2.442h2.442v-2.441h9.525v2.441h2.354v2.397h2.438V13.33h-2.351v-2.398L19.018,10.932  L19.018,10.932z M7.073,8.973H4.631V6.534h2.442V8.973z M13.717,8.973h-2.439V6.534h2.439V8.973z';
         inv.b1 = 'M3.453,17.283h2.271V15.01H3.453V17.283z M5.724-0.901v2.273h2.272v-2.273H5.724z M23.909,17.283V15.01 h-2.271v2.273H23.909z M21.636-0.901h-2.272v2.273h2.272V-0.901z M23.909,1.373v4.545h-2.271V3.645h-2.273V1.373h-2.273v2.272     h-6.817V1.373H8.001v2.272H5.728v2.272H3.458V1.373H1.183v9.09h2.274v2.273h2.271v2.272h2.273v-2.272h11.366v2.272h2.272v-2.272 h2.271v-2.273h2.271v-9.09H23.909z M10.271,8.191H7.999V5.917h2.272V8.191z M19.364,8.191h-2.274V5.917h2.274V8.191z';
@@ -358,7 +342,7 @@ function invInit() {
         // Create group
         var group = document.createElementNS(svg.ns,'g');
         group.setAttribute('class','open');
-        group.setAttribute('id',inv.flock);
+        group.setAttribute('id','flock');
         
         // Creating the invader array
         invArray = new Array(inv.row);
@@ -393,7 +377,7 @@ function invInit() {
         }
         
         svg.id.appendChild(group);
-        inv.flock = document.getElementById(inv.flock);
+        inv.flock = document.getElementById('flock');
 }
 
 function invDraw() {
@@ -449,10 +433,6 @@ function invDraw() {
                         invs[i].setAttribute('x',newX);
                 }
                 
-                // Cycle animation
-                //img = invImageChange(img);
-                //invs[i].setAttribute('xlink:href',img);
-                
                 // Game over test
                 if (y > shield.y - 20 - inv.h) {
                         return setTimeout('gameOver()', 2000); // Exit everything and shut down the game
@@ -487,7 +467,6 @@ function invImage(row) {
 }
 
 function invAnimate() {
-        // Cycle animation
         var c = inv.flock.getAttribute('class');
         if (c == 'open') {
                 inv.flock.setAttribute('class','closed');
@@ -534,32 +513,31 @@ function invShoot () {
 }
 
 
-// Text
-function textInit() {
-        score = 0;
-        scoreLife = 0;
+function hudInit() {
+        hud.lives = 3;
+        hud.level = 1;
+        hud.score = 0;
+        hud.scoreLife = 0;
         
         textCreate('Lives:',310,30,'textLives');
-        textCreate('Score: ' + score,20,30,'textScore');
+        textCreate('Score: ' + hud.score,20,30,'textScore');
 }
 
 function textCreate(write,x,y,textName,color) {
-        text = document.createElementNS('http://www.w3.org/2000/svg','text');
+        hud.text = document.createElementNS('http://www.w3.org/2000/svg','text');
         
-        text.setAttribute('x', x);
-        text.setAttribute('y', y);
-        text.setAttribute('id', textName);
-        text.setAttribute('fill', '#ddd');
-        text.setAttribute('style', 'font: bold 14px Arial, Helvetica');
-        text.appendChild(document.createTextNode(write));
-        svg.id.appendChild(text);
+        hud.text.setAttribute('x', x);
+        hud.text.setAttribute('y', y);
+        hud.text.setAttribute('id', textName);
+        hud.text.appendChild(document.createTextNode(write));
+        svg.id.appendChild(hud.text);
 }
 
 function scoreDraw(amount) {
         scoreCount(amount);
         element = document.getElementById('textScore');
         element.removeChild(element.firstChild);
-        element.appendChild(document.createTextNode('Score: ' + score));
+        element.appendChild(document.createTextNode('Score: ' + hud.score));
 }
 
 function levelUp() {
@@ -569,36 +547,36 @@ function levelUp() {
         
         // Test to level up or increase invader speed
         if (inv.counter === invCount) {
-                level += 1;
+                hud.level += 1;
                 inv.counter = 0;
-                inv.update = 800 - (20 * level);
+                inv.update = 800 - (20 * hud.level);
                 
-                clearInterval(invTimer);
+                clearInterval(timer.inv);
                 svg.id.removeChild(inv.flock);
                 invInit();
-                invTimer = setInterval(invDraw, inv.update);
+                timer.inv = setInterval(invDraw, inv.update);
         }
         else if (inv.counter === Math.round(invCount / 2)) {
                 inv.update -= 250;
                 
-                clearInterval(invTimer);
-                invTimer = setInterval(invDraw, inv.update);
+                clearInterval(timer.inv);
+                timer.inv = setInterval(invDraw, inv.update);
         }
         else if (inv.counter === (inv.col * inv.row) - 3) {
                 inv.update -= 300;
                 
-                clearInterval(invTimer);
-                invTimer = setInterval(invDraw, inv.update);
+                clearInterval(timer.inv);
+                timer.inv = setInterval(invDraw, inv.update);
         }
 }
 
 function lifeDraw() {
-        lives -= 1;
+        hud.lives -= 1;
         
         svg.id.removeChild(ship.player[0]);
-        svg.id.removeChild(ship.lives[lives]);
+        svg.id.removeChild(ship.lives[hud.lives]);
         
-        if (lives > 0) {
+        if (hud.lives > 0) {
                 setTimeout('shipCreate(ship.x, ship.y, \'player\')', 1000);
         }
         else {
@@ -607,72 +585,78 @@ function lifeDraw() {
 }
 
 function scoreCount(pts) {
-        score += pts;
-        scoreLife += pts;
+        hud.score += pts;
+        hud.scoreLife += pts;
         
-        if (scoreLife >= 100) {
-                if (lives < 3) {
-                        x = ship.livesX + (ship.w * lives) + (ship.livesGap * lives);
+        if (hud.scoreLife >= 100) {
+                if (hud.lives < 3) {
+                        x = ship.livesX + (ship.w * lives) + (ship.hud.livesGap * hud.lives);
                         shipCreate(x, ship.livesY, 'life'); // Add an extra life
                         
-                        lives += 1;
-                        scoreLife = 0;
+                        hud.lives += 1;
+                        hud.scoreLife = 0;
                 }
                 else {
-                        scoreLife = 0;
+                        hud.scoreLife = 0;
                 }
         }
 }
 
 function gameOver() {
-        clearInterval(rshipTimer);
-        clearInterval(invTimer);
-        clearInterval(svgRun);
+        clearInterval(timer.rship);
+        clearInterval(timer.inv);
+        clearInterval(timer.svg);
         
         $('.shield, #redShip, .life, #flock, .player, #textScore, #textLives, .laserEvil, .laserGood').detach();
 
-        restart.setAttribute('style', 'display: inline');
+        screen.restart.setAttribute('style', 'display: inline');
         svg.id.addEventListener('click', restartGame, false);
 }
 
 // Movement controls
-$(document).keydown(function(evt) {
-        if (evt.keyCode === 39) { // right arrow
-                keyL = false;
-                keyR = true;
-        }
-        else if (evt.keyCode === 37) { // left arrow
-                keyL = true;
-                keyR = false;
-        }
-        else if (evt.keyCode === 32 && (! $('.' + laser.good)[0])) { // If clicking and laser doesn't already exist
-                laserInit(ship.x + (ship.w / 2), ship.y, laser.good);
-        }
-});
-
-$(document).keyup(function(evt) {
-        if (evt.keyCode === 39 || evt.keyCode === 37) {
-                keyL = false;
-                keyR = false;
-        }
-});
-
+control.keys = function() {
+        control.keyL;
+        control.keyR;
+        
+        $(document).keydown(function(evt) {
+                if (evt.keyCode === 39) { // right arrow
+                        control.keyL = false;
+                        control.keyR = true;
+                }
+                else if (evt.keyCode === 37) { // left arrow
+                        control.keyL = true;
+                        control.keyR = false;
+                }
+                else if (evt.keyCode === 32 && (! $('.' + laser.good)[0])) { // If clicking and laser doesn't already exist
+                        laserInit(ship.x + (ship.w / 2), ship.y, laser.good);
+                }
+        });
+        
+        $(document).keyup(function(evt) {
+                if (evt.keyCode === 39 || evt.keyCode === 37) {
+                        control.keyL = false;
+                        control.keyR = false;
+                }
+        });
+};
 
 // Monitors positive or negative mouse movement and applies that to the ship's position
 // Works perfect for the adjustable screen size
-$('#svg').mousemove(function(e){
-        ship.posNew = e.pageX - ship.posPrev + ship.x;
+control.mouse = function() {
+        $('#svg').mousemove(function(e){
+                ship.posNew = e.pageX - ship.posPrev + ship.x;
+                
+                if (ship.posNew > 0 && ship.posNew < svg.width - ship.w) {
+                        ship.x = ship.posNew;
+                }
+                
+                // Record previous x
+                ship.posPrev = e.pageX;
+        });
         
-        if (ship.posNew > 0 && ship.posNew < svg.width - ship.w) {
-                ship.x = ship.posNew;
-        }
-        
-        // Record previous x
-        ship.posPrev = e.pageX;
-});
-
-$('#svg').click(function(){
-        if (! $('.' + laser.good)[0] && $('.player')[0]) {
-                laserInit(ship.x + (ship.w / 2), ship.y, laser.good);
-        }
-});
+        $('#svg').click(function(){
+                if (! $('.' + laser.good)[0] && $('.player')[0]) {
+                        laserInit(ship.x + (ship.w / 2), ship.y, laser.good);
+                }
+        });
+};

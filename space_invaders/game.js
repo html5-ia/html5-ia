@@ -11,7 +11,7 @@ Global variables and objects
 ********/
 // Core elements
 var svg = {};
-var screen = {};
+var overlay = {};
 var timer = {};
 var hud = {};
 var control = {};
@@ -49,11 +49,11 @@ function setup() {
 }
 
 function runGame() {
-        screen.welcome = document.getElementById('screenWelcome');
-        screen.restart = document.getElementById('screenGameover');
+        overlay.welcome = document.getElementById('screenWelcome');
+        overlay.restart = document.getElementById('screenGameover');
         
         svg.id.removeEventListener('click', runGame, false);
-        svg.id.removeChild(screen.welcome);
+        svg.id.removeChild(overlay.welcome);
         
         control.keys();
         control.mouse();
@@ -63,7 +63,7 @@ function runGame() {
 
 function restartGame() {
         svg.id.removeEventListener('click', restartGame, false);
-        screen.restart.setAttribute('style', 'display: none');
+        overlay.restart.setAttribute('style', 'display: none');
         
         init();
 }
@@ -600,7 +600,7 @@ function gameOver() {
         
         $('.shield, #redShip, .life, #flock, .player, #textScore, #textLives, .laserEvil, .laserGood').detach();
 
-        screen.restart.setAttribute('style', 'display: inline');
+        overlay.restart.setAttribute('style', 'display: inline');
         svg.id.addEventListener('click', restartGame, false);
 }
 

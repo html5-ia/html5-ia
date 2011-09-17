@@ -581,7 +581,7 @@ function scoreCount(pts) {
         // Add an extra life
         if (hud.scoreLife >= 100) {
                 if (hud.lives < 3) {
-                        x = ship.livesX + (ship.w * lives) + (ship.hud.livesGap * hud.lives);
+                        x = ship.livesX + (ship.w * hud.lives) + (ship.livesGap * hud.lives);
                         shipCreate(x, ship.livesY, 'life');
                         
                         hud.lives += 1;

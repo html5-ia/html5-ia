@@ -4,7 +4,23 @@ var squareVerticesBuffer;
 var mvMatrix;
 var shaderProgram;
 var vertexPositionAttribute;
-var perspectiveMatrix; 
+var perspectiveMatrix;
+var horizAspect;
+var squareRotation = 0.0;
+var lastSquareUpdateTime = 0;
+
+// How to figure out what a user's computer can handle for frames with fallbacks
+// http://paulirish.com/2011/requestanimationframe-for-smart-animating/
+window.requestAnimFrame = (function(){
+return  window.requestAnimationFrame       || 
+        window.webkitRequestAnimationFrame || 
+        window.mozRequestAnimationFrame    || 
+        window.oRequestAnimationFrame      || 
+        window.msRequestAnimationFrame     || 
+        function(/* function */ callback, /* DOMElement */ element){
+          window.setTimeout(callback, 1000 / 60);
+        };
+})();
 
 window.onload = function() { webGL(); }
 
@@ -31,22 +47,32 @@ function webGL() {
                 // Enable depth testing
                                                
         
-                draw();
+                animate();
                 
                 // Constantly updating version of draw
                 //tick();
         }
 }
 
+function animate() {
+        requestAnimFrame( animate );
+        draw();
+}
+
 function initWebGL(canvas) {
         try {
+                // Canvas width must be set before gl initializes to prevent the Canvas
+                // size from distorting WebGL view
+                canvas.width = window.innerWidth - 20;
+                canvas.height = window.innerHeight - 20;
+                //canvas.width = 480;
+                //canvas.height = 640;
                 gl = canvas.getContext("experimental-webgl");
                 
                 // Set width and height equal to window
-                //canvas.width = window.innerWidth - 20;
-                //canvas.height = window.innerHeight - 20;
-                canvas.width = 640;
-                canvas.height = 480;
+                
+                
+                horizAspect = canvas.width/canvas.height;
                 // Set WebGL box in Canvas viewport
         }
         catch(e) {}
@@ -75,6 +101,10 @@ function initShaders() {
                 alert("Shaders have FAILED to load.");
         }
         gl.useProgram(shaderProgram);
+        
+        // Store color data
+        vertexColorAttribute = gl.getAttribLocation(shaderProgram, "aVertexColor");  
+        gl.enableVertexAttribArray(vertexColorAttribute); 
         
         // Store the shader's attribute in an object so you can use it again later
         shaderProgram.vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition");
@@ -120,8 +150,6 @@ function getShader(gl, id) {
         }
         return shader;
 }
-
-var horizAspect = 480.0/640.0;  
   
 function initBuffers() {
         // Create a buffer and store the graphics 
@@ -134,31 +162,96 @@ function initBuffers() {
                 -1.0,  1.0,  0.0,  
                  1.0, -1.0,  0.0,  
                 -1.0, -1.0,  0.0  
-        ]; 
+        ];
+        // rgba
+        var colors = [  
+                1.0,  1.0,  1.0,  1.0,    // white  
+                1.0,  0.0,  0.0,  1.0,    // red  
+                0.0,  1.0,  0.0,  1.0,    // green  
+                0.0,  0.0,  1.0,  1.0     // blue  
+        ];  
         
         // Uses float32 to change the array into a webGL edible format. Research float32arrays more and play.
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);  
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+        
+        // Color data
+        squareVerticesColorBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, squareVerticesColorBuffer);  
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW); 
 } 
 
 function draw() {  
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);  
         // field of view in degress, width/height, only get objects between 1, 100 units
-        perspectiveMatrix = makePerspective(45, canvas.width/canvas.height, 0.1, 200.0);  
+        perspectiveMatrix = makePerspective(45, horizAspect, 0.1, 100.0);  
         
         // Set things up to draw
         loadIdentity();
         // Setup translate away from the camera by 6 units
-        mvTranslate([0.0, 0.0, -6.0]);  
+        
+        
+        // Rotate square
+        mvPushMatrix();
+        mvRotate(squareRotation, [0, 0, 1]); // x, y, z
+        mvTranslate([0.0, 0.0, -6.0]);
+        
         
         // Pass buffer data
         gl.bindBuffer(gl.ARRAY_BUFFER, squareVerticesBuffer);
         // Send over shader program, number of arrays, something, something, something, something
-        gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);  
+        gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
+        
+        // Pass color data from buffer
+        gl.bindBuffer(gl.ARRAY_BUFFER, squareVerticesColorBuffer);  
+        gl.vertexAttribPointer(vertexColorAttribute, 4, gl.FLOAT, false, 0, 0);  
+        
         setMatrixUniforms();
         // Why x, y, and z?
-        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);  
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+        
+        // Restore original matrix after drawing square
+        mvPopMatrix();
+        
+        // Actual rotation of square
+        var currentTime = (new Date).getTime();  
+        if (lastSquareUpdateTime) {
+                var delta = currentTime - lastSquareUpdateTime;  
+            
+                squareRotation += (100 * delta) / 1000.0;
+                // alert(squareRotation);
+        }   
+        lastSquareUpdateTime = currentTime; 
 }
 
+// Matrix functions written by Vlad Vukicevic
+    var mvMatrixStack = [];  
+      
+    function mvPushMatrix(m) {  
+      if (m) {  
+        mvMatrixStack.push(m.dup());  
+        mvMatrix = m.dup();  
+      } else {  
+        mvMatrixStack.push(mvMatrix.dup());  
+      }  
+    }  
+      
+    function mvPopMatrix() {  
+      if (!mvMatrixStack.length) {  
+        throw("Can't pop from an empty matrix stack.");  
+      }  
+        
+      mvMatrix = mvMatrixStack.pop();  
+      return mvMatrix;  
+    }  
+      
+    function mvRotate(angle, v) {  
+      var inRadians = angle * Math.PI / 180.0;  
+        
+      var m = Matrix.Rotation(inRadians, $V([v[0], v[1], v[2]])).ensure4x4();  
+      multMatrix(m);  
+    }  
+
+// Matrix functions from Mozilla
 function loadIdentity() {  
         mvMatrix = Matrix.I(4);  
 }    

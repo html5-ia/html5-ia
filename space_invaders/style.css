@@ -24,7 +24,7 @@ text#more { font: 28px 'Courier New', Courier, monospace }
 .quote { font: bold 12px arial; fill: #000 }
 
 /* Game */
-.life, .player, .shield, .player { fill: #3f0 }
+.life, .player, .shield { fill: #3f0 }
 .anim1, .anim2 { fill: #ddd }
         .closed .anim1, .open .anim2 { display: none }
         .open .anim1, .closed .anim2 { display: inherit }

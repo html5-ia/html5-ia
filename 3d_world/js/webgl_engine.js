@@ -39,18 +39,8 @@ function webGL() {
                 initShaders();
                 // Loop throug buffers
                 initBuffers();
-                
-                // RGB for clear color
-                // Set clear color to black, fully opaque
-                
-                
-                // Enable depth testing
                                                
-        
                 animate();
-                
-                // Constantly updating version of draw
-                //tick();
         }
 }
 

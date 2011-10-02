@@ -513,7 +513,7 @@ function hudInit() {
         textCreate('Score: ' + hud.score,20,30,'textScore');
 }
 
-function textCreate(write,x,y,textName,color) {
+function textCreate(write,x,y,textName) {
         hud.text = document.createElementNS('http://www.w3.org/2000/svg','text');
         
         hud.text.setAttribute('x', x);
@@ -528,6 +528,25 @@ function scoreDraw(amount) {
         element = document.getElementById('textScore');
         element.removeChild(element.firstChild);
         element.appendChild(document.createTextNode('Score: ' + hud.score));
+}
+
+function scoreCount(pts) {
+        hud.score += pts;
+        hud.scoreLife += pts;
+        
+        // Add an extra life
+        if (hud.scoreLife >= 100) {
+                if (hud.lives < 3) {
+                        x = ship.livesX + (ship.w * hud.lives) + (ship.livesGap * hud.lives);
+                        shipCreate(x, ship.livesY, 'life');
+                        
+                        hud.lives += 1;
+                        hud.scoreLife = 0;
+                }
+                else {
+                        hud.scoreLife = 0;
+                }
+        }
 }
 
 function levelUp() {
@@ -572,25 +591,6 @@ function lifeDraw() {
         else {
                 setTimeout('gameOver()', 3000);
         } 
-}
-
-function scoreCount(pts) {
-        hud.score += pts;
-        hud.scoreLife += pts;
-        
-        // Add an extra life
-        if (hud.scoreLife >= 100) {
-                if (hud.lives < 3) {
-                        x = ship.livesX + (ship.w * hud.lives) + (ship.livesGap * hud.lives);
-                        shipCreate(x, ship.livesY, 'life');
-                        
-                        hud.lives += 1;
-                        hud.scoreLife = 0;
-                }
-                else {
-                        hud.scoreLife = 0;
-                }
-        }
 }
 
 function gameOver() {

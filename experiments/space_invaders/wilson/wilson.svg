@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg version="1.1" id="Invader_1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px"
-	 width="140px" height="140px" viewBox="0 0 140 140" xml:space="preserve">
+<svg version="1.1" id="Invader_1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="0 0 140 140" xml:space="preserve">
     <circle cx="70" cy="70" r="70" style="fill:#ff0"/>
     <path d="M38,57
              A7,7 0 0,1 52,57

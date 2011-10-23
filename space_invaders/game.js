@@ -217,10 +217,6 @@ function laserDraw() {
                                                 svg.id.removeChild(collide[j]);
                                                 scoreDraw(10);
                                         }
-                                        else if ((x1 >= ship.x && x1 <= (ship.x + ship.w) && y1 >= ship.y && y1 <= (ship.y + ship.h)) && ship.player[0]) {
-                                                svg.id.removeChild(lasers[n]);
-                                                lifeDraw();
-                                        }
                                         // else normal points and remove
                                         else {
                                                 if (lasers[n] != null) svg.id.removeChild(lasers[n]);
@@ -229,10 +225,9 @@ function laserDraw() {
                                                 levelUp();
                                         }
                                 }
-                                // Check for ship
                                 else if ((x1 >= ship.x && x1 <= (ship.x + ship.w) && y1 >= ship.y && y1 <= (ship.y + ship.h)) && ship.player[0]) {
-                                        svg.id.removeChild(lasers[n]);
-                                        lifeDraw();
+                                                svg.id.removeChild(lasers[n]);
+                                                lifeDraw();
                                 }
                         }
                 } 
@@ -492,7 +487,7 @@ function invShoot () {
                         
                         // If in the same column find the bottom most Invader
                         if (x1 === x2) {
-                                value = parseInt(invs[i].getAttribute('y'))
+                                value = parseInt(invs[i].getAttribute('y'));
                                 y = Math.max(y,value);
                         }
                 }

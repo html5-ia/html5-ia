@@ -1,45 +1,12 @@
 /********
-Variables
+Variable Setup
 ********/
-// Canvas
-var canvas = document.getElementById('canvas');                       
-var canvasAtt = canvas.attributes;                                    
-var canvasW = canvasAtt.getNamedItem('width').value;                  
-var canvasH = canvasAtt.getNamedItem('height').value;
-var canvasRun;
-
-// Ball
-var ballX;
-var ballSX;
-var ballY;
-var ballSY;
-var ballR;
-
-// Paddle
-var padX;
-var padY;
-var padW;
-var padH;
-var padR;
-var padSpeed;
-
-// Bricks
-var bricks;
-var bGap;
-var bRow;
-var bCol;
-var bW;
-var bH;
-var bCount;
-
-// HUD
-var score;
-var level;
-
-// Controls
-var keyL;
-var keyR;
-var mouseX;
+var canvas = document.getElementById('canvas'); 
+var ball = {};
+var pad = {};
+var brick = {};
+var hud = {};
+var ctrl = {};
 
 
 /********
@@ -48,6 +15,7 @@ Setup
 if (canvas.getContext){
         var context = canvas.getContext('2d');
         
+        // Run the game
         welcomeDraw();
         canvas.addEventListener('click', runGame, false);                                                    
 }
@@ -59,7 +27,7 @@ function runGame() {
 
 function restartGame() {
         canvas.removeEventListener('click', restartGame, false);
-        clearInterval(canvasRun);
+        clearInterval(canvas.run);
         init();
 } 
 
@@ -68,11 +36,11 @@ function init() {
         brickInit();
         ballInit();
         padInit();
-        return canvasRun = setInterval(draw, 12);
+        return canvas.run = setInterval(draw, 12);
 }
 
 function draw() {
-        context.clearRect(0,0,canvasW,canvasH); 
+        context.clearRect(0,0,canvas.width,canvas.height); 
         background();
     
         brickDraw();
@@ -93,55 +61,55 @@ function background() {
 
 // Ball
 function ballInit() { 
-        ballX = 120;
-        ballSX = .9 + (.4 * level);
-        ballY = 120;
-        ballSY = -.9 - (.4 * level);
-        ballR = 10;
+        ball.x = 120;
+        ball.sx = .9 + (.4 * hud.lv);
+        ball.y = 120;
+        ball.sy = -.9 - (.4 * hud.lv);
+        ball.r = 10;
 }
 
 function ballDraw() {
         // Canvas edge detection
-        if (ballY < 1) { // Top
-                ballY = 1; // Prevents the ball from getting stuck at fast speeds
-                ballSY = -ballSY;
+        if (ball.y < 1) { // Top
+                ball.y = 1; // Prevents the ball from getting stuck at fast speeds
+                ball.sy = -ball.sy;
         }
         // Bottom
-        else if (ballY > canvasH) {
-                clearInterval(canvasRun);
-                canvasRun = setInterval(goDraw, 12);
+        else if (ball.y > canvas.height) {
+                clearInterval(canvas.run);
+                canvas.run = setInterval(goDraw, 12);
                 canvas.addEventListener('click', restartGame, false);
         }
         
         // Left
-        if (ballX < 1) {
-                ballX = 1; // Prevents the ball from getting stuck at fast speeds
-                ballSX = - ballSX;
+        if (ball.x < 1) {
+                ball.x = 1; // Prevents the ball from getting stuck at fast speeds
+                ball.sx = - ball.sx;
         }
         // Right
-        else if (ballX > canvasW) {
-                ballX = canvasW - 1; // Prevents the ball from getting stuck at fast speeds
-                ballSX = - ballSX;
+        else if (ball.x > canvas.width) {
+                ball.x = canvas.width - 1; // Prevents the ball from getting stuck at fast speeds
+                ball.sx = - ball.sx;
         }
         
         // Paddle to ball collision
-        if (ballX >= padX && ballX <= (padX + padW) && ballY >= padY && ballY <= (padY + padW)) {
-                ballSX = 7 * ((ballX - (padX+padW/2))/padW);
-                ballSY = -ballSY;
+        if (ball.x >= pad.x && ball.x <= (pad.x + pad.w) && ball.y >= pad.y && ball.y <= (pad.y + pad.w)) {
+                ball.sx = 7 * ((ball.x - (pad.x+pad.w/2))/pad.w);
+                ball.sy = -ball.sy;
         }
         
-        ballX += ballSX;
-        ballY += ballSY;
+        ball.x += ball.sx;
+        ball.y += ball.sy;
         
         // Create ball
         context.beginPath();
-        context.arc(ballX, ballY, ballR, 0, 2 * Math.PI, false);
+        context.arc(ball.x, ball.y, ball.r, 0, 2 * Math.PI, false);
         context.fillStyle = ballGrad();
         context.fill();
 }
 
 function ballGrad() {
-        var ballG = context.createRadialGradient(ballX,ballY,2,ballX-4,ballY-3,10);                                                     
+        var ballG = context.createRadialGradient(ball.x,ball.y,2,ball.x-4,ball.y-3,10);
         ballG.addColorStop(0, '#eee');                         
         ballG.addColorStop(1, '#999');                         
         return ballG;
@@ -149,38 +117,38 @@ function ballGrad() {
 
 // Paddle
 function padInit() {     
-        padX = 100;
-        padY = 210;
-        padW = 90;
-        padH = 20;
-        padR = 9;
-        padSpeed = 4;
+        pad.x = 100;
+        pad.y = 210;
+        pad.w = 90;
+        pad.h = 20;
+        pad.r = 9;
+        pad.speed = 4;
 }
 
 function padDraw() {
         // Detect controller input
-        if (keyL && (padX < (canvasW - padW))) {                      
-                padX += padSpeed;                                         
+        if (ctrl.left && (pad.x < (canvas.width - pad.w))) {                      
+                pad.x += pad.speed;                                         
         }                                                             
 
-        else if (keyR && padX > 0) {                                  
-                padX += -padSpeed;                                                    
+        else if (ctrl.right && pad.x > 0) {                                  
+                pad.x += -pad.speed;                                                    
         }
         
         // Create paddle
         context.beginPath();
-        context.moveTo(padX,padY);                                           
-        context.arcTo(padX+padW, padY, padX+padW, padY+padR, padR);
-        context.arcTo(padX+padW, padY+padH,padX+padW-padR,padY+padH, padR);
-        context.arcTo(padX, padY+padH, padX, padY+padH-padR, padR);
-        context.arcTo(padX, padY, padX+padR, padY, padR);
+        context.moveTo(pad.x,pad.y);                                           
+        context.arcTo(pad.x+pad.w, pad.y, pad.x+pad.w, pad.y+pad.r, pad.r);
+        context.arcTo(pad.x+pad.w, pad.y+pad.h,pad.x+pad.w-pad.r,pad.y+pad.h, pad.r);
+        context.arcTo(pad.x, pad.y+pad.h, pad.x, pad.y+pad.h-pad.r, pad.r);
+        context.arcTo(pad.x, pad.y, pad.x+pad.r, pad.y, pad.r);
         context.closePath();                                                 
         context.fillStyle = padGrad();
         context.fill();
 }
 
 function padGrad() {                
-        var padG = context.createLinearGradient(padX,padY,padX,padY+20);
+        var padG = context.createLinearGradient(pad.x,pad.y,pad.x,pad.y+20);
         padG.addColorStop(0, '#eee');
         padG.addColorStop(1, '#999');
         return padG;
@@ -188,55 +156,55 @@ function padGrad() {
 
 // Bricks
 function brickInit() {
-        bGap = 2;
-        bRow = 2 + levelLim(level);
-        bCol = 5;
-        bW = 80;
-        bH = 15;
-        bCount = 0;
+        brick.gap = 2;
+        brick.row = 2 + levelLim(hud.lv);
+        brick.col = 5;
+        brick.w = 80;
+        brick.h = 15;
+        brick.total = 0;
         
         // Create an updatable brick array = number of bricks
-        bricks = new Array(bRow);
-        for (i=0; i<bRow; i++) {
-                bricks[i] = new Array(bCol);
+        brick.count = new Array(brick.row);
+        for (i=0; i<brick.row; i++) {
+                brick.count[i] = new Array(brick.col);
         }
 }
 
 function brickDraw() {      
-        for (i=0; i<bRow; i++) {
-                for (j=0; j<bCol; j++) {
+        for (i=0; i<brick.row; i++) {
+                for (j=0; j<brick.col; j++) {
                         // Test in case we shouldn't draw a brick
-                        if (bricks[i][j] !== false) { 
+                        if (brick.count[i][j] !== false) { 
                                 // Delete overlapping brick if overlap
-                                if (ballX >= brickX(j) && ballX <= (brickX(j) + bW) && ballY >= brickY(i) && ballY <= (brickY(i) + bH)) {
-                                        score += 1;
-                                        bCount += 1;
-                                        bricks[i][j] = false;
-                                        ballSY = -ballSY;
+                                if (ball.x >= brickX(j) && ball.x <= (brickX(j) + brick.w) && ball.y >= brickY(i) && ball.y <= (brickY(i) + brick.h)) {
+                                        hud.score += 1;
+                                        brick.total += 1;
+                                        brick.count[i][j] = false;
+                                        ball.sy = -ball.sy;
                                 }
                                         
                                 brickColor(i);          
-                                context.fillRect(brickX(j),brickY(i),bW,bH);
+                                context.fillRect(brickX(j),brickY(i),brick.w,brick.h);
                         }
                 }
         }
     
-        if (bCount === (bRow * bCol)) {
+        if (brick.total === (brick.row * brick.col)) {
                 levelUp();                                                   
         }
 }
 
 function brickX(row) {
-        return (row * bW) + (row * bGap);
+        return (row * brick.w) + (row * brick.gap);
 }
         
 function brickY(col) {
-        return (col * bH) + (col * bGap);
+        return (col * brick.h) + (col * brick.gap);
 }
 
 function brickColor(row) {                                           
         y = brickY(row);
-        var brickG = context.createLinearGradient(0,y,0,y+bH);
+        var brickG = context.createLinearGradient(0,y,0,y+brick.h);
         switch(row) {                                                    
                 case 0:  brickG.addColorStop(0,'#bd06f9');                   
                 brickG.addColorStop(1,'#9604c7'); break;                     
@@ -255,7 +223,7 @@ function brickColor(row) {
 
 // Leveling
 function levelUp() {
-        level += 1;
+        hud.lv += 1;
         brickInit();
         ballInit();
         padInit();
@@ -272,75 +240,75 @@ function levelLim(lv) {
 
 // Heads up display
 function hudInit() {
-        level = 1;
-        score = 0;
+        hud.lv = 1;
+        hud.score = 0;
 }
 
 function hudDraw() {
         context.font = '12px helvetica, arial';
         context.fillStyle = 'white';
         context.textAlign = 'left'; 
-        context.fillText('Score: ' + score, 5, canvasH - 5);
+        context.fillText('Score: ' + hud.score, 5, canvas.height - 5);
         context.textAlign = 'right'; 
-        context.fillText('Lv: ' + level, canvasW - 5, canvasH - 5);
+        context.fillText('Lv: ' + hud.lv, canvas.width - 5, canvas.height - 5);
 }
 
 // Transition screens
 function welcomeDraw() {
         context.fillStyle = 'black';
-        context.fillRect(0, 0, canvasW, canvasH);
+        context.fillRect(0, 0, canvas.width, canvas.height);
         
         context.fillStyle = 'white';
         context.textAlign = 'center';
         context.font = '40px helvetica, arial';
-        context.fillText('BREAKOUT', canvasW/2, canvasH/2);
+        context.fillText('BREAKOUT', canvas.width/2, canvas.height/2);
         
         context.fillStyle = '#999999';
         context.font = '20px helvetica, arial';
-        context.fillText('Click To Start', canvasW/2, canvasH/2 + 30);
+        context.fillText('Click To Start', canvas.width/2, canvas.height/2 + 30);
 }
 
 function goDraw() {
         context.fillStyle = 'black';
-        context.fillRect(0,0,canvasW,canvasH);
+        context.fillRect(0,0,canvas.width,canvas.height);
         
         context.fillStyle = 'red';
         context.textAlign = 'center';
         context.font = '40px helvetica, arial';
-        context.fillText('Game Over', canvasW/2, canvasH/2);
+        context.fillText('Game Over', canvas.width/2, canvas.height/2);
         
         context.fillStyle = '#999999';
         context.font = '20px helvetica, arial';
-        context.fillText('Click To Retry', canvasW/2, canvasH/2 + 30);
+        context.fillText('Click To Retry', canvas.width/2, canvas.height/2 + 30);
 }
 
 // Game controller logic
 $(document).keydown(function(evt) {                                  
         if (evt.keyCode === 39) {                                    
-                keyL = true;                                                                                 
+                ctrl.left = true;                                                                                 
         }
         else if (evt.keyCode === 37) {                               
-                keyR = true;
+                ctrl.right = true;
         }
 });
 
 $(document).keyup(function(evt) {                                    
         if (evt.keyCode === 39) {                                    
-                keyL = false;                                        
+                ctrl.left = false;                                        
         }                                                            
         else if (evt.keyCode === 37) {                               
-                keyR = false;                                        
+                ctrl.right = false;                                        
         }                                                            
 });                                                                  
 
 $('#canvas').mousemove(function(e){
         var canvasPosLeft = Math.round($("#canvas").position().left);  
         var canvasPos = e.pageX - canvasPosLeft;                             
-        var padM = padW / 2;                                           
+        var padM = pad.w / 2;                                           
         
-        if (canvasPos > padM && canvasPos < canvasW - padM) {          
-                mouseX = canvasPos;                                 
-                mouseX -= padW / 2;                                        
-                padX = mouseX;                                         
+        if (canvasPos > padM && canvasPos < canvas.width - padM) {          
+                ctrl.mX = canvasPos;                                 
+                ctrl.mX -= pad.w / 2;                                        
+                pad.x = ctrl.mX;                                         
         }
 });

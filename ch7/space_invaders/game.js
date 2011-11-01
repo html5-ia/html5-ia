@@ -7,6 +7,72 @@ Publisher: Manning
 */
 
 /********
+Animation Functions
+********/
+// How to figure out what a user's computer can handle for frames with fallbacks
+// Original by Paul Irish: http://paulirish.com/2011/requestanimationframe-for-smart-animating/
+// Clear interval version here created by Jerome Etienne http://notes.jetienne.com/2011/05/18/cancelRequestAnimFrame-for-paul-irish-requestAnimFrame.html
+window.cancelRequestAnimFrame = ( function() {
+        return window.cancelAnimationFrame          ||
+        window.webkitCancelRequestAnimationFrame    ||
+        window.mozCancelRequestAnimationFrame       ||
+        window.oCancelRequestAnimationFrame         ||
+        window.msCancelRequestAnimationFrame        ||
+        clearTimeout
+} )();
+
+window.requestAnimFrame = (function(){
+        return window.requestAnimationFrame         || 
+        window.webkitRequestAnimationFrame          || 
+        window.mozRequestAnimationFrame             || 
+        window.oRequestAnimationFrame               || 
+        window.msRequestAnimationFrame              || 
+        function(/* function */ callback, /* DOMElement */ element){
+                return window.setTimeout(callback, 1000 / 60);
+        };
+})();
+
+// From "A better setTimeout() / setInterval()" by Joe Lambert
+// Makes intervals run in unison with request anmation frame
+// http://blog.joelambert.co.uk/2011/06/01/a-better-settimeoutsetinterval/
+window.requestInterval = function(fn, delay) {
+        if( !window.requestAnimationFrame   && 
+        !window.webkitRequestAnimationFrame && 
+        !window.mozRequestAnimationFrame    && 
+        !window.oRequestAnimationFrame      && 
+        !window.msRequestAnimationFrame)
+        return window.setInterval(fn, delay);
+
+        var start = new Date().getTime(),
+        handle = new Object();
+
+        function loop() {
+                var current = new Date().getTime(),
+                delta = current - start;
+        
+                if(delta >= delay) {
+                        fn.call();
+                        start = new Date().getTime();
+                }
+        
+                handle.value = requestAnimFrame(loop);
+        };
+
+        handle.value = requestAnimFrame(loop);
+        return handle;
+}
+
+window.clearRequestInterval = function(handle) {
+        window.cancelAnimationFrame ? window.cancelAnimationFrame(handle.value) :
+        window.webkitCancelRequestAnimationFrame ? window.webkitCancelRequestAnimationFrame(handle.value) :
+        window.mozCancelRequestAnimationFrame ? window.mozCancelRequestAnimationFrame(handle.value) :
+        window.oCancelRequestAnimationFrame ? window.oCancelRequestAnimationFrame(handle.value) :
+        window.msCancelRequestAnimationFrame ? msCancelRequestAnimationFrame(handle.value) :
+        clearInterval(handle);
+};
+
+
+/********
 Global variables and objects
 ********/
 // Core elements
@@ -28,13 +94,21 @@ var inv = {};
 Core Logic
 ********/
 /* Check if the browser can run the game */
-svg.support = document.implementation.hasFeature("http://www.w3.org/TR/SVG11/feature#Shape", "1.1");
-if (svg.support){
-        setup();
-        svg.id.addEventListener('click', runGame, false);
-}
-else {
-        alert('Your browser does not support SVG. Try using Google Chrome.');
+window.onload = function() {
+        svg.support = document.implementation.hasFeature("http://www.w3.org/TR/SVG11/feature#Shape", "1.1");
+        svg.chrome = Boolean(window.chrome);
+        if (svg.support && svg.chrome){
+                setup();
+                svg.id.addEventListener('click', runGame, false);
+        }
+        else if (svg.support){
+                alert('This game is specifically designed for the latest version of Google Chrome. You may proceed, but no gurantee that everything will run smoothly.');
+                setup();
+                svg.id.addEventListener('click', runGame, false);
+        }
+        else {
+                alert('Your browser doesn\'t support SVG, please download Google Chrome.');
+        }
 }
 
 /* Store variables here that stay consistent throughout the game. Makes them easy to reference in multiple places. */
@@ -78,9 +152,14 @@ function init() {
         invInit();
         shipInit();
         
-        timer.svg = setInterval(draw, 12);
-        timer.rship = setInterval(rshipInit, 30000);
-        timer.inv = setInterval(invDraw, inv.update);
+        animate();
+        timer.inv = requestInterval(invDraw, inv.update);
+        timer.rship = requestInterval(rshipInit, 30000);
+}
+
+function animate() {
+        draw();
+        timer.svg = requestAnimFrame(animate);
 }
 
 function draw() {
@@ -163,7 +242,7 @@ function shieldHit(piece) {
 // Laser
 function laserInit(x, y, laserName) {
         laser.create = document.createElementNS(svg.ns,'rect');
-        laser.speed = 5;
+        laser.speed = 6;
         laser.width = 2;
         laser.height = 10;
         
@@ -226,7 +305,7 @@ function laserDraw() {
                                         }
                                 }
                                 else if ((x1 >= ship.x && x1 <= (ship.x + ship.w) && y1 >= ship.y && y1 <= (ship.y + ship.h)) && ship.player[0]) {
-                                                svg.id.removeChild(lasers[n]);
+                                                if (lasers[n] != null) svg.id.removeChild(lasers[n]);
                                                 lifeDraw();
                                 }
                         }
@@ -497,7 +576,6 @@ function invShoot () {
         }
 }
 
-
 function hudInit() {
         hud.lives = 3;
         hud.level = 1;
@@ -555,22 +633,22 @@ function levelUp() {
                 inv.counter = 0;
                 inv.update = 800 - (20 * hud.level);
                 
-                clearInterval(timer.inv);
+                clearRequestInterval(timer.inv);
                 svg.id.removeChild(inv.flock);
                 invInit();
-                timer.inv = setInterval(invDraw, inv.update);
+                timer.inv = requestInterval(invDraw, inv.update);
         }
         else if (inv.counter === Math.round(invCount / 2)) {
                 inv.update -= 250;
                 
-                clearInterval(timer.inv);
-                timer.inv = setInterval(invDraw, inv.update);
+                clearRequestInterval(timer.inv);
+                timer.inv = requestInterval(invDraw, inv.update);
         }
         else if (inv.counter === (inv.col * inv.row) - 3) {
                 inv.update -= 300;
                 
-                clearInterval(timer.inv);
-                timer.inv = setInterval(invDraw, inv.update);
+                clearRequestInterval(timer.inv);
+                timer.inv = requestInterval(invDraw, inv.update);
         }
 }
 
@@ -584,14 +662,14 @@ function lifeDraw() {
                 setTimeout('shipCreate(ship.x, ship.y, \'player\')', 1000);
         }
         else {
-                setTimeout('gameOver()', 3000);
+                return gameOver();
         } 
 }
 
 function gameOver() {
-        clearInterval(timer.rship);
-        clearInterval(timer.inv);
-        clearInterval(timer.svg);
+        clearRequestInterval(timer.rship);
+        clearRequestInterval(timer.inv);
+        cancelRequestAnimFrame(timer.svg);
         
         $('.shield, #redShip, .life, #flock, .player, #textScore, #textLives, .laserEvil, .laserGood').detach();
 
@@ -627,7 +705,7 @@ control.keys = function() {
 };
 
 // Monitors positive or negative mouse movement and applies that to the ship's position
-// Works perfect for the adjustable screen size
+// Works very well for the adjustable screen size
 control.mouse = function() {
         $('#svg').mousemove(function(e){
                 ship.posNew = e.pageX - ship.posPrev + ship.x;

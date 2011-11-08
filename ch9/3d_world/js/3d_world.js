@@ -1,19 +1,24 @@
+window.onload = function() {
 /*------------
  Running The Game 
 ------------*/
 // You can overwrite any of Engines values here
-window.onload = function() {
-    var World = new Engine();
-    World.run();
-}
+var World = new Engine();
+World.spawnEntity(Entity);
+
+World.run();
+
 
 /*------------
  Entity Objects
 ------------*/
+//var Square = Entity.extend({
+//
+//});
 
 
 /*------------
  Entity Spawning
 ------------*/
-//spawnEntity(Background, 200, 50);
-//spawnEntity(Background, 20, 20);
+
+}

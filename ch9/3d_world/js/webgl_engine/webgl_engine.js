@@ -5,7 +5,7 @@ Author: Ashton Blue
 Author URL: http://twitter.com/#!/ashbluewd
 
 To-do
-- Solve prespective ration drawing bug
+- Solve prespective ratio drawing bug
 - Configure dynamic screen resizing listener
 - Draw shapes from entity attributes and remove them from the core
     - Store all shapes inside the object array
@@ -105,10 +105,20 @@ function storageGet(property) {
 
 // Spawn an entity
 var id = 0;
-function spawnEntity(name,x,y) {
+function spawnEntity(name) {
         window['id' + id] = eval(new name);
-        window['id' + id].spawn(x,y);
+        window['id' + id].spawn();
         id += 1;
+}
+
+// Generate a random number from min to max
+function random(min,max) {
+    // Defaults to 1 for min
+    if (!min) min = 1;
+    // Default to positive value of minimum number + 9
+    if (!max) max = Math.abs(min) + 9;
+    
+    return Math.floor(Math.random() * (max - min) + min);
 }
 
 
@@ -116,27 +126,54 @@ function spawnEntity(name,x,y) {
  Core game logic
 ---------*/
 var Engine = Class.extend({
+    /* ----- Default Values -----*/
     canvas: document.getElementById("canvas"),
     width: window.innerWidth - 20,
     height: window.innerHeight - 20,
+    storage: new Array(),
+    id: 0,
     
+    
+    /* ----- Utilities -----*/
+    // Generates a random number from min to max
+    random: function(min,max) {
+        // Defaults to 1 for min
+        if (!min) min = 1;
+        // Default to positive value of minimum number + 9
+        if (!max) max = Math.abs(min) + 9;
+        
+        return Math.floor(Math.random() * (max - min) + min);
+    },
+    
+    
+    /* ----- Entity Control -----*/
+    spawnEntity: function(name) { // Add x, y, z support
+        window['id' + this.id] = eval(new name);
+        this.storage.push(window['id' + this.id].spawn());
+        this.id += 1;
+    },
+
+    
+    /* ----- Screen Control -----*/
+    screen: function() {
+        this.canvas.width = this.width;
+        this.canvas.height = this.height;
+        
+        // Set WebGL viewport ratio to prevent potential distortion
+        this.horizAspect = this.width / this.height;
+    },
+    screenResize: function() {
+        // Might do this, not too sure
+    },
+    
+    
+    /* ----- Game Engine Functions -----*/
     run: function() {
         this.init();
         this.initGL();
         this.initShaders();
         this.initBuffers();
         this.draw();
-    },
-    
-    screen: function() {
-        this.canvas.width = this.width;
-        this.canvas.height = this.height;
-        
-        // Set WebGL viewport ratio to prevent potential distortion
-        this.horizAspect = this.canvas.width / this.canvas.height;
-    },
-    screenResize: function() {
-        // Might do this, not too sure
     },
     
     init: function() {
@@ -191,23 +228,13 @@ var Engine = Class.extend({
     },
     // Prepare WebGL graphics to be drawn by storing them
     initBuffers: function() {
-        // Buffer creation
-        this.squareVerticesBuffer = this.gl.createBuffer();
-        // Graphic storage
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.squareVerticesBuffer);
-        
-        // Sets up points at x, y, z
-        this.vertices = [  
-            1.0,  1.0,  0.0,  
-            -1.0,  1.0,  0.0,  
-            1.0, -1.0,  0.0,  
-            -1.0, -1.0,  0.0  
-        ];
-        
-        // Uses float32 to change the array into a webGL edible format. Research float32arrays more and play.
-        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(this.vertices), this.gl.STATIC_DRAW);
+        for (var i in this.storage) {
+            this.storage[i].buffer = this.gl.createBuffer(); // Buffer creation
+            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.storage[i].buffer); // Graphic storage
+            this.vertices = this.storage[i].bufVert; // Sets up points at x, y, z via array
+            this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(this.vertices), this.gl.STATIC_DRAW); // Uses float32 to change the array into a webGL edible format.
+        }
     },
-    
     // Goes into the DOM to configure shaders via variable id
     getShader: function(id) {
         this.shaderScript = document.getElementById(id);
@@ -257,16 +284,19 @@ var Engine = Class.extend({
         this.perspectiveMatrix = makePerspective(45, this.horizAspect, 0.1, 100.0);
         
         this.loadIdentity();
-        // Setup object 6 units away from camera
-        this.mvTranslate([0,0,-6]);
         
-        // Pass buffer data
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.squareVerticesBuffer);
-        // Pass position data
-        this.gl.vertexAttribPointer(this.vertexPositionAttribute, 3, this.gl.FLOAT, false, 0, 0);  
-        this.setMatrixUniforms();
-        // Draw at location x, y, z
-        this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);  
+        
+        for (var i in this.storage) {
+            this.mvTranslate(this.storage[i].posVert()); // Draw at location x, y, z
+            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.storage[i].buffer); // Pass buffer data
+            this.gl.vertexAttribPointer(this.vertexPositionAttribute, this.storage[i].bufCols, this.gl.FLOAT, false, 0, 0); // Pass position data
+            this.setMatrixUniforms();
+            this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, this.storage[i].bufRows); // Take the matrix vertex positions and go through all of the elements from 0 to the .numItems object
+        }
+    },
+    animate: function() {
+        requestAnimFrame( this.animate() );
+        this.draw();
     },
     
     // Matrix functions modified from Mozilla's WebGL tutorial https://developer.mozilla.org/en/WebGL/Adding_2D_content_to_a_WebGL_context
@@ -287,6 +317,39 @@ var Engine = Class.extend({
         var mvUniform = this.gl.getUniformLocation(this.shaderProgram, "uMVMatrix");  
         this.gl.uniformMatrix4fv(mvUniform, false, new Float32Array(mvMatrix.flatten())); 
     }
+});
+
+
+/*-----------
+ Entity Pallete
+-----------*/
+var Entity = Class.extend({
+        x: 0,
+        y: 0,
+        z: -6,
+        posVert: function() {
+            return [ this.x, this.y, this.z ];
+        },
+        
+        bufCols: 3,
+        bufRows: 4,
+        bufVert: [
+             1.0,  1.0,  0.0,  
+            -1.0,  1.0,  0.0,  
+             1.0, -1.0,  0.0,  
+            -1.0, -1.0,  0.0
+        ],
+
+        init: function() {
+                
+        },
+        spawn: function(x,y,z) { // Add x, y, z support
+                if (x) this.x = x;
+                if (y) this.y = y;
+                if (z) this.z = z;
+                this.init();
+                return this;
+        }
 });
 
 //var canvas;

@@ -262,17 +262,33 @@ var Engine = Class.extend({
         for (var i in this.storage) {
             this.mvTranslate(this.storage[i].posVert()); // Draw at location x, y, z
             
+            // Pass rotate data
+            this.mvPushMatrix();  
+            this.mvRotate(this.storage[i].rotateInit, this.storage[i].rotate); 
+            
             // Pass shape data
             this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.storage[i].buffer); 
             this.gl.vertexAttribPointer(this.vertexPositionAttribute, this.storage[i].bufCols, this.gl.FLOAT, false, 0, 0); // Pass position data
             
             // Pass color data
             this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.storage[i].colorBuffer);  
-            this.gl.vertexAttribPointer(this.vertexColorAttribute, 4, this.gl.FLOAT, false, 0, 0);  
+            this.gl.vertexAttribPointer(this.vertexColorAttribute, 4, this.gl.FLOAT, false, 0, 0);
             
-            // Crete
+            // Create
             this.setMatrixUniforms();
             this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, this.storage[i].bufRows); // Take the matrix vertex positions and go through all of the elements from 0 to the .numItems object
+        
+            // Implement rotation
+            this.mvPopMatrix();
+            
+            this.currentTime = (new Date).getTime();  
+            if (this.storage[i].lastUpdate) {  
+                this.delta = this.currentTime - this.storage[i].lastUpdate;  
+                
+                this.storage[i].rotateInit += (30 * this.delta) / 1000.0;  
+            }  
+              
+            this.storage[i].lastUpdate = this.currentTime;  
         }
     },
     
@@ -293,7 +309,36 @@ var Engine = Class.extend({
         
         var mvUniform = this.gl.getUniformLocation(this.shaderProgram, "uMVMatrix");  
         this.gl.uniformMatrix4fv(mvUniform, false, new Float32Array(mvMatrix.flatten())); 
-    }
+    },
+    
+    // Additional functions by Vlad Vukicevic
+    mvMatrixStack: [],
+  
+    mvPushMatrix: function(m) {  
+        if (m) {  
+            this.mvMatrixStack.push(m.dup());  
+            mvMatrix = m.dup();  
+        }
+        else {  
+            this.mvMatrixStack.push(mvMatrix.dup());  
+        }  
+    },  
+      
+    mvPopMatrix: function() {  
+        if (!this.mvMatrixStack.length) {  
+            throw("Can't pop from an empty matrix stack.");  
+        }  
+        
+        mvMatrix = this.mvMatrixStack.pop();  
+        return mvMatrix;  
+    },
+      
+    mvRotate: function(angle, v) {  
+      this.inRadians = angle * Math.PI / 180.0;  
+        
+      this.m = Matrix.Rotation(this.inRadians, $V([v[0], v[1], v[2]])).ensure4x4();  
+      this.multMatrix(this.m);  
+    }  
 });
 
 
@@ -316,6 +361,10 @@ var Entity = Class.extend({
         
         // Buffer data for color
         colVert: null,
+        
+        // Rotation
+        rotate: null,
+        rotateInit: 0,
         
         // place extra setup code before spawning here
         init: function() {

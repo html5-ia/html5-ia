@@ -39,6 +39,8 @@ var Square = Entity.extend({
             0.0,  1.0,  0.0,  1.0,    // green  
             0.0,  0.0,  1.0,  1.0     // blue  
         ],
+        
+        rotate: [1,0,1],
 
         init: function() {
                 
@@ -57,6 +59,5 @@ var Square = Entity.extend({
  Entity Spawning
 ------------*/
 World.spawnEntity(Square,0,0,-6);
-World.spawnEntity(Square,7,1,-4);
 
 } // End onload

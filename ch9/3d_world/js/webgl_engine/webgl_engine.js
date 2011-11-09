@@ -7,9 +7,6 @@ Author URL: http://twitter.com/#!/ashbluewd
 To-do
 - Solve prespective ratio drawing bug
 - Configure dynamic screen resizing listener
-- Draw shapes from entity attributes and remove them from the core
-    - Store all shapes inside the object array
-    - Spawn shapes from spawn entity
 */
 
 /*----------
@@ -17,16 +14,17 @@ To-do
 ----------*/
 // How to figure out what a user's computer can handle for frames with fallbacks
 // http://paulirish.com/2011/requestanimationframe-for-smart-animating/
-window.requestAnimFrame = (function(){
-return  window.requestAnimationFrame       || 
+window.requestAnimFrame = function(){
+return( window.requestAnimationFrame       || 
         window.webkitRequestAnimationFrame || 
         window.mozRequestAnimationFrame    || 
         window.oRequestAnimationFrame      || 
         window.msRequestAnimationFrame     || 
         function(/* function */ callback, /* DOMElement */ element){
                 window.setTimeout(callback, 1000 / 60);
-        };
-})();
+        }
+    );
+}();
 
 /* Simple JavaScript Inheritance
  * By John Resig http://ejohn.org/
@@ -93,35 +91,6 @@ return  window.requestAnimationFrame       ||
 })();
 
 
-/*----------
- Function library
-----------*/
-// Loops through objects
-function storageGet(property) {
-        for (var i in storage) {
-                storage[i].draw();
-        }
-}
-
-// Spawn an entity
-var id = 0;
-function spawnEntity(name) {
-        window['id' + id] = eval(new name);
-        window['id' + id].spawn();
-        id += 1;
-}
-
-// Generate a random number from min to max
-function random(min,max) {
-    // Defaults to 1 for min
-    if (!min) min = 1;
-    // Default to positive value of minimum number + 9
-    if (!max) max = Math.abs(min) + 9;
-    
-    return Math.floor(Math.random() * (max - min) + min);
-}
-
-
 /*---------
  Core game logic
 ---------*/
@@ -144,12 +113,11 @@ var Engine = Class.extend({
         
         return Math.floor(Math.random() * (max - min) + min);
     },
-    
-    
-    /* ----- Entity Control -----*/
-    spawnEntity: function(name) { // Add x, y, z support
+    spawnEntity: function(name,x,y,z) { // Add x, y, z support
         window['id' + this.id] = eval(new name);
-        this.storage.push(window['id' + this.id].spawn());
+        this.storage.push(window['id' + this.id].spawn(x,y,z));
+        this.initBuffers(this.storage[this.id]);
+        
         this.id += 1;
     },
 
@@ -168,12 +136,11 @@ var Engine = Class.extend({
     
     
     /* ----- Game Engine Functions -----*/
-    run: function() {
+    setup: function() {
         this.init();
         this.initGL();
         this.initShaders();
-        this.initBuffers();
-        this.draw();
+        //this.initBuffers();
     },
     
     init: function() {
@@ -223,17 +190,24 @@ var Engine = Class.extend({
         this.gl.useProgram(this.shaderProgram);
         
         // Store the shader's attribute in an object so you can use it again later
-        this.shaderProgram.vertexPositionAttribute = this.gl.getAttribLocation(this.shaderProgram, "aVertexPosition");
-        this.gl.enableVertexAttribArray(this.shaderProgram.vertexPositionAttribute);
+        this.vertexPositionAttribute = this.gl.getAttribLocation(this.shaderProgram, "aVertexPosition");
+        this.gl.enableVertexAttribArray(this.vertexPositionAttribute);
+        
+        // Allow usage of color data with shaders
+        this.vertexColorAttribute = this.gl.getAttribLocation(this.shaderProgram, "aVertexColor");
+        this.gl.enableVertexAttribArray(this.vertexColorAttribute);
     },
     // Prepare WebGL graphics to be drawn by storing them
-    initBuffers: function() {
-        for (var i in this.storage) {
-            this.storage[i].buffer = this.gl.createBuffer(); // Buffer creation
-            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.storage[i].buffer); // Graphic storage
-            this.vertices = this.storage[i].bufVert; // Sets up points at x, y, z via array
-            this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(this.vertices), this.gl.STATIC_DRAW); // Uses float32 to change the array into a webGL edible format.
-        }
+    initBuffers: function(object) {
+        // Create shape
+        object.buffer = this.gl.createBuffer(); // Buffer creation
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, object.buffer); // Graphic storage
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(object.bufVert), this.gl.STATIC_DRAW); // Uses float32 to change the array into a webGL edible format.
+        
+        // Create color
+        object.colorBuffer = this.gl.createBuffer();  
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, object.colorBuffer);  
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(object.colVert), this.gl.STATIC_DRAW);
     },
     // Goes into the DOM to configure shaders via variable id
     getShader: function(id) {
@@ -285,18 +259,21 @@ var Engine = Class.extend({
         
         this.loadIdentity();
         
-        
         for (var i in this.storage) {
             this.mvTranslate(this.storage[i].posVert()); // Draw at location x, y, z
-            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.storage[i].buffer); // Pass buffer data
+            
+            // Pass shape data
+            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.storage[i].buffer); 
             this.gl.vertexAttribPointer(this.vertexPositionAttribute, this.storage[i].bufCols, this.gl.FLOAT, false, 0, 0); // Pass position data
+            
+            // Pass color data
+            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.storage[i].colorBuffer);  
+            this.gl.vertexAttribPointer(this.vertexColorAttribute, 4, this.gl.FLOAT, false, 0, 0);  
+            
+            // Crete
             this.setMatrixUniforms();
             this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, this.storage[i].bufRows); // Take the matrix vertex positions and go through all of the elements from 0 to the .numItems object
         }
-    },
-    animate: function() {
-        requestAnimFrame( this.animate() );
-        this.draw();
     },
     
     // Matrix functions modified from Mozilla's WebGL tutorial https://developer.mozilla.org/en/WebGL/Adding_2D_content_to_a_WebGL_context
@@ -324,26 +301,27 @@ var Engine = Class.extend({
  Entity Pallete
 -----------*/
 var Entity = Class.extend({
+        // Determines position
         x: 0,
         y: 0,
-        z: -6,
+        z: 0,
         posVert: function() {
             return [ this.x, this.y, this.z ];
         },
         
-        bufCols: 3,
-        bufRows: 4,
-        bufVert: [
-             1.0,  1.0,  0.0,  
-            -1.0,  1.0,  0.0,  
-             1.0, -1.0,  0.0,  
-            -1.0, -1.0,  0.0
-        ],
-
+        // Buffer data for drawing
+        bufCols: 0,
+        bufRows: 0,
+        bufVert: null,
+        
+        // Buffer data for color
+        colVert: null,
+        
+        // place extra setup code before spawning here
         init: function() {
-                
+            
         },
-        spawn: function(x,y,z) { // Add x, y, z support
+        spawn: function(x,y,z) {
                 if (x) this.x = x;
                 if (y) this.y = y;
                 if (z) this.z = z;

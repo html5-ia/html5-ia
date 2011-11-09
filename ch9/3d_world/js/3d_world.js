@@ -33,11 +33,9 @@ var Square = Entity.extend({
             -1.0, -1.0,  0.0
         ],
         
+        colRows: 4,
         colVert: [
-            1.0,  1.0,  1.0,  1.0,    // white  
-            1.0,  0.0,  0.0,  1.0,    // red  
-            0.0,  1.0,  0.0,  1.0,    // green  
-            0.0,  0.0,  1.0,  1.0     // blue  
+            1,  1,  1,  1 // r,g,b,a
         ],
         
         rotate: [1,0,1],

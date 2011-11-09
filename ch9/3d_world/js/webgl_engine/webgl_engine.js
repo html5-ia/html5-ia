@@ -207,7 +207,7 @@ var Engine = Class.extend({
         // Create color
         object.colorBuffer = this.gl.createBuffer();  
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, object.colorBuffer);  
-        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(object.colVert), this.gl.STATIC_DRAW);
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(object.colOutput()), this.gl.STATIC_DRAW);
     },
     // Goes into the DOM to configure shaders via variable id
     getShader: function(id) {
@@ -360,7 +360,15 @@ var Entity = Class.extend({
         bufVert: null,
         
         // Buffer data for color
+        col: [],
+        colRows: 4,
         colVert: null,
+        colOutput: function() {
+            for (var i=0; i < this.colRows; i++) {
+                this.col = this.col.concat(this.colVert);
+            }
+            return this.col;
+        },
         
         // Rotation
         rotate: null,

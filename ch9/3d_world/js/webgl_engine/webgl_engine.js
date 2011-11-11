@@ -199,7 +199,7 @@ var Engine = Class.extend({
     },
     // Prepare WebGL graphics to be drawn by storing them
     initBuffers: function(object) {
-        // Create shape
+        // Create shape        
         object.buffer = this.gl.createBuffer(); // Buffer creation
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, object.buffer); // Graphic storage
         this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(object.bufVert), this.gl.STATIC_DRAW); // Uses float32 to change the array into a webGL edible format.
@@ -208,6 +208,12 @@ var Engine = Class.extend({
         object.colorBuffer = this.gl.createBuffer();  
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, object.colorBuffer);  
         this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(object.colOutput()), this.gl.STATIC_DRAW);
+        
+        // Define each piece as a triangle to create 3D shapes from flat objects
+        // Think of it as folding a gigantic piece of cardboard into a cube
+        object.dimBuffer = this.gl.createBuffer();
+        this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, object.dimBuffer);
+        this.gl.bufferData(this.gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(object.bufDim), this.gl.STATIC_DRAW);
     },
     // Goes into the DOM to configure shaders via variable id
     getShader: function(id) {
@@ -275,13 +281,16 @@ var Engine = Class.extend({
             this.gl.vertexAttribPointer(this.vertexColorAttribute, 4, this.gl.FLOAT, false, 0, 0);
             
             // Create
+            this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.storage[i].dimBuffer);
             this.setMatrixUniforms();
-            this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, this.storage[i].bufRows); // Take the matrix vertex positions and go through all of the elements from 0 to the .numItems object
+            this.gl.drawElements(this.gl.TRIANGLES, this.storage[i].bufRows, this.gl.UNSIGNED_SHORT, 0); // Take the matrix vertex positions and go through all of the elements from 0 to the .numItems object
         
-            // Implement rotation
+            // Restore original matrix
             this.mvPopMatrix();
             
-            this.currentTime = (new Date).getTime();  
+            // Implement rotation
+            this.currentTime = (new Date).getTime();
+            
             if (this.storage[i].lastUpdate) {  
                 this.delta = this.currentTime - this.storage[i].lastUpdate;  
                 
@@ -359,15 +368,32 @@ var Entity = Class.extend({
         bufRows: 0,
         bufVert: null,
         
+        // Buffer data for creating dimension
+        bufDim: null,
+        
         // Buffer data for color
         col: [],
-        colRows: 4,
+        colRows: 6,
+        colCols: 4,
         colVert: null,
         colOutput: function() {
-            for (var i=0; i < this.colRows; i++) {
-                this.col = this.col.concat(this.colVert);
+            // Single color non-folded shape
+            //for (var i=0; i < this.colRows; i++) {
+            //    this.col = this.col.concat(this.colVert);
+            //}
+            
+            this.colGen = [];
+            
+            // Generating colors for the cube, is there an easier way?
+            for (i=0; i<this.colRows; i++) {
+                var c = this.colVert[i];
+                
+                for (var k=0; k<this.colCols; k++) {
+                    this.colGen = this.colGen.concat(c);
+                }
             }
-            return this.col;
+            
+            return this.colGen;
         },
         
         // Rotation

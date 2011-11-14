@@ -1,109 +1,127 @@
 window.onload = function() {
-/*------------
- Running The Game 
-------------*/
-var World = new Engine();
-World.setup();
-
-// Animation must be kept seperate due to a DOM error it causes from self-reference in your objects
-function animate() {
-    requestAnimFrame( animate );
-    World.draw();
-}
-animate();
-
-
-/*------------
- Entity Objects
-------------*/
-var Square = Entity.extend({
-        x: 0,
-        y: 0,
-        z: -6,
-        posVert: function() {
-            return [ this.x, this.y, this.z ];
-        },
+    
+    /*------------
+     Running The Program 
+    ------------*/
+    var World = new Engine();
+    World.setup();
+    
+    // Animation must be kept seperate due to a DOM error caused by self-reference in your objects
+    function animate() {
+        requestAnimFrame( animate );
+        World.draw();
+    }
+    animate();
+    
+    
+    /*------------
+     Object Templates
+    ------------*/
+    var Square = Entity.extend({
+        rotate: [1,0,1],
         
         bufCols: 3,
         bufRows: 36,
         bufVert: [
-            // Front face  
-            -1.0, -1.0,  1.0,  
-             1.0, -1.0,  1.0,  
-             1.0,  1.0,  1.0,  
-            -1.0,  1.0,  1.0,  
-              
-            // Back face  
-            -1.0, -1.0, -1.0,  
-            -1.0,  1.0, -1.0,  
-             1.0,  1.0, -1.0,  
-             1.0, -1.0, -1.0,  
-              
-            // Top face  
-            -1.0,  1.0, -1.0,  
-            -1.0,  1.0,  1.0,  
-             1.0,  1.0,  1.0,  
-             1.0,  1.0, -1.0,  
-              
-            // Bottom face  
-            -1.0, -1.0, -1.0,  
-             1.0, -1.0, -1.0,  
-             1.0, -1.0,  1.0,  
-            -1.0, -1.0,  1.0,  
-              
-            // Right face  
-             1.0, -1.0, -1.0,  
-             1.0,  1.0, -1.0,  
-             1.0,  1.0,  1.0,  
-             1.0, -1.0,  1.0,  
-              
-            // Left face  
-            -1.0, -1.0, -1.0,  
-            -1.0, -1.0,  1.0,  
-            -1.0,  1.0,  1.0,  
-            -1.0,  1.0, -1.0  
+            // Front  
+            -1, -1, 1,  
+             1, -1, 1,  
+             1,  1, 1,  
+            -1,  1, 1,  
+            // Back  
+            -1, -1, -1,  
+            -1,  1, -1,  
+             1,  1, -1,  
+             1, -1, -1,  
+            // Top  
+            -1,  1, -1,  
+            -1,  1,  1,  
+             1,  1,  1,  
+             1,  1, -1,  
+            // Bottom  
+            -1, -1, -1,  
+             1, -1, -1,  
+             1, -1,  1,  
+            -1, -1,  1,  
+            // Right  
+             1, -1, -1,  
+             1,  1, -1,  
+             1,  1,  1,  
+             1, -1,  1,  
+            // Left  
+            -1, -1, -1,  
+            -1, -1,  1,  
+            -1,  1,  1,  
+            -1,  1, -1  
         ],
-        
         bufDim: [
-            0,  1,  2,      0,  2,  3,    // front
-            4,  5,  6,      4,  6,  7,    // back
-            8,  9,  10,     8,  10, 11,   // top
-            12, 13, 14,     12, 14, 15,   // bottom
-            16, 17, 18,     16, 18, 19,   // right
-            20, 21, 22,     20, 22, 23    // left
+             0,  1,  2,    0,  2,  3, // front
+             4,  5,  6,    4,  6,  7, // back
+             8,  9, 10,    8, 10, 11, // top
+            12, 13, 14,   12, 14, 15, // bottom
+            16, 17, 18,   16, 18, 19, // right
+            20, 21, 22,   20, 22, 23  // left
         ],
-        
+            
         colRows: 6,
         colCols: 4,
         colVert: [
             // r,g,b,a
-            [1.0,  1.0,  1.0,  1.0],    // Front face: white  
-            [1.0,  0.0,  0.0,  1.0],    // Back face: red  
-            [0.0,  1.0,  0.0,  1.0],    // Top face: green  
-            [0.0,  0.0,  1.0,  1.0],    // Bottom face: blue  
-            [1.0,  1.0,  0.0,  1.0],    // Right face: yellow  
-            [1.0,  0.0,  1.0,  1.0]     // Left face: purple  
+            [1, 0, 0, 1], // Front: red  
+            [0, 1, 0, 1], // Back: green  
+            [0, 0, 1, 1], // Top: blue  
+            [1, 1, 0, 1], // Bottom: blue  
+            [1, 0, 1, 1], // Right face: yellow  
+            [0, 1, 1, 1]  // Left face: purple  
+        ]
+    });
+    
+    var SquareStop = Square.extend({
+        rotate: null
+    });
+    
+    var SquareSolid = Square.extend({
+        colVert: [
+            [0, 1, 0, 1],  
+            [0, 1, 0, 1],  
+            [0, 1, 0, 1],  
+            [0, 1, 0, 1], 
+            [0, 1, 0, 1], 
+            [0, 1, 0, 1] 
+        ]
+    });
+    
+    var SquareFlat = Square.extend({
+        bufRows: 4,
+        bufVert: [
+             1.0,  1.0,  0.0,  
+            -1.0,  1.0,  0.0,  
+             1.0, -1.0,  0.0,  
+            -1.0, -1.0,  0.0
         ],
+        bufDim: null,
         
-        // Make so no rotate will not rotate the shape and not crash
-        rotate: [1,0,1],
-
-        init: function() {
-                
-        },
-        spawn: function(x,y,z) { // Add x, y, z support
-                if (x) this.x = x;
-                if (y) this.y = y;
-                if (z) this.z = z;
-                this.init();
-                return this;
+        colOutput: function() {
+            vert = [ 1, 0, 0, 1,
+                     0, 1, 1, 1,
+                     1, 0, 1, 1,
+                     1, 1, 0, 1 ]
+            return vert;
         }
-});
-
-
-/*------------
- Entity Spawning
-------------*/
-World.spawnEntity(Square,0,0,-6);
-
+    });
+    
+    var SquareReverse = Square.extend({
+        rotate: [-1,0,-1]
+    });
+    
+    
+    /*------------
+     Object Spawning
+    ------------*/
+    World.spawnEntity(SquareStop,-6,4,-15);
+    World.spawnEntity(Square, 6, -4, 5);
+    World.spawnEntity(SquareSolid, 6, -4, -5);
+    World.spawnEntity(SquareReverse, 0, 8, 0);
+    World.spawnEntity(SquareFlat, -12, -8, 0);
+    
 } // End onload

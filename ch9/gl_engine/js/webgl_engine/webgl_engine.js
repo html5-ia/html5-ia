@@ -1,6 +1,5 @@
 /*
-Name: Canvas Prime
-Version: Alpha
+Name: WebGL Engine
 Author: Ashton Blue
 Author URL: http://twitter.com/#!/ashbluewd
 Credits: Based on Mozilla's WebGL (https://developer.mozilla.org/en/WebGL) and Giles Thomas' Learning WebGL (http://learningwebgl.com/blog) tutorials.

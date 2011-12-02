@@ -58,7 +58,7 @@ window.onload = function() {
             // Uses a measurement of time to update and configure your rotation
             // Originally from Mozilla's WebGL tutorial https://developer.mozilla.org/en/WebGL/Animating_objects_with_WebGL
             this.currentTime = (new Date).getTime();
-            if (this.lastUpdate) {  
+            if (this.lastUpdate < this.currentTime) {  
                 this.delta = this.currentTime - this.lastUpdate;  
                 
                 this.rotateInit += (30 * this.delta) / 1000.0;  
@@ -219,9 +219,9 @@ window.onload = function() {
     
     // Four example objects on corners
     World.spawnEntity(Square, -6, 4, -15); // spawnEntity(entity, x, y, z);
+    World.spawnEntity(SquareRotate, -6, -4, -15);
     World.spawnEntity(Cube, 6, -4, -15);
     World.spawnEntity(CubeSolid, 6, 4, -15);
-    World.spawnEntity(SquareRotate, -6, -4, -15);
     
     // Rotating cube-like planet with other shapes
     World.spawnEntity(Cube, 0, 0, -10);

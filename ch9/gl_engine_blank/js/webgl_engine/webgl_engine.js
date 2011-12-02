@@ -280,10 +280,10 @@ var Engine = Class.extend({
             
             // Draw at location x, y, z
             // Other objects drawn before refreshing will be drawn relative to this position
-            this.mvTranslate(this.storage[i].posVert());
-            this.mvPushMatrix();
+            this.mvTranslate(this.storage[i].posVert()); 
             
             // Pass rotate data
+            this.mvPushMatrix();  
             if (this.storage[i].rotate) this.mvRotate(this.storage[i].rotateInit, this.storage[i].rotate);
             
             // Pass shape data

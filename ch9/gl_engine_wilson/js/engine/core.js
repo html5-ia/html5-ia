@@ -46,7 +46,7 @@ var Engine = Class.extend({
     setup: function() {
         this.init();
         this.initGL();
-        this.initShaders();
+        this.initShadersColor();
     },
     
     init: function() {
@@ -74,8 +74,8 @@ var Engine = Class.extend({
         }
     },
     
-    // Sets up shaders
-    initShaders: function() {
+    // Sets up shaders for color
+    initShadersColor: function() {
         // Literally pulls shader programs from the DOM
         this.fragmentShader = this.getShader('shader-fs');
         this.vertexShader = this.getShader('shader-vs');
@@ -103,6 +103,30 @@ var Engine = Class.extend({
         // Allow usage of color data with shaders
         this.vertexColorAttribute = this.gl.getAttribLocation(this.shaderProgram, "aVertexColor");
         this.gl.enableVertexAttribArray(this.vertexColorAttribute);
+    },
+    // Sets up shaders for image data
+    initShadersImg: function() {
+        this.imgFragmentShader = this.getShader('shader-image-fs');
+        this.imgVertexShader = this.getShader('shader-image-vs');
+        
+        this.imgShaderProgram = this.gl.createProgram();
+        this.gl.attachShader(this.imgShaderProgram, this.imgVertexShader);
+        this.gl.attachShader(this.imgShaderProgram, this.imgFragmentShader);
+        this.gl.linkProgram(this.imgShaderProgram);
+        
+        // Here we will fire a different error that indicates the image shader has failed
+        if (!this.gl.getProgramParameter(this.imgShaderProgram, this.gl.LINK_STATUS)) {
+            alert("Image shaders have FAILED to load.");
+        }
+        this.gl.useProgram(this.imgShaderProgram);
+        
+        // Store the shader's attribute in an object so you can use it again later
+        this.imgVertexPositionAttribute = this.gl.getAttribLocation(this.imgShaderProgram, "aVertexPosition");
+        this.gl.enableVertexAttribArray(this.imgVertexPositionAttribute);
+        
+        // Allow usage of color data with shaders
+        this.imgVertexColorAttribute = this.gl.getAttribLocation(this.imgShaderProgram, "aVertexColor");
+        this.gl.enableVertexAttribArray(this.imgVertexColorAttribute);
     },
     // Goes into the DOM to get shaders via variable id
     getShader: function(id) {

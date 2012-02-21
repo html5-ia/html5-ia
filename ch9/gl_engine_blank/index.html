@@ -1,19 +1,21 @@
 <!DOCTYPE html>   
 <html> 
 <head>
-    <title>3D World</title>
+    <title>WebGL Engine</title>
 </head>
 
 <body>
     <canvas id="canvas">
-        Download FireFox to experience the demo!
+        Download Chrome to experience the demo!
     </canvas>
         
     <!-- Script loading -->
-    <script type="text/javascript" src="js/webgl_engine/assets/sylvester.js"></script>
-    <script type="text/javascript" src="js/webgl_engine/assets/webgl_util.js"></script>
-    <script type="text/javascript" src="js/webgl_engine/webgl_engine.js"></script>
-    <script type="text/javascript" src="js/3d_world.js"></script>
+    <script type="text/javascript" src="js/engine/assets/sylvester.js"></script>
+    <script type="text/javascript" src="js/engine/assets/webgl_util.js"></script>
+    <script type="text/javascript" src="js/engine/assets/animation.js"></script>
+    <script type="text/javascript" src="js/engine/assets/classes.js"></script>
+    <script type="text/javascript" src="js/engine/core.js"></script>
+    <script type="text/javascript" src="js/run.js"></script>
         
     <!-- Color fragments -->
     <script id="shader-fs" type="x-shader/x-fragment">
@@ -26,18 +28,18 @@
         
     <!-- Vertex position and shape -->
     <script id="shader-vs" type="x-shader/x-vertex">  
-              attribute vec3 aVertexPosition;
-              attribute vec4 aVertexColor;
+        attribute vec3 aVertexPosition;
+        attribute vec4 aVertexColor;
+        
+        uniform mat4 uMVMatrix;
+        uniform mat4 uPMatrix;
+        
+        varying lowp vec4 vColor;
               
-              uniform mat4 uMVMatrix;
-              uniform mat4 uPMatrix;
-              
-              varying lowp vec4 vColor;
-              
-              void main(void) {
-                gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
-                vColor = aVertexColor;
-            }    
+        void main(void) {
+            gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+            vColor = aVertexColor;
+        }    
     </script>
 </body>
 </html>

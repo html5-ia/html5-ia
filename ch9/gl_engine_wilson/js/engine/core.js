@@ -47,6 +47,8 @@ var Engine = Class.extend({
         this.init();
         this.initGL();
         this.initShadersColor();
+        this.textureLoader();
+        this.initShadersTexture();
     },
     
     init: function() {
@@ -104,8 +106,8 @@ var Engine = Class.extend({
         this.vertexColorAttribute = this.gl.getAttribLocation(this.shaderProgram, "aVertexColor");
         this.gl.enableVertexAttribArray(this.vertexColorAttribute);
     },
-    // Sets up shaders for image data
-    initShadersImg: function() {
+    // Sets up shaders for image texture data
+    initShadersTexture: function() {
         this.imgFragmentShader = this.getShader('shader-image-fs');
         this.imgVertexShader = this.getShader('shader-image-vs');
         
@@ -124,9 +126,41 @@ var Engine = Class.extend({
         this.imgVertexPositionAttribute = this.gl.getAttribLocation(this.imgShaderProgram, "aVertexPosition");
         this.gl.enableVertexAttribArray(this.imgVertexPositionAttribute);
         
-        // Allow usage of color data with shaders
-        this.imgVertexColorAttribute = this.gl.getAttribLocation(this.imgShaderProgram, "aVertexColor");
-        this.gl.enableVertexAttribArray(this.imgVertexColorAttribute);
+        // Allow usage of image data with shaders
+        this.imgCoordAttribute = this.gl.getAttribLocation(this.imgShaderProgram, "aTextureCoord");
+        this.gl.enableVertexAttribArray(this.imgCoordAttribute);
+    },
+    
+    // An object literal of texture images to be loaded
+    textures: {
+        'test': 'ff.jpg',
+        'wilson': 'wilson.jpg'
+    },
+    // Execute logic for each texture individually
+    texturesLoad: function() {
+        var base = 'images/'; // url base
+        for (var file in this.textures) {
+            var url = base + this.textures[file]; // Complete url string
+            this.texturesProcess(url, this.textures[file]);
+        }
+    },
+    // Load in the texture fired from an array
+    texturesProcess: function(imgSrc, objTexture) {
+        objTexture = this.gl.createTexture(); // Calls from stored variable name, may need to be dynamically generated
+        this.objImg = new Image();
+        // Simple post-processing after images have loaded
+        this.objImg.onload = function() {
+            this.texturesHandle( this.objImg, this.objTexture );
+        }
+        this.objImg.src = imgSrc;
+    },
+    texturesHandle: function(image, texture) {
+        this.gl.bindTexture(gl.TEXTURE_2D, texture);  
+        this.gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);  
+        this.gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);  
+        this.gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST);  
+        this.gl.generateMipmap(gl.TEXTURE_2D);  
+        this.gl.bindTexture(gl.TEXTURE_2D, null);  
     },
     // Goes into the DOM to get shaders via variable id
     getShader: function(id) {
@@ -183,12 +217,19 @@ var Engine = Class.extend({
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, object.buffer); // Graphic storage
         this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(object.bufVert), this.gl.STATIC_DRAW); // Uses float32 to change the array into a webGL edible format.
         
+        // May need an if here to prevent crashing when an image is loaded instead
         // Create color
         object.colorBuffer = this.gl.createBuffer();  
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, object.colorBuffer);  
         this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(object.colOutput()), this.gl.STATIC_DRAW);
         
-        if (object.bufDim) {
+        if (object.bufTexture) {
+            // Take priority on loading in a texture over color
+            object.dimBuffer = this.gl.createBuffer();
+            this.gl.bindBuffer(gl.ARRAY_BUFFER, object.dimBuffer);
+            this.gl.bufferData(this.gl.ARRAY_BUFFER, new WebGLFloatArray(object.bufTexture), this.gl.STATIC_DRAW);
+        }
+        else if (object.bufDim) {
             // Define each piece as a triangle to create 3D shapes from flat objects
             // Think of it as folding a gigantic piece of cardboard into a cube
             object.dimBuffer = this.gl.createBuffer();
@@ -230,9 +271,16 @@ var Engine = Class.extend({
             this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.storage[i].buffer); 
             this.gl.vertexAttribPointer(this.vertexPositionAttribute, this.storage[i].bufCols, this.gl.FLOAT, false, 0, 0); // Pass position data
             
-            // Pass color data
-            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.storage[i].colorBuffer);  
-            this.gl.vertexAttribPointer(this.vertexColorAttribute, 4, this.gl.FLOAT, false, 0, 0);
+            // Pass texture or color data
+            if (this.storage[i].bufTextures) {
+                this.gl.activeTexture(this.gl.TEXTURE0);
+                this.gl.bindTexture(this.gl.TEXTURE_2D, this.objTexture);
+                this.gl.uniform1i(this.gl.getUniformLocation(this.imgShaderProgram, "uSampler"), 0);
+            }
+            else {
+                this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.storage[i].colorBuffer);  
+                this.gl.vertexAttribPointer(this.vertexColorAttribute, 4, this.gl.FLOAT, false, 0, 0);
+            }
             
             // Create
             this.setMatrixUniforms();

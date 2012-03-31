@@ -24,7 +24,23 @@
          Note: Each shader program is grabbed via DOM, so you can have
          as many as you want for differnt shading purposes (such as
          images or coloring) -->
-         
+
+    <!-- Vertex position and shape, includes textures too -->
+    <script id="shader-image-vs" type="x-shader/x-vertex">  
+        attribute vec3 aVertexPosition;
+        attribute vec2 aTextureCoord;
+        
+        uniform mat4 uMVMatrix;
+        uniform mat4 uPMatrix;
+        
+        varying highp vec2 vTextureCoord;
+              
+        void main(void) {
+            gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+            vTextureCoord  = aTextureCoord;
+        }    
+    </script>
+    
     <!-- Image fragments -->    
     <script id="shader-image-fs" type="x-shader/x-fragment">
         varying highp vec2 vTextureCoord;
@@ -34,22 +50,6 @@
         void main(void) {
             gl_FragColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
         }
-    </script>
-        
-    <!-- Vertex position and shape, includes textures too -->
-    <script id="shader-image-vs" type="x-shader/x-vertex">  
-        attribute vec3 aVertexPosition;
-        attribute vec4 aVertexColor;
-        
-        uniform mat4 uMVMatrix;
-        uniform mat4 uPMatrix;
-        
-        varying lowp vec4 vColor;
-              
-        void main(void) {
-            gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
-            vTextureCoord  = aVertexColor;
-        }    
     </script>
     
     <!-- Color fragments -->

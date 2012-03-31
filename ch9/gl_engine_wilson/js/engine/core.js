@@ -47,7 +47,7 @@ var Engine = Class.extend({
         this.init();
         this.initGL();
         this.initShadersColor();
-        this.textureLoader();
+        this.texturesLoad();
         this.initShadersTexture();
     },
     
@@ -133,8 +133,8 @@ var Engine = Class.extend({
     
     // An object literal of texture images to be loaded
     textures: {
-        'test': 'ff.jpg',
-        'wilson': 'wilson.jpg'
+        'test': 'ff.png'
+        //'wilson': 'wilson.jpg'
     },
     // Execute logic for each texture individually
     texturesLoad: function() {

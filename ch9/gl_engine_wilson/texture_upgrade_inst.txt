@@ -1,7 +1,0 @@
-https://developer.mozilla.org/en/WebGL/Using_textures_in_WebGL
-- Modify init w/ texture option (detect image possibly)
-- Grab and process shader image DOM elements
-- Texture initialization and callback after being loaded
-- Mapping of texture via coordinates and binding them
-- Alter initshader for textures
-- Drawing w/ texture may be slightly different

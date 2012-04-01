@@ -1,11 +1,3 @@
-/*
- To-do
- * Remove jQuery dependencies
- * Simplify user input (keyboard and mouse)
- * Turn various sections into objects (game, bricks, background, HUD, paddle, ect.)
-*/
-
-
 /********
 Setup
 ********/

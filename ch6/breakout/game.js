@@ -1,348 +1,443 @@
+/*
+ To-do
+ * Remove jQuery dependencies
+ * Simplify user input (keyboard and mouse)
+ * Turn various sections into objects (game, bricks, background, HUD, paddle, ect.)
+*/
+
 window.onload = function() {
-        /********
-        Setup
-        ********/
-        // Grab canvas DOM element via global variable
-        var canvas = document.getElementById('canvas'); 
+    /********
+    Setup
+    ********/
+    // Grab canvas DOM element via global variable
+    //var canvas = document.getElementById('canvas'); 
         
-        // How to figure out what a user's computer can handle for frames with fallbacks
-        // Original by Paul Irish: http://paulirish.com/2011/requestanimationframe-for-smart-animating/
-        // Clear interval version here created by Jerome Etienne http://notes.jetienne.com/2011/05/18/cancelRequestAnimFrame-for-paul-irish-requestAnimFrame.html
-        window.cancelRequestAnimFrame = ( function() {
-                return window.cancelAnimationFrame          ||
-                window.webkitCancelRequestAnimationFrame    ||
-                window.mozCancelRequestAnimationFrame       ||
-                window.oCancelRequestAnimationFrame         ||
-                window.msCancelRequestAnimationFrame        ||
-                clearTimeout
-        } )();
-        
-        window.requestAnimFrame = (function(){
-                return  window.requestAnimationFrame        || 
-                window.webkitRequestAnimationFrame          || 
-                window.mozRequestAnimationFrame             || 
-                window.oRequestAnimationFrame               || 
-                window.msRequestAnimationFrame              || 
-                function(/* function */ callback, /* DOMElement */ element){
-                        return window.setTimeout(callback, 1000 / 60);
-                };
-        })();
-        
-        if (canvas.getContext){
+    // How to figure out what a user's computer can handle for frames with fallbacks
+    // Original by Paul Irish: http://paulirish.com/2011/requestanimationframe-for-smart-animating/
+    // Clear interval version here created by Jerome Etienne http://notes.jetienne.com/2011/05/18/cancelRequestAnimFrame-for-paul-irish-requestAnimFrame.html
+    window.cancelRequestAnimFrame = ( function() {
+        return window.cancelAnimationFrame          ||
+        window.webkitCancelRequestAnimationFrame    ||
+        window.mozCancelRequestAnimationFrame       ||
+        window.oCancelRequestAnimationFrame         ||
+        window.msCancelRequestAnimationFrame        ||
+        clearTimeout
+    })();
+    
+    window.requestAnimFrame = ( function() {
+        return  window.requestAnimationFrame        || 
+        window.webkitRequestAnimationFrame          || 
+        window.mozRequestAnimationFrame             || 
+        window.oRequestAnimationFrame               || 
+        window.msRequestAnimationFrame              || 
+        function(/* function */ callback, /* DOMElement */ element){
+            return window.setTimeout(callback, 1000 / 60);
+        };
+    })();
+    
+    var Game = {
+        // Setup configuration
+        canvas: document.getElementById('canvas'),
+        setup: function() {
+            if (this.canvas.getContext){
                 // Setup variables
-                var context = canvas.getContext('2d');
-                var ball = {};
-                var pad = {};
-                var brick = {};
-                var hud = {};
-                var ctrl = {};
+                this.ctx = this.canvas.getContext('2d');
                 
                 // Run the game
-                welcomeDraw();
-                canvas.addEventListener('click', runGame, false);                                                    
-        }
+                Screen.welcome();
+                this.canvas.addEventListener('click', this.listen.run, false);
+                //Ctrl.init();
+            }
+        },
         
-        function runGame() {
-                canvas.removeEventListener('click', runGame, false);
-                init();
-        }
-        
-        function restartGame() {
-                canvas.removeEventListener('click', restartGame, false);
-                cancelRequestAnimFrame(canvas.run);
-                init();
-        } 
-        
-        function init() {
-                hudInit();
-                brickInit();
-                ballInit();
-                padInit();
-                
-                animate();
-        }
-        
-        function animate() {
-                draw();
-                canvas.run = requestAnimFrame(animate);
-        }
-        
-        function draw() {
-                context.clearRect(0,0,canvas.width,canvas.height); 
-                background();
+        init: function() {
+            // Setup initial objects
+            Background.init();
+            //Hud.init();
+            //Bricks.init();
+            //Ball.init();
+            //Paddle.init();
             
-                brickDraw();
-                padDraw();
-                hudDraw();
-                ballDraw();
-        }
+            // Run animation
+            this.animate();
+        },
         
+        animate: function() {
+            // Self-referring object, so you must use Game instead of this to prevent a crash
+            Game.draw();
+            Game.play = requestAnimFrame(Game.animate);
+        },
         
-        /********
-        Functions
-        ********/
-        function background() {                                               
-                var img = new Image();               
-                img.src = 'background.jpg';             
-                context.drawImage(img,0,0);        
-        }
-        
-        // Ball
-        function ballInit() { 
-                ball.x = 120;
-                ball.sx = 1 + (.4 * hud.lv);
-                ball.y = 120;
-                ball.sy = -1.5 - (.4 * hud.lv);
-                ball.r = 10;
-        }
-        
-        function ballDraw() {
-                // Canvas edge detection
-                
-                // Top
-                if (ball.y < 1) { 
-                        ball.y = 1; // Prevents the ball from getting stuck at fast speeds
-                        ball.sy = -ball.sy;
-                }
-                // Bottom
-                else if (ball.y > canvas.height) {
-                        cancelRequestAnimFrame(canvas.run);
-                        goDraw();
-                        canvas.addEventListener('click', restartGame, false);
-                }
-                
-                // Left
-                if (ball.x < 1) {
-                        ball.x = 1; // Prevents the ball from getting stuck at fast speeds
-                        ball.sx = - ball.sx;
-                }
-                // Right
-                else if (ball.x > canvas.width) {
-                        ball.x = canvas.width - 1; // Prevents the ball from getting stuck at fast speeds
-                        ball.sx = - ball.sx;
-                }
-                
-                // Paddle to ball collision
-                if (ball.x >= pad.x && ball.x <= (pad.x + pad.w) && ball.y >= pad.y && ball.y <= (pad.y + pad.w)) {
-                        ball.sx = 7 * ((ball.x - (pad.x+pad.w/2))/pad.w);
-                        ball.sy = -ball.sy;
-                }
-                
-                ball.x += ball.sx;
-                ball.y += ball.sy;
-                
-                // Create ball
-                context.beginPath();
-                context.arc(ball.x, ball.y, ball.r, 0, 2 * Math.PI, false);
-                context.fillStyle = ballGrad();
-                context.fill();
-        }
-        
-        function ballGrad() {
-                var ballG = context.createRadialGradient(ball.x,ball.y,2,ball.x-4,ball.y-3,10);
-                ballG.addColorStop(0, '#eee');                         
-                ballG.addColorStop(1, '#999');                         
-                return ballG;
-        }
-        
-        // Paddle
-        function padInit() {     
-                pad.x = 100;
-                pad.y = 210;
-                pad.w = 90;
-                pad.h = 20;
-                pad.r = 9;
-                pad.speed = 4;
-        }
-        
-        function padDraw() {
-                // Detect controller input
-                if (ctrl.left && (pad.x < (canvas.width - pad.w))) {                      
-                        pad.x += pad.speed;                                         
-                }                                                             
-        
-                else if (ctrl.right && pad.x > 0) {                                  
-                        pad.x += -pad.speed;                                                    
-                }
-                
-                // Create paddle
-                context.beginPath();
-                context.moveTo(pad.x,pad.y);                                           
-                context.arcTo(pad.x+pad.w, pad.y, pad.x+pad.w, pad.y+pad.r, pad.r);
-                context.arcTo(pad.x+pad.w, pad.y+pad.h, pad.x+pad.w-pad.r, pad.y+pad.h, pad.r);
-                context.arcTo(pad.x, pad.y+pad.h, pad.x, pad.y+pad.h-pad.r, pad.r);
-                context.arcTo(pad.x, pad.y, pad.x+pad.r, pad.y, pad.r);
-                context.closePath();                                                 
-                context.fillStyle = padGrad();
-                context.fill();
-        }
-        
-        function padGrad() {                
-                var padG = context.createLinearGradient(pad.x,pad.y,pad.x,pad.y+20);
-                padG.addColorStop(0, '#eee');
-                padG.addColorStop(1, '#999');
-                return padG;
-        }
-        
-        // Bricks
-        function brickInit() {
-                brick.gap = 2;
-                brick.row = 2 + levelLim(hud.lv);
-                brick.col = 5;
-                brick.w = 80;
-                brick.h = 15;
-                brick.total = 0;
-                
-                // Create an updatable brick array = number of bricks
-                brick.count = new Array(brick.row);
-                for (i=0; i<brick.row; i++) {
-                        brick.count[i] = new Array(brick.col);
-                }
-        }
-        
-        function brickDraw() {      
-                for (i=0; i<brick.row; i++) {
-                        for (j=0; j<brick.col; j++) {
-                                // Test in case we shouldn't draw a brick
-                                if (brick.count[i][j] !== false) { 
-                                        // Delete overlapping brick if overlap
-                                        if (ball.x >= brickX(j) && ball.x <= (brickX(j) + brick.w) && ball.y >= brickY(i) && ball.y <= (brickY(i) + brick.h)) {
-                                                hud.score += 1;
-                                                brick.total += 1;
-                                                brick.count[i][j] = false;
-                                                ball.sy = -ball.sy;
-                                        }
-                                                
-                                        brickColor(i);          
-                                        context.fillRect(brickX(j),brickY(i),brick.w,brick.h);
-                                }
-                        }
-                }
+        draw: function() {
+            console.log(this.canvas.width);
+            this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height); 
             
-                if (brick.total === (brick.row * brick.col)) {
-                        levelUp();                                                   
-                }
-        }
+            // Draw objects
+            Background.draw();
+            //Bricks.draw();
+            //Paddle.draw();
+            //Hud.draw();
+            //Ball.draw();
+        },
         
-        function brickX(row) {
-                return (row * brick.w) + (row * brick.gap);
-        }
+        
+        // Must reference as Game isntead of this due to when the listener is fired (outside of the object)
+        listen: {
+            run: function() {
+                Game.canvas.removeEventListener('click', Game.listen.run, false);
+                Game.init();
+            },
+            restart: function() {
+                // cache variable
+                var canvas = Game.canvas;
                 
-        function brickY(col) {
-                return (col * brick.h) + (col * brick.gap);
-        }
-        
-        function brickColor(row) {                                           
-                y = brickY(row);
-                var brickG = context.createLinearGradient(0,y,0,y+brick.h);
-                switch(row) {                                                    
-                        case 0:  brickG.addColorStop(0,'#bd06f9');                   
-                        brickG.addColorStop(1,'#9604c7'); break;                     
-                
-                        case 1: brickG.addColorStop(0,'#F9064A');                    
-                        brickG.addColorStop(1,'#c7043b'); break;                     
-                        
-                        case 2: brickG.addColorStop(0,'#05fa15');                    
-                        brickG.addColorStop(1,'#04c711'); break;                     
-                        
-                        default: brickG.addColorStop(0,'#faa105');                   
-                        brickG.addColorStop(1,'#c77f04'); break;                     
-                }
-                return context.fillStyle = brickG;
-        }
-        
+                canvas.removeEventListener('click', Game.restart, false);
+                cancelRequestAnimFrame(Game.play);
+                this.init();
+            }
+        },
+
         // Leveling
-        function levelUp() {
-                hud.lv += 1;
-                brickInit();
-                ballInit();
-                padInit();
-        }
-        
-        function levelLim(lv) {
+        level: {
+            up: function() {
+                Hud.lv += 1;
+                Bricks.init();
+                Ball.init();
+                Paddle.init();
+            },
+            limit: function(lv) {
                 if (lv > 5) {
-                        return 5;
+                    return 5;
                 }
                 else {
-                        return lv;
+                    return lv;
                 }
+            }
         }
+    };
+    
+    var Screen = {
+        welcome: function() {
+            // Setup base values
+            this.text = 'CANVAS BREAK';
+            this.textSub = 'Click To Start';
+            this.textColor = 'white';
+            
+            // Create screen
+            this.create();
+        },
         
-        // Heads up display
-        function hudInit() {
-                hud.lv = 1;
-                hud.score = 0;
+        gameover: function() {
+            this.text = 'Game Over';
+            this.textSub = 'Click To Retry';
+            this.textColor = 'red';
+            
+            this.create();
+        },
+        
+        create: function() {
+            // Cache variables
+            var ctx = Game.ctx;
+            var width = Game.canvas.width;
+            var height = Game.canvas.height;
+            
+            // Background
+            ctx.fillStyle = 'black';
+            ctx.fillRect(0, 0, width, height);
+            
+            // Main text
+            ctx.fillStyle = this.textColor;
+            ctx.textAlign = 'center';
+            ctx.font = '40px helvetica, arial';
+            ctx.fillText(this.text, width/2, height/2);
+            
+            // Sub text
+            ctx.fillStyle = '#999999';
+            ctx.font = '20px helvetica, arial';
+            ctx.fillText(this.textSub, width/2, height/2 + 30);            
         }
-        
-        function hudDraw() {
-                context.font = '12px helvetica, arial';
-                context.fillStyle = 'white';
-                context.textAlign = 'left'; 
-                context.fillText('Score: ' + hud.score, 5, canvas.height - 5);
-                context.textAlign = 'right'; 
-                context.fillText('Lv: ' + hud.lv, canvas.width - 5, canvas.height - 5);
+    };
+    
+    /***************************
+    Game Objects
+    ***************************/
+    var Background = {
+        init: function() {
+            this.ready = false;
+            
+            this.img = new Image();
+            this.img.src = 'background.jpg';
+            this.img.onload = function() {
+                this.ready = true;
+            }
+        },
+        draw: function() {
+            if (this.ready)
+                Game.ctx.drawImage(this.img,0,0);
         }
+    };
+    
+    var Ball = {
+        r: 10,
         
-        // Transition screens
-        function welcomeDraw() {
-                context.fillStyle = 'black';
-                context.fillRect(0, 0, canvas.width, canvas.height);
-                
-                context.fillStyle = 'white';
-                context.textAlign = 'center';
-                context.font = '40px helvetica, arial';
-                context.fillText('CANVAS BREAK', canvas.width/2, canvas.height/2);
-                
-                context.fillStyle = '#999999';
-                context.font = '20px helvetica, arial';
-                context.fillText('Click To Start', canvas.width/2, canvas.height/2 + 30);
+        init: function() {            
+            this.x = 120;
+            this.sx = 1 + (.4 * Hud.lv);
+            this.y = 120;
+            this.sy = -1.5 - (.4 * Hud.lv);
+        },
+        draw: function() {
+            // Edge detection
+            this.edges();
+            
+            // Cache game's context since its used multiple times
+            var ctx = Game.ctx;
+            
+            // Create ball
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.r, 0, 2 * Math.PI, false);
+            ctx.fillStyle = this.gradient();
+            ctx.fill();
+        },
+        
+        // Edge dectection
+        edges: function() {
+            // Cache Game's canvas for quicker reference
+            var canvas = Game.canvas;
+            
+            // Top
+            if (this.y < 1) { 
+                this.y = 1; // Prevents the ball from getting stuck at fast speeds
+                this.sy = -this.sy;
+            }
+            // Bottom
+            else if (this.y > canvas.height) {
+                cancelRequestAnimFrame(Game.play);
+                Screen.gameover();
+                canvas.addEventListener('click', Game.restart, false);
+            }
+            
+            // Left
+            if (this.x < 1) {
+                    this.x = 1; // Prevents the ball from getting stuck at fast speeds
+                    this.sx = - this.sx;
+            }
+            // Right
+            else if (this.x > canvas.width) {
+                    this.x = canvas.width - 1; // Prevents the ball from getting stuck at fast speeds
+                    this.sx = - this.sx;
+            }
+        },
+        
+        // Paddle to ball collision detection
+        paddleHit: function() {
+            var padX = Paddle.x;
+            var padY = Paddle.y;
+            var padW = Paddle.w;
+            
+            if (this.x >= padX && this.x <= (padX + padW) && this.y >= padY && this.y <= (padY + padW)) {
+                this.sx = 7 * ((this.x - (padX + padW/2))/padW);
+                this.sy = -this.sy;
+            }
+            
+            this.x += this.sx;
+            this.y += this.sy;
+        },
+        
+        // Gradient for paddle
+        gradient: function() {
+            var grad = Game.ctx.createRadialGradient(this.x, this.y, 2, this.x-4, this.y-3, 10);
+            grad.addColorStop(0, '#eee');                         
+            grad.addColorStop(1, '#999');                         
+            return grad;
         }
+    };
+    
+    var Paddle = {
+        w: 90,
+        h: 20,
+        r: 9,
         
-        function goDraw() {
-                context.fillStyle = 'black';
-                context.fillRect(0, 0, canvas.width, canvas.height);
-                
-                context.fillStyle = 'red';
-                context.textAlign = 'center';
-                context.font = '40px helvetica, arial';
-                context.fillText('Game Over', canvas.width/2, canvas.height/2);
-                
-                context.fillStyle = '#999999';
-                context.font = '20px helvetica, arial';
-                context.fillText('Click To Retry', canvas.width/2, canvas.height/2 + 30);
+        init: function() {
+            this.x = 100;
+            this.y = 210;
+            this.speed = 4;
+        },
+        
+        draw: function() {
+            // Detect controller input
+            if (Ctrl.left && (this.x < (Game.canvas.width - this.w))) {                      
+                this.x += this.speed;                                         
+            }                                                             
+    
+            else if (Ctrl.right && this.x > 0) {                                  
+                this.x += -this.speed;                                                    
+            }
+            
+            // Cache drawing tool
+            var ctx = Game.ctx;
+            
+            // Create paddle
+            ctx.beginPath();
+            ctx.moveTo(this.x, this.y);
+            ctx.arcTo(this.x+this.w, this.y, this.x + this.w, this.y+this.r, this.r);
+            ctx.arcTo(this.x+this.w, this.y+this.h, this.x + this.w - this.r, this.y + this.h, this.r);
+            ctx.arcTo(this.x, this.y + this.h, this.x, this.y + this.h - this.r, this.r);
+            ctx.arcTo(this.x, this.y, this.x + this.r, this.y, this.r);
+            ctx.closePath();
+            ctx.fillStyle = this.gradient();
+            ctx.fill();
+        },
+        
+        gradient: function() {
+            var grad = Game.ctx.createLinearGradient(this.x, this.y, this.x, this.y + 20);
+            grad.addColorStop(0, '#eee');
+            grad.addColorStop(1, '#999');
+            return grad;
         }
+    };
+    
+    var Bricks = {
+        gap: 2,
+        col: 5,
+        w: 80,
+        h: 15,
+        init: function() {
+            this.row = 2 + Game.level.limit(Hud.lv);
+            this.total = 0;
+            
+            // Create an updatable brick array = number of bricks
+            this.count = new Array(this.row);
+            for (i=0; i < this.row; i++) {
+                this.count[i] = new Array(this.col);
+            }
+        },
         
-        
-        /********
-        Game Controllers
-        ********/
-        $(document).keydown(function(evt) {                                  
-                if (evt.keyCode === 39) {                                    
-                        ctrl.left = true;                                                                                 
+        draw: function() {
+            for (i=0; i < this.row; i++) {
+                for (j=0; j < this.col; j++) {
+                    // Test in case we shouldn't draw a brick
+                    if (this.count[i][j] !== false) {
+                        // Cache needed information
+                        ballX = Ball.x;
+                        ballY = Ball.y;
+                        brickX = this.x(j);
+                        brickY = this.y(i);
+                        
+                        // Delete overlapping bricks if present
+                        if (ballX >= brickX && ballX <= (brickX + this.w) && ballY >= brickY && ballY <= (brickY + this.h)) {
+                            Hud.score += 1;
+                            this.total += 1;
+                            this.count[i][j] = false;
+                            this.sy = -Ball.sy;
+                        }
+                                            
+                        this.gradient(i);
+                        Game.ctx.fillRect(brickX, brickY, this.w, this.h);
+                    }
                 }
-                else if (evt.keyCode === 37) {                               
-                        ctrl.right = true;
-                }
-        });
+            }
         
-        $(document).keyup(function(evt) {                                    
-                if (evt.keyCode === 39) {                                    
-                        ctrl.left = false;                                        
-                }                                                            
-                else if (evt.keyCode === 37) {                               
-                        ctrl.right = false;                                        
-                }                                                            
-        });                                                                  
+            if (this.total === (this.row * this.col)) {
+                Game.levelUp();
+            }
+        },
         
-        $('#canvas').mousemove(function(e){
-                canvas.posLeft = Math.round($("#canvas").position().left);  
-                canvas.pos = e.pageX - canvas.posLeft;                             
-                pad.m = pad.w / 2;                                           
-                
-                if (canvas.pos > pad.m && canvas.pos < canvas.width - pad.m) {          
-                        ctrl.mX = canvas.pos;                                 
-                        ctrl.mX -= pad.w / 2;                                        
-                        pad.x = ctrl.mX;                                         
-                }
-        });
+        x: function(row) {
+            return (row * this.w) + (row * this.gap);
+        },
+        
+        y: function(col) {
+            return (col * this.h) + (col * this.gap);
+        },
+        
+        gradient: function(row) {
+            var y = this.y(row);
+            var grad = Game.ctx.createLinearGradient(0, y, 0, y + this.h);
+            switch(row) {                                                    
+                    case 0:  grad.addColorStop(0,'#bd06f9');                   
+                    grad.addColorStop(1,'#9604c7'); break;                     
+            
+                    case 1: grad.addColorStop(0,'#F9064A');                    
+                    grad.addColorStop(1,'#c7043b'); break;                     
+                    
+                    case 2: grad.addColorStop(0,'#05fa15');                    
+                    grad.addColorStop(1,'#04c711'); break;                     
+                    
+                    default: grad.addColorStop(0,'#faa105');                   
+                    grad.addColorStop(1,'#c77f04'); break;                     
+            }
+            return Game.ctx.fillStyle = grad;
+        }
+    };
+    
+    var Hud = {
+        init: function() {
+            this.lv = 1;
+            this.score = 0;
+        },
+        
+        draw: function() {
+            var ctx = Game.ctx;
+            var canvasH = Game.canvas.height;
+            
+            ctx.font = '12px helvetica, arial';
+            ctx.fillStyle = 'white';
+            ctx.textAlign = 'left'; 
+            ctx.fillText('Score: ' + Hud.score, 5, canvasH - 5);
+            ctx.textAlign = 'right'; 
+            ctx.fillText('Lv: ' + Hud.lv, Game.canvas.width - 5, canvasH - 5);
+        }
+    };
+    
+    /***************************
+    Game Controllers
+    ***************************/
+    var Ctrl = {
+        init: function() {
+            window.addEventListener('keydown', this.keyDown, true);
+            window.addEventListener('keyup', this.keyUp, true);
+            window.addEventListener('mousemove', this.mouse, true);
+        },
+        
+        keyDown: function(event) {
+            switch(event.keyCode) {
+                case 37: // Left
+                    this.left = true;
+                    break;
+                case 39: // Right
+                    this.right = true;
+                    break;
+                default:
+                    break;
+            }
+        },
+        
+        keyUp: function(event) {
+            switch(event.keyCode) {
+                case 39: // Left
+                    this.left = false;
+                    break;
+                case 37: // Right
+                    this.right = false;
+                    break;
+                default:
+                    break;
+            }
+        },
+        
+        mouse: function(event) {
+            var mouseX = event.offsetLeft;
+            var canvasX = Game.canvas.offsetLeft;
+            var paddleMid = Paddle.w / 2;
+            
+            if (canvasX > paddleMid && canvasX < canvasX - paddleMid)                                     
+                Paddle.x -= paddleMid;                                       
+        }
+    };                                                               
+    
+    /***************************
+    Run Game
+    ***************************/
+    Game.setup();
 }

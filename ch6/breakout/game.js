@@ -21,7 +21,7 @@ window.requestAnimFrame = ( function() {
 window.cancelRequestAnimFrame = ( function() {
     return window.cancelAnimationFrame          ||
     window.webkitCancelRequestAnimationFrame    ||
-    window.mozCancelRequestAnimationFrame       ||
+    window.mozCancelAnimationFrame              ||
     window.oCancelRequestAnimationFrame         ||
     window.msCancelRequestAnimationFrame        ||
     clearTimeout
@@ -169,8 +169,8 @@ var Ball = {
     r: 10,
     init: function() {            
         this.x = 120;
-        this.sx = 1 + (.4 * Hud.lv);
         this.y = 120;
+        this.sx = 1 + (.4 * Hud.lv);
         this.sy = -1.5 - (.4 * Hud.lv);
     },
     
@@ -189,7 +189,6 @@ var Ball = {
         ctx.closePath();
         this.gradient();
         ctx.fill();
-        
     },
     
     move: function() {
@@ -251,7 +250,6 @@ var Paddle = {
     w: 90,
     h: 20,
     r: 9,
-    
     init: function() {
         this.x = 100;
         this.y = 210;
@@ -259,14 +257,7 @@ var Paddle = {
     },
     
     draw: function() {        
-        // Detect controller input
-        if (Ctrl.left && (this.x < (Game.canvas.width - this.w))) {                      
-            this.x += this.speed;                                         
-        }                                                             
-
-        else if (Ctrl.right && this.x > 0) {                                  
-            this.x += -this.speed;                                                    
-        }
+        this.move();
         
         // Cache drawing tool
         var ctx = Game.ctx;
@@ -281,6 +272,17 @@ var Paddle = {
         ctx.closePath();
         this.gradient();
         ctx.fill();
+    },
+    
+    move: function() {
+        // Detect controller input
+        if (Ctrl.left && (this.x < (Game.canvas.width - this.w))) {                      
+            this.x += this.speed;                                         
+        }                                                             
+
+        else if (Ctrl.right && this.x > 0) {                                  
+            this.x += -this.speed;                                                    
+        }
     },
     
     gradient: function() {

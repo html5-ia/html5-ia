@@ -20,8 +20,7 @@ var Engine = Class.extend({
     /* ----- Utilities -----*/
     spawnEntity: function(name, x, y, z) {
         // window[] allows you to process its contents and treat it as a variable
-        // eval() will process its contents before the variable can grab it
-        window['id' + this.id] = eval(new name);
+        window['id' + this.id] = (new name);
         // Pushes your new variable into an array and runs its spawn function
         this.storage.push(window['id' + this.id].spawn(x, y, z));
         

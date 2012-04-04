@@ -13,4 +13,4 @@ To run gl_eninge_blank:
 3. Navigate to root->index.html and run the file. All should work as expected (Chrome recommended).
 
 NOTE: If you aren't seeing any WebGL in Chrome try another computer with a better graphics card.
-Reason being graphics cards released in the past couple years are only capable of supporting it.
+Reason being graphics cards released in the past couple years are the only GPUs with the necessary drivers.

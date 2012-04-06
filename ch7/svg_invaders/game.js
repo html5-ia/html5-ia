@@ -1,5 +1,5 @@
 /*
-Name: Space Invaders
+Name: SVG Invaders
 Version: .4
 Author: Ashton Blue
 Author URL: http://twitter.com/#!/ashbluewd
@@ -71,6 +71,84 @@ window.clearRequestInterval = function(handle) {
         clearInterval(handle);
 };
 
+
+/********
+Setup
+********/
+var Game = {
+    // organize random vars a bit better
+    svg: document.getElementById('svg'),
+    support: document.implementation.hasFeature("http://www.w3.org/TR/SVG11/feature#Shape", "1.1"),
+    chrome: Boolean(window.chrome),
+    width: svg.width,
+    height: svg.height,
+    ns: 'http://www.w3.org/2000/svg',
+    xlink: 'http://www.w3.org/1999/xlink',
+    
+    // Needs to be moved into the laser (probably removed completely)
+    good: 'laserGood',
+    evil: 'laserEvil',
+    
+    run: function() {
+        if (this.support && this.chrome) {
+            this.setup();
+            this.svg.addEventListener('click', this.listen.run, false);
+        }
+        else if (this.support) {
+            alert('This game is specifically designed for the latest version of Google Chrome. You may proceed, but no gurantee that everything will run smoothly.');
+            this.setup();
+            this.svg.addEventListener('click', this.listen.run, false);
+        }
+        else {
+            alert('Your browser doesn\'t support SVG, please download Google Chrome on a desktop.');
+        }
+    },
+    
+    init: function() {
+        // Setup initial objects
+
+        
+        // Run animation
+        this.animate();
+    },
+    
+    animate: function() {
+        // Self-referring object, so you must use Game instead of this to prevent a crash
+        Game.draw();
+        Game.play = requestAnimFrame(Game.animate);
+    },
+    
+    draw: function() {
+
+    },
+    
+    
+    // Must reference as Game isntead of this due to when the listener is fired (outside of the object)
+    listen: {
+        run: function() {
+            Game.canvas.removeEventListener('click', Game.listen.run, false);
+            Game.init();
+        },
+        restart: function() {
+            Game.canvas.removeEventListener('click', Game.listen.restart, false);
+            cancelRequestAnimFrame(Game.play);
+            Game.init();
+        }
+    },
+
+    level: {
+
+    },
+};
+
+
+
+
+
+
+/********
+Previous Code (re-factoring)
+********/
 
 /********
 Global variables and objects

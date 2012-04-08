@@ -4,6 +4,8 @@ Version: .4
 Author: Ashton Blue
 Author URL: http://twitter.com/#!/ashbluewd
 Publisher: Manning
+
+Note: to see to-dos and notes search note
 */
 
 /********
@@ -13,62 +15,62 @@ Animation Functions
 // Original by Paul Irish: http://paulirish.com/2011/requestanimationframe-for-smart-animating/
 // Clear interval version here created by Jerome Etienne http://notes.jetienne.com/2011/05/18/cancelRequestAnimFrame-for-paul-irish-requestAnimFrame.html
 window.cancelRequestAnimFrame = ( function() {
-        return window.cancelAnimationFrame          ||
-        window.webkitCancelRequestAnimationFrame    ||
-        window.mozCancelRequestAnimationFrame       ||
-        window.oCancelRequestAnimationFrame         ||
-        window.msCancelRequestAnimationFrame        ||
-        clearTimeout
+    return window.cancelAnimationFrame          ||
+    window.webkitCancelRequestAnimationFrame    ||
+    window.mozCancelRequestAnimationFrame       ||
+    window.oCancelRequestAnimationFrame         ||
+    window.msCancelRequestAnimationFrame        ||
+    clearTimeout
 } )();
 
 window.requestAnimFrame = (function(){
-        return window.requestAnimationFrame         || 
-        window.webkitRequestAnimationFrame          || 
-        window.mozRequestAnimationFrame             || 
-        window.oRequestAnimationFrame               || 
-        window.msRequestAnimationFrame              || 
-        function(/* function */ callback, /* DOMElement */ element){
-                return window.setTimeout(callback, 1000 / 60);
-        };
+    return window.requestAnimationFrame         || 
+    window.webkitRequestAnimationFrame          || 
+    window.mozRequestAnimationFrame             || 
+    window.oRequestAnimationFrame               || 
+    window.msRequestAnimationFrame              || 
+    function(/* function */ callback, /* DOMElement */ element){
+            return window.setTimeout(callback, 1000 / 60);
+    };
 })();
 
 // From "A better setTimeout() / setInterval()" by Joe Lambert
 // Makes intervals run in unison with request anmation frame
 // http://blog.joelambert.co.uk/2011/06/01/a-better-settimeoutsetinterval/
 window.requestInterval = function(fn, delay) {
-        if( !window.requestAnimationFrame   && 
-        !window.webkitRequestAnimationFrame && 
-        !window.mozRequestAnimationFrame    && 
-        !window.oRequestAnimationFrame      && 
-        !window.msRequestAnimationFrame)
-        return window.setInterval(fn, delay);
+    if( !window.requestAnimationFrame   && 
+    !window.webkitRequestAnimationFrame && 
+    !window.mozRequestAnimationFrame    && 
+    !window.oRequestAnimationFrame      && 
+    !window.msRequestAnimationFrame)
+    return window.setInterval(fn, delay);
 
-        var start = new Date().getTime(),
-        handle = new Object();
+    var start = new Date().getTime(),
+    handle = new Object();
 
-        function loop() {
-                var current = new Date().getTime(),
-                delta = current - start;
-        
-                if(delta >= delay) {
-                        fn.call();
-                        start = new Date().getTime();
-                }
-        
-                handle.value = requestAnimFrame(loop);
-        };
+    function loop() {
+            var current = new Date().getTime(),
+            delta = current - start;
+    
+            if(delta >= delay) {
+                    fn.call();
+                    start = new Date().getTime();
+            }
+    
+            handle.value = requestAnimFrame(loop);
+    };
 
-        handle.value = requestAnimFrame(loop);
-        return handle;
+    handle.value = requestAnimFrame(loop);
+    return handle;
 }
 
 window.clearRequestInterval = function(handle) {
-        window.cancelAnimationFrame ? window.cancelAnimationFrame(handle.value) :
-        window.webkitCancelRequestAnimationFrame ? window.webkitCancelRequestAnimationFrame(handle.value) :
-        window.mozCancelRequestAnimationFrame ? window.mozCancelRequestAnimationFrame(handle.value) :
-        window.oCancelRequestAnimationFrame ? window.oCancelRequestAnimationFrame(handle.value) :
-        window.msCancelRequestAnimationFrame ? msCancelRequestAnimationFrame(handle.value) :
-        clearInterval(handle);
+    window.cancelAnimationFrame ? window.cancelAnimationFrame(handle.value) :
+    window.webkitCancelRequestAnimationFrame ? window.webkitCancelRequestAnimationFrame(handle.value) :
+    window.mozCancelRequestAnimationFrame ? window.mozCancelRequestAnimationFrame(handle.value) :
+    window.oCancelRequestAnimationFrame ? window.oCancelRequestAnimationFrame(handle.value) :
+    window.msCancelRequestAnimationFrame ? msCancelRequestAnimationFrame(handle.value) :
+    clearInterval(handle);
 };
 
 
@@ -91,22 +93,24 @@ var Game = {
     
     run: function() {
         if (this.support && this.chrome) {
-            this.setup();
-            this.svg.addEventListener('click', this.listen.run, false);
+            this.svg.addEventListener('click', this.listen.start, false);
         }
         else if (this.support) {
             alert('This game is specifically designed for the latest version of Google Chrome. You may proceed, but no gurantee that everything will run smoothly.');
-            this.setup();
-            this.svg.addEventListener('click', this.listen.run, false);
+            this.svg.addEventListener('click', this.listen.start, false);
         }
         else {
             alert('Your browser doesn\'t support SVG, please download Google Chrome on a desktop.');
         }
     },
     
-    init: function() {
+    init: function() { 
         // Setup initial objects
-
+        Hud.init();
+        Shield.init();
+        Inv.init();
+        Ship.init();
+        InvShip.init();
         
         // Run animation
         this.animate();
@@ -114,24 +118,34 @@ var Game = {
     
     animate: function() {
         // Self-referring object, so you must use Game instead of this to prevent a crash
-        Game.draw();
-        Game.play = requestAnimFrame(Game.animate);
+        Game.update();
+        Game.timer = requestAnimFrame(Game.animate);
     },
     
-    draw: function() {
-
+    update: function() {
+        Ship.update();
+        InvShip.update();
+        Laser.update();
     },
     
-    
-    // Must reference as Game isntead of this due to when the listener is fired (outside of the object)
+    // Must reference as Game instead of this due to when the listener is fired (outside of the object)
     listen: {
-        run: function() {
-            Game.canvas.removeEventListener('click', Game.listen.run, false);
+        // Literally starts the game up from after the user clicks to start
+        start: function() {
+            // Update DOM
+            Game.svg.removeEventListener('click', Game.listen.start, false);
+            Game.svg.removeChild(Screen.welcome);
+            
+            // Fire controls and activate the game elements
+            Ctrl.init();
             Game.init();
         },
         restart: function() {
-            Game.canvas.removeEventListener('click', Game.listen.restart, false);
-            cancelRequestAnimFrame(Game.play);
+            // Update DOM
+            Game.svg.removeEventListener('click', Game.listen.restart, false);
+            Screen.restart.setAttribute('style', 'display: none');
+            
+            // Fire game
             Game.init();
         }
     },
@@ -139,12 +153,368 @@ var Game = {
     level: {
 
     },
+    
+    gameOver: function() {
+        clearRequestInterval(InvShip.spawn, InvShip.delay);
+        clearRequestInterval(Inv.update, Inv.delay);
+        cancelRequestAnimFrame(Game.timer);
+        
+        $('.shield, #redShip, .life, #flock, .player, #textScore, #textLives, .laserEvil, .laserGood').detach();
+
+        overlay.restart.setAttribute('style', 'display: inline');
+        Game.svg.addEventListener('click', restartGame, false);
+    }
 };
 
 
 
+/********
+ Objects
+********/
+var Shield = {
+    x: 64,
+    y: 390,
+    hp: 3,
+    num: 4,
+    p: 8, // Pieces
+    pSize: 15, // Piece size
+    
+    init: function() {
+        // Create a two tier shield array to store the pieces
+        this.shields = new Array(this.num);
+        for (i=0; i<this.num; i++) {
+            this.shields[i] = new Array(this.p);
+        }
+        
+        // Build the shields
+        for (i=0; i<this.num; i++) {
+            for (j=0; j<this.p; j++) {
+                this.build(i,j);
+            }
+        }
+    },
+    
+    // Designed to build individual shield pieces based upon their location in an array
+    build: function(loc, piece) {
+        var el = document.createElementNS(Game.ns,'rect');
+        var x = this.x + (loc * this.x) + (loc * (this.pSize * 3));
+        
+        el.setAttribute('x', locX(piece, x));
+        el.setAttribute('y', locY(piece));
+        el.setAttribute('class', 'shield active');
+        el.setAttribute('hp', this.hp);
+        el.setAttribute('width', this.pSize);
+        el.setAttribute('height', this.pSize);
+        svg.id.appendChild(el);
+    },
+    
+    // Determines a shields location based upon passed data
+    locX: function(piece, x) {
+        switch(piece) {
+            case 0: return x;
+            case 1: return x;
+            case 2: return x;
+            case 3: return x + this.pSize;
+            case 4: return x + this.pSize;
+            case 5: return x + (this.pSize * 2);
+            case 6: return x + (this.pSize * 2);
+            case 7: return x + (this.pSize * 2);
+        }
+    },
+    // Only needs one param as y coordinate is the same across all piece sections
+    locY: function(piece) {
+        switch(piece) {
+            case 0: return this.y;
+            case 1: return this.y + this.pSize;
+            case 2: return this.y + (this.pSize * 2);
+            case 3: return this.y;
+            case 4: return this.y + this.pSize;
+            case 5: return this.y;
+            case 6: return this.y + this.pSize;
+            case 7: return this.y + (this.pSize * 2);
+        }
+    },
+    
+    // Accepts a passed shield element and modifies its helath
+    hit: function(el) {
+        // Get and modify the hp attribute
+        var hp = parseInt(el.getAttribute('hp'));
+        hp -= 1;
+        
+        // Determine what to do based upon the current HP
+        switch(hp) {
+            case 1: var opacity = .33; break;
+            case 2: var opacity = .66; break;
+            default: return Game.svg.removeChild(el); // Exits this function
+        }
+        
+        // Adjust attributes if the element wasn't deleted
+        el.setAttribute('hp', hp);
+        el.setAttribute('fill-opacity', opacity);
+    }
+};
 
+var Laser = {
+    speed: 6,
+    width: 2,
+    height: 10,
+    
+    build: function(x, y, negative) {
+        this.el = document.createElementNS(Game.ns,'rect');
+        
+        // Determine laser direction
+        if (negative)
+            this.el.setAttribute('class', 'laser negative');
+        else
+            this.el.setAttribute('class', 'laser');
+        
+        this.el.setAttribute('x', x);
+        this.el.setAttribute('y', y);
+        this.el.setAttribute('width', this.width);
+        this.el.setAttribute('height', this.height);
+        Game.svg.appendChild(this.el);
+    },
+    
+    update: function() {
+        var lasers = document.getElementsByClassName('laser');
+        
+        if (lasers.length) {
+            for (n = 0; n < lasers.length; n++) {
+                // collect vars for current laser object
+                var laserX = parseInt(lasers[n].getAttribute('x'));
+                var laserY = parseInt(lasers[n].getAttribute('y'));
+                var laserClass = lasers[n].getAttribute('class');
+                
+                // Remove laser if its out of bounds
+                if (laserX < 0 || laserY > Game.height)
+                    Game.svg.removeChild(lasers[n]);
+                // Otherwise move it on the cartesian graph and update the y coordinate
+                else {
+                    laserY = this.direction(laserY, laserClass);
+                    lasers[n].setAttribute('y', laserY);
+                }
+                
+                // Check against active elements
+                var active = document.getElementsByClassName('active');
+                for (j=0; j < active.length; j++) {
+                    // Get active element properties
+                    activeX = parseInt(active[j].getAttribute('x'));
+                    activeY = parseInt(active[j].getAttribute('y'));
+                    activeW = parseInt(active[j].getAttribute('width'));
+                    activeH = parseInt(active[j].getAttribute('height'));
+                    
+                    // Laser and active element collision test
+                    if (laserX + activeW >= activeX &&
+                        laserX <= (activeX + activeW) &&
+                        laserY + this.height >= activeY &&
+                        laserY <= (activeY + activeH)) {
+                        
+                        // Use active's class to determine what was hit
+                        activeClass = active[j].getAttribute('class');
+                        if (activeClass === 'shield active')
+                            Shield.hit(active[j]);
+                        else if (objClass === 'invShip active')
+                            InvShip.hit(active[j]);
+                        else { // hit an invader
+                            Inv.hit(active[j]);
+                        }
+                        
+                        // Remove laser
+                        this.hit(lasers[n]);
+                    }
+                    // Note: Should see if this can't be integrated with the normal collision test
+                    else if (
+                        (laserX >= Ship.x && laserX <= (Ship.x + Ship.w) &&
+                        laserY >= Ship.y &&
+                        laserY <= (Ship.y + Ship.h)) &&
+                        Ship.el[0]) {
+                        
+                        Player.hit();
+                        this.hit(lasers[n]);
+                    }
+                }
+            }
+        }
+    },
+    
+    direction: function(y, laserClass) {
+        if (laserClass == 'laser negative')
+            y -= this.speed;
+        else
+            y += this.speed;
+        
+        return y;
+    }
+    
+    hit: function(laser) {
+        if (laser != null) svg.id.removeChild(laser);
+    }
+};
 
+var Ship = {
+    width: 35,
+    height: 15,
+    speed: 3,
+    // path only contains the shape, not the x and y information
+    path: 'v 13 h 35 v -13 h -2 v -2 h -12 v -4 h -2 v -2 h -3 v 2 h -2 v 4 h -12 v 2 l -2 0',
+    
+    // Note: Move this block into the HUD init
+    livesX: 360,
+    livesY: 10,
+    livesGap: 10,
+    
+    init: function() {
+        // Change player x and y to the default
+        this.x = 220;
+        this.y = 460;
+        
+        // Create the main player
+        this.build(this.x, this.y, 'player');
+        
+        // Note: move this crap into the HUD
+        // Re-use the ship object to create a life counter
+        for (i=0; i < Hud.lives; i++) {
+            x = this.livesX + (this.width * i) + (this.livesGap * i);
+            shipCreate(x, this.livesY, 'life');
+        }
+        
+        // Store the lives and player in memory for easy reference
+        this.lives = document.getElementsByClassName('life'); // Note, move to HUD
+        this.player = document.getElementsByClassName('player');
+    },
+    
+    // We need to make the build function take parameters so its re-usable to draw lives
+    build: function(x, y , shipClass) {
+        var el = document.createElementNS(Game.ns,'path');
+        var pathNew = 'M' + x + ' ' + (y + 8) + this.path;
+        
+        el.setAttribute('class', shipClass);
+        el.setAttribute('d', pathNew);
+        Game.svg.appendChild(el);
+    },
+    
+    update: function() {
+        // Move the ship if keyboard input is detected and the ship is against the container walls
+        if (Ctrl.keyLeft && this.x >= 0) {
+            this.x -= this.speed;
+        }
+        else if (Ctrl.keyRight &&
+            this.x <= (Game.svg.width - this.w)) {
+            ship.x += ship.speed;
+        }
+        
+        // Create a new path to implement the movement
+        var pathNew = 'M' + this.x + ' ' + (this.y + 8) + this.path;
+        // Doulbe check the player exists before trying to update it
+        if (this.player[0]) this.player[0].setAttribute('d', pathNew);
+    },
+    
+    hit: function() {
+        Hud.lives -= 1;
+        
+        Game.svg.removeChild(this.player[0]);
+        Game.svg.removeChild(this.lives[Hud.lives]);
+        
+        if (Hud.lives > 0) {
+            // Recreates the player with a delay timer
+            setTimeout('Ship.build(ship.x, ship.y, \'player\')', 1000);
+        }
+        else {
+            return gameOver();
+        } 
+    }
+};
+
+var InvShip = {
+    delay: 30000,
+    init: function() {
+        // Invader ships have their own separate spawning timer
+        this.timer = requestInterval(this.spawn, this.delay);
+    }
+};
+
+var Inv = {
+    init: function() {
+        this.delay = 800;
+        this.counter = 0;
+        
+        // Invaders run on their own separate time gauge
+        this.timer = requestInterval(this.update, this.delay);
+    },
+    
+    hit: function(el) {
+        svg.id.removeChild(collide[j]);
+        scoreDraw(10);
+    }
+};
+
+var Screen = {
+    welcome: document.getElementById('screenWelcome'),
+    restart: document.getElementById('screenGameover')
+};
+
+var Hud = {
+    init: function() {
+        this.score = 0;
+    }
+};
+
+/***************************
+Game Controllers
+***************************/
+var Ctrl = {
+    init: function() {
+        window.addEventListener('keydown', this.keyDown, true);
+        window.addEventListener('keyup', this.keyUp, true);
+        window.addEventListener('mousemove', this.mouse, true);
+    },
+    
+    keyDown: function(event) {
+        switch(event.keyCode) {
+            case 39: // Left
+                Ctrl.left = true;
+                break;
+            case 37: // Right
+                Ctrl.right = true;
+                break;
+            default:
+                break;
+        }
+    },
+    
+    keyUp: function(event) {
+        switch(event.keyCode) {
+            case 39: // Left
+                Ctrl.left = false;
+                break;
+            case 37: // Right
+                Ctrl.right = false;
+                break;
+            default:
+                break;
+        }
+    },
+    
+    mouse: function(event) {
+        var canvas = Game.canvas;
+        var mouseX = event.pageX;
+        var canvasX = canvas.offsetLeft;
+        var paddleMid = Paddle.w / 2;
+        
+        if (mouseX - paddleMid > canvasX && mouseX + paddleMid < canvasX + canvas.width) {
+            var newX = mouseX - canvasX;
+            newX -= paddleMid;
+            Paddle.x = newX;
+        }
+    }
+};
+
+/***************************
+ Execute the game
+***************************/
+window.onload = function() {
+    Game.run();  
+};
 
 /********
 Previous Code (re-factoring)
@@ -223,7 +593,7 @@ function restartGame() {
 function init() {
         // Set these to reset stats upon game over
         inv.update = 800;
-        inv.counter = 0;
+        inv.counter = 0; 
         
         hudInit();
         shieldInit();

@@ -76,6 +76,10 @@ window.clearRequestInterval = function(handle) {
 
 /********
 Setup
+
+ * To-Do
+ * move leveling mechanics to main Game object
+ * Integrate remove into all items
 ********/
 var Game = {
     // organize random vars a bit better
@@ -87,7 +91,7 @@ var Game = {
     ns: 'http://www.w3.org/2000/svg',
     xlink: 'http://www.w3.org/1999/xlink',
     
-    // Needs to be moved into the laser (probably removed completely)
+    // Note: Needs to be moved into the laser (probably removed completely)
     good: 'laserGood',
     evil: 'laserEvil',
     
@@ -154,15 +158,40 @@ var Game = {
 
     },
     
-    gameOver: function() {
-        clearRequestInterval(InvShip.spawn, InvShip.delay);
-        clearRequestInterval(Inv.update, Inv.delay);
+    end: function() {
+        clearRequestInterval(InvShip.timer);
+        clearRequestInterval(Inv.timer);
         cancelRequestAnimFrame(Game.timer);
         
-        $('.shield, #redShip, .life, #flock, .player, #textScore, #textLives, .laserEvil, .laserGood').detach();
+        this.remove.elClass('shield player life laser');
+        this.remove.elId('flock invShip textScore textLives'); // Note: these IDs might not be correct
 
         overlay.restart.setAttribute('style', 'display: inline');
         Game.svg.addEventListener('click', restartGame, false);
+    },
+    
+    // Note: this can probably be re-used throughout the application
+    remove: {
+        elClass: function(name) {
+            // Explode the passed name to take multiple elements
+            var elAll = name.split(' ');
+            
+            // Loop through exploded string
+            for (var num in elAll) {
+                // Get elements and remove each one
+                var el = document.getElementsByClassName(elAll[num]);
+                for (var num in el)
+                    this.svg.removeChild(el[num]);
+            }
+        },
+        elId: function(name) {
+            var elAll = name.split(' ');
+            
+            for (var num in elAll) {
+                var el = document.getElementById(elAll[num]);
+                this.svg.removeChild(el);
+            }
+        }
     }
 };
 
@@ -344,7 +373,7 @@ var Laser = {
             y += this.speed;
         
         return y;
-    }
+    },
     
     hit: function(laser) {
         if (laser != null) svg.id.removeChild(laser);
@@ -420,7 +449,22 @@ var Ship = {
             setTimeout('Ship.build(ship.x, ship.y, \'player\')', 1000);
         }
         else {
-            return gameOver();
+            return Game.end();
+        } 
+    },
+    
+    kill: function() {
+        Hud.lives -= 1;
+        
+        // Remove player and life image
+        Game.svg.removeChild(this.player[0]);
+        Game.svg.removeChild(this.lives[Hud.lives]);
+        
+        if (Hud.lives > 0) {
+            setTimeout('Ship.build(Ship.x, Ship.y, \'player\')', 1000);
+        }
+        else {
+            return Game.end();
         } 
     }
 };
@@ -471,6 +515,8 @@ var Inv = {
     x: 64,
     y: 90,
     gap: 10,
+    row: 5,
+    col: 11,
     
     // Invader paths retrieved from Inkscape with SVG files saved from Adobe Illustrator
     // In Inkscape use the XML DOM view to get your path data
@@ -484,9 +530,8 @@ var Inv = {
     
     init: function() {
         // Reset necessary values
-        this.row = 5;
-        this.col = 11;
         this.speed = 10;
+        this.ySpeed = 0;
         this.counter = 0;
         
         // Invaders run on their own separate time gauge
@@ -495,7 +540,169 @@ var Inv = {
     },
     
     build: function() {
+        // Create group for storing invader array output
+        var group = document.createElementNS(Game.ns, 'g');
+        group.setAttribute('class','open');
+        group.setAttribute('id','flock');
         
+        // Create the invader array
+        var invArray = new Array(Inv.row);
+        for (row = 0; row < Inv.row; row++) {
+            invArray[row] = new Array(Inv.col);
+        }
+        
+        // Loop through invader array data you just created
+        for (row=0; row<inv.row; row++) {
+            for (col=0; col<inv.col; col++) {
+                // Setup the invader's output
+                var el = document.createElementNS(Game.ns, 'svg');
+                el.setAttribute('x', this.x(col));
+                el.setAttribute('y', this.y(row));
+                el.setAttribute('class', 'invader active');
+                el.setAttribute('row', row);
+                el.setAttribute('col', col);
+                el.setAttribute('width', this.width);
+                el.setAttribute('height', this.height);
+                el.setAttribute('viewBox', this.offset(row) + ' 0 25 19'); // Controls viewport of individual invader
+                
+                var imageA = document.createElementNS(Game.ns, 'path');
+                var imageB = document.createElementNS(Game.ns, 'path');
+                imageA.setAttribute('d', this.path(row + 'a'));
+                imageA.setAttribute('class','anim1');
+                imageB.setAttribute('d', this.path(row + 'b'));
+                imageB.setAttribute('class','anim2');
+                el.appendChild(imageA);
+                el.appendChild(imageB);
+                
+                group.appendChild(el);
+            }
+        }
+        
+        // Add the created invader flock to the DOM
+        Game.svg.appendChild(group);
+        
+        // Store the invader flock for manipulation later
+        this.flock = document.getElementById('flock');
+    },
+    
+    x: function(row) {
+        return this.x + (row * this.width) + (row * this.gap);
+    },
+    
+    y: function(col) {
+        return this.y + (col * this.height) + (col * this.gap);
+    },
+    
+    offset: function(row) {
+        // helps to fix graphical offset from animation
+        switch(row) {
+                case 0: return -3;
+                case 1: return 1;
+                case 2: return 1;
+                default: return 0;
+        }
+    },
+    
+    path: function(row) {
+        // Note: might need to be switched to 0 + 'x' instead of '0a'
+        switch(row) {
+            case '0a': return this.pathA1;
+            case '0b': return this.pathA2;
+            case '1a': return this.pathB1;
+            case '1b': return this.pathB2;
+            case '2a': return this.pathB1;
+            case '2b': return this.pathB2; 
+            case '2a': return this.pathC1; 
+            case '2b': return this.pathC2; 
+            case '2a': return this.pathC1;
+            case '2b': return this.pathC2;
+        }
+    },
+    
+    update: function() {
+        var invs = document.getElementsByClassName('invader');
+        
+        if (invs.length >= 1) {
+            // Find the first and last invader in the flock
+            var xFirst = Game.width;
+            var xLast = 0;
+            for (i = 0; i < invs.length; i++) {
+                var x = parseInt(invs[i].getAttribute('x'));
+                xFirst = Math.min(xFirst, x);
+                xLast = Math.max(xLast, x);
+            }
+            
+            // Set speed based upon first and last invader results
+            if ((xLast >= (Game.width - 20 - this.width) &&
+                this.ySpeed === 0) ||
+                (xFirst < 21 && this.ySpeed === 0))
+                    this.ySpeed = Math.abs(this.speed);
+            else if ((xLast >= (Game.width - 20 - this.width)) ||
+                (xFirst < 21) ||
+                this.ySpeed > 0) {
+                    this.speed = -this.speed;
+                    this.ySpeed = 0;
+            }
+            
+            // Update invader positions
+            for (i = 0; i < invs.length; i++) {
+                // Increment x and y counters
+                var x = parseInt(invs[i].getAttribute('x'));
+                var y = parseInt(invs[i].getAttribute('y'));
+                var xNew = x + this.speed;
+                var yNew = y + this.speedY;
+                
+                // Set direction (left, right, down)
+                if (this.speedY > 0) {
+                    invs[i].setAttribute('y', yNew);
+                }
+                else {
+                    invs[i].setAttribute('x', xNew);
+                }
+                
+                // Test if Invaders have pushed far enough to beat the player
+                if (y > Shield.y - 20 - this.height) {
+                    return Game.end(); // Exit everything and shut down the game
+                }
+            }
+            
+            this.animate();
+            this.shoot(invs);
+        }
+    },
+    
+    animate: function() {
+        var c = this.flock.getAttribute('class');
+        if (c == 'open') {
+            this.flock.setAttribute('class','closed');
+        } else {
+            this.flock.setAttribute('class','open');
+        }
+    },
+    
+    shoot: function(invs) {
+        // Test a random number to see if the Invaders fire
+        var test = Math.floor(Math.random() * 5);
+        if (test === 1) {
+            // Choose a random invader to fire
+            var invRandom = Math.floor(Math.random() * invs.length);
+            var invX = parseInt(invs[invRandom].getAttribute('x'));
+            
+            // Find bottom invader of current column and shoot with it
+            for (i = 0; i < invs.length; i++) {
+                var currentX = parseInt(invs[i].getAttribute('x'));
+                
+                // If in the same column find the bottom most Invader
+                if (invX === currentX) {
+                    var value = parseInt(invs[i].getAttribute('y'));
+                    var y = Math.max(y, value);
+                    // Note: might want to throw a break into here or return
+                }
+            }
+            
+            // Shoot from bottom column
+            Laser.build(currentX + (this.w / 2), y + 20, false); // Note: might need to be true, can't remember...
+        }
     },
     
     hit: function(el) {
@@ -512,6 +719,84 @@ var Screen = {
 var Hud = {
     init: function() {
         this.score = 0;
+        this.bonus = 0;
+        this.lives = 3;
+        this.level = 1;
+        
+        this.build('Lives:', 310, 30, 'textLives');
+        this.build('Score:', 20, 30, 'textScore');
+    },
+    
+    // Creates text output
+    build: function(text, x, y, classText) {
+        var el = document.createElementNS(Game.ns, 'text');
+        el.setAttribute('x', x);
+        el.setAttribute('y', y);
+        el.setAttribute('id', classText);
+        el.appendChild(document.createTextNode(text));
+        Game.svg.appendChild(el);
+    }
+    
+    update: {
+        score: function(pts) {
+            // Update scores
+            this.score += pts;
+            this.bonus += pts;
+            
+            this.lifePlus();
+            
+            // Inject new score text
+            element = document.getElementById('textScore');
+            element.removeChild(element.firstChild);
+            element.appendChild(document.createTextNode('Score: ' + this.score));
+        },
+        level: function() {
+            // count invader kills
+            Inv.counter += 1;
+            var invTotal = inv.col * inv.row;
+            
+            // Test to level
+            if (Inv.counter === invTotal) {
+                Hud.level += 1;
+                Inv.counter = 0;
+                Inv.delay = 800 - (20 * Hud.level);
+                
+                clearRequestInterval(Inv.timer);
+                Game.svg.removeChild(Inv.flock);
+                Inv.init();
+                Inv.flock = requestInterval(Inv.update, Inv.delay);
+            }
+            // Increase invader speed
+            else if (Inv.counter === Math.round(invTotal / 2)) {
+                Inv.delay -= 250;
+                
+                clearRequestInterval(Inv.timer);
+                Inv.timer = requestInterval(Inv.update, Inv.delay);
+            }
+            else if (Inv.counter === (Inv.col * Inv.row) - 3) {
+                Inv.delay -= 300;
+                
+                clearRequestInterval(Inv.timer);
+                Inv.timer = requestInterval(Inv.update, Inv.delay);
+            }
+        }
+    },
+    
+    lifePlus: function() {
+        if (this.bonus >= 100) {
+            // Add an extra life
+            if (this.lives < 3) {
+                var x = Ship.livesX + (Ship.width * this.lives) + (Ship.livesGap * this.lives);
+                shipCreate(x, Ship.livesY, 'life');
+                
+                this.lives += 1;
+                this.bonus = 0;
+            }
+            // Incase 3 lives are already present set the counter to 0
+            else {
+                this.bonus = 0;
+            }
+        }
     }
 };
 

@@ -80,6 +80,8 @@ Setup
 var Game = {
     // organize random vars a bit better
     svg: document.getElementById('svg'),
+    welcome: document.getElementById('screenWelcome'),
+    restart: document.getElementById('screenGameover'),
     support: document.implementation.hasFeature("http://www.w3.org/TR/SVG11/feature#Shape", "1.1"),
     width: 500,
     height: 500,
@@ -89,12 +91,10 @@ var Game = {
     run: function() {
         if (this.support && Boolean(window.chrome)) {
             this.svg.addEventListener('click', this.listen.start, false);
-        }
-        else if (this.support) {
+        } else if (this.support) {
             alert('This game is specifically designed for the latest version of Google Chrome. You may proceed, but no gurantee that everything will run smoothly.');
             this.svg.addEventListener('click', this.listen.start, false);
-        }
-        else {
+        } else {
             alert('Your browser doesn\'t support SVG, please download Google Chrome on a desktop.');
         }
     },
@@ -108,14 +108,14 @@ var Game = {
         InvShip.init();
                 
         // Run animation
-        this.animate();
+        if (! this.play)
+            this.animate();
     },
     
     animate: function() {
         // Self-referring object, so you must use Game instead of this to prevent a crash
         Game.update();
         Game.play = requestAnimFrame(Game.animate);
-        console.log('test');
     },
     
     update: function() {
@@ -130,7 +130,7 @@ var Game = {
         start: function() {
             // Update DOM
             Game.svg.removeEventListener('click', Game.listen.start, false);
-            Game.svg.removeChild(Screen.welcome);
+            Game.svg.removeChild(Game.welcome);
             
             // Fire controls and activate the game elements
             Ctrl.init();
@@ -139,49 +139,44 @@ var Game = {
         restart: function() {
             // Update DOM
             Game.svg.removeEventListener('click', Game.listen.restart, false);
-            Screen.restart.setAttribute('style', 'display: none');
+            Game.restart.setAttribute('style', 'display: none');
             
             // Fire game
-            cancelRequestAnimFrame(Game.play);
             Game.init();
         }
     },
     
     end: function() {
-        // Note: should clear Game.play, but it refuses to clear
         clearRequestInterval(InvShip.timer);
         clearRequestInterval(Inv.timer);
         
-        this.remove.elClass('shield player life laser'); // Note: what happends if you pass in a non-existent class?
-        this.remove.elId('flock invShip textScore textLives'); // Note: these IDs might not be correct
+        this.remove.elClass('shield player life laser');
+        this.remove.elId('flock invShip textScore textLives');
 
-        Screen.restart.setAttribute('style', 'display: inline'); // Note: does not fire correctly
+        this.restart.setAttribute('style', 'display: inline');
         Game.svg.addEventListener('click', this.listen.restart, false);
     },
     
-    // Note: this can probably be re-used throughout the application
     remove: {
         elClass: function(name) {
-            // Explode the passed name to take multiple elements
+            // Explode passed names
             var elAll = name.split(' ');
             
             // Loop through exploded string
-            for (var num in elAll) {
+            for (var count in elAll) {
                 // Get elements and remove them until empty
-                var el = document.getElementsByClassName(elAll[num]);
+                var el = document.getElementsByClassName(elAll[count]);
                 while(el[0])
                     el[0].parentNode.removeChild(el[0]);
             }
         },
         elId: function(name) {
-            var self = Game;
-            
             var elAll = name.split(' ');
             
-            for (var num in elAll) {
-                var el = document.getElementById(elAll[num]);
+            for (var count in elAll) {
+                var el = document.getElementById(elAll[count]);
                 if (typeof el === 'object' && el != null)
-                    self.svg.removeChild(el);
+                    Game.svg.removeChild(el);
             }
         }
     }
@@ -201,16 +196,12 @@ var Shield = {
     pSize: 15, // Piece size
     
     init: function() {
-        // Create a two tier shield array to store the pieces
+        // Create a shield array to store the pieces
         this.shields = new Array(this.num);
-        for (i=0; i<this.num; i++) {
-            this.shields[i] = new Array(this.p);
-        }
-        
-        // Build the shields
-        for (i=0; i<this.num; i++) {
-            for (j=0; j<this.p; j++) {
-                this.build(i,j);
+
+        for (var block = 0; block < this.num; block++) {
+            for (var piece = 0; piece < this.p; piece++) {
+                this.build(block, piece);
             }
         }
     },
@@ -266,7 +257,7 @@ var Shield = {
         switch(hp) {
             case 1: var opacity = .33; break;
             case 2: var opacity = .66; break;
-            default: return Game.svg.removeChild(el); // Exits this function
+            default: return Game.svg.removeChild(el); // Exits this function early
         }
         
         // Adjust attributes if the element wasn't deleted
@@ -300,29 +291,29 @@ var Laser = {
         var lasers = document.getElementsByClassName('laser');
         
         if (lasers.length) {
-            for (n = 0; n < lasers.length; n++) {
+            for (var cur = 0; cur < lasers.length; cur++) {
                 // collect vars for current laser object
-                var laserX = parseInt(lasers[n].getAttribute('x'));
-                var laserY = parseInt(lasers[n].getAttribute('y'));
-                var laserClass = lasers[n].getAttribute('class');
+                var laserX = parseInt(lasers[cur].getAttribute('x'));
+                var laserY = parseInt(lasers[cur].getAttribute('y'));
+                var laserClass = lasers[cur].getAttribute('class');
                 
                 // Remove laser if its out of bounds
-                if (laserY < 0 || laserY > Game.height)
-                    Game.svg.removeChild(lasers[n]);
-                // Otherwise move it on the cartesian graph and update the y coordinate
-                else {
+                if (laserY < 0 || laserY > Game.height) {
+                    Game.svg.removeChild(lasers[cur]);
+                    continue; // Exit for loop and start next item, nothing left to do
+                } else { // Otherwise move it on the cartesian graph and update the y coordinate
                     laserY = this.direction(laserY, laserClass);
-                    lasers[n].setAttribute('y', laserY);
+                    lasers[cur].setAttribute('y', laserY);
                 }
                 
                 // Check against active elements
                 var active = document.getElementsByClassName('active');
-                for (j=0; j < active.length; j++) {
+                for (var num = 0; num < active.length; num++) {
                     // Get active element properties
-                    activeX = parseInt(active[j].getAttribute('x'));
-                    activeY = parseInt(active[j].getAttribute('y'));
-                    activeW = parseInt(active[j].getAttribute('width'));
-                    activeH = parseInt(active[j].getAttribute('height'));
+                    var activeX = parseInt(active[num].getAttribute('x'));
+                    var activeY = parseInt(active[num].getAttribute('y'));
+                    var activeW = parseInt(active[num].getAttribute('width'));
+                    var activeH = parseInt(active[num].getAttribute('height'));
                     
                     // Laser and active element collision test
                     if (laserX + this.width >= activeX &&
@@ -331,28 +322,24 @@ var Laser = {
                         laserY <= (activeY + activeH)) {
                         
                         // Use active's class to determine what was hit
-                        activeClass = active[j].getAttribute('class');
-                        if (activeClass === 'shield active') {
-                            Shield.hit(active[j]);
-                        }
-                        else if (activeClass === 'invShip active') {
-                            InvShip.hit(active[j]);
-                        }
-                        else { // hit an invader
-                            Inv.hit(active[j]);
+                        var activeClass = active[num].getAttribute('class');
+                        if (activeClass === 'invader active') {
+                            Inv.hit(active[num]);
+                        } else if (activeClass === 'shield active') {
+                            Shield.hit(active[num]);
+                        } else { // invader ship
+                            InvShip.hit(active[num]);
                         }
                         
                         // Remove laser
-                        this.hit(lasers[n]);
-                    }
-                    // Note: Should see if this can't be integrated with the normal collision test
-                    else if (
+                        this.hit(lasers[cur]);
+                    } else if ( // Separate check due to ships using paths instead of x/y
                         (laserX >= Ship.x && laserX <= (Ship.x + Ship.width) &&
                         laserY >= Ship.y &&
                         laserY <= (Ship.y + Ship.height)) &&
                         Ship.player[0]) {
                         Ship.hit();
-                        this.hit(lasers[n]);
+                        this.hit(lasers[cur]);
                     }
                 }
             }
@@ -377,13 +364,8 @@ var Ship = {
     width: 35,
     height: 15,
     speed: 3,
-    // path only contains the shape, not the x and y information
+    // path only contains the shape, not the x and y information (limitation of SVG paths)
     path: 'v 13 h 35 v -13 h -2 v -2 h -12 v -4 h -2 v -2 h -3 v 2 h -2 v 4 h -12 v 2 l -2 0',
-    
-    // Note: Move this block into the HUD init
-    livesX: 360,
-    livesY: 10,
-    livesGap: 10,
     
     init: function() {
         // Change player x and y to the default
@@ -391,17 +373,9 @@ var Ship = {
         this.y = 460;
         
         // Create the main player
-        this.build(this.x, this.y, 'player');
-        
-        // Note: move this crap into the HUD
-        // Re-use the ship object to create a life counter
-        for (i=0; i < Hud.lives; i++) {
-            x = this.livesX + (this.width * i) + (this.livesGap * i);
-            this.build(x, this.livesY, 'life');
-        }
+        this.build(this.x, this.y, 'player active');
         
         // Store the lives and player in memory for easy reference
-        this.lives = document.getElementsByClassName('life'); // Note, move to HUD
         this.player = document.getElementsByClassName('player');
     },
     
@@ -419,8 +393,7 @@ var Ship = {
         // Move the ship if keyboard input is detected and the ship is against the container walls
         if (Ctrl.left && this.x >= 0) {
             this.x -= this.speed;
-        }
-        else if (Ctrl.right &&
+        } else if (Ctrl.right &&
             this.x <= (Game.width - this.width)) {
             this.x += this.speed;
         }
@@ -440,23 +413,7 @@ var Ship = {
         if (Hud.lives > 0) {
             // Recreates the player with a delay timer
             setTimeout('Ship.build(Ship.x, Ship.y, \'player\')', 1000);
-        }
-        else {
-            return Game.end();
-        } 
-    },
-    
-    kill: function() {
-        Hud.lives -= 1;
-        
-        // Remove player and life image
-        Game.svg.removeChild(this.player[0]);
-        Game.svg.removeChild(this.lives[Hud.lives]);
-        
-        if (Hud.lives > 0) {
-            setTimeout('Ship.build(Ship.x, Ship.y, \'player\')', 1000);
-        }
-        else {
+        } else {
             return Game.end();
         } 
     }
@@ -474,37 +431,38 @@ var InvShip = {
         this.timer = requestInterval(this.build, this.delay);
     },
     
+    // Fires from window, no this
     build: function() {
-        var self = InvShip;
-                
         // create invader ship element
         var el = document.createElementNS(Game.ns, 'image');
         el.setAttribute('id', 'invShip'); // Can be targeted by ID since only 1 will ever be present
         el.setAttribute('class', 'invShip active');
-        el.setAttribute('x', self.x);
-        el.setAttribute('y', self.y);
-        el.setAttribute('width', self.width);
-        el.setAttribute('height', self.height);
+        el.setAttribute('x', InvShip.x);
+        el.setAttribute('y', InvShip.y);
+        el.setAttribute('width', InvShip.width);
+        el.setAttribute('height', InvShip.height);
         el.setAttributeNS(Game.xlink, 'xlink:href', 'redship.svg');
         Game.svg.appendChild(el);
+        
+        // Store for later use
+        InvShip.el = document.getElementById('invShip');
     },
     
     update: function() {
-        // Get ship in DOM
-        el = document.getElementById('invShip');
-        
-        if (el) {
-            var x = parseInt(el.getAttribute('x'));
+        if (this.el) {
+            var x = parseInt(this.el.getAttribute('x'));
             
-            if (x > Game.width)
-                Game.svg.removeChild(el);
-            else
-                el.setAttribute('x', x + this.speed);
+            if (x > Game.width) {
+                Game.svg.removeChild(this.el);
+                this.el = null;
+            } else
+                this.el.setAttribute('x', x + this.speed);
         }
     },
     
     hit: function(el) {
         Hud.update.score(30);
+        this.el = null;
         return Game.svg.removeChild(el);
     }
 };
@@ -529,8 +487,6 @@ var Inv = {
     pathC2: 'M10.705,13.994h4.174V11.91h-4.174V13.994z M25.313,9.82V3.561h-2.086V1.476h-6.26v-2.087H8.618v2.087     h-6.26v2.085H0.272V9.82h4.174v2.09H2.358v2.084h2.088v2.086h4.172v-2.086H6.532V11.91h4.173V9.82h4.174v2.09h4.172v2.084h-2.084 v2.086h4.172v-2.086h2.088V11.91h-2.088V9.82H25.313z M10.705,7.735H6.532V5.65h4.173V7.735z M19.051,7.735h-4.172V5.65h4.172 V7.735z',
     
     init: function() {
-        var self = this;
-        
         // Reset necessary values
         this.speed = 10;
         this.ySpeed = 0;
@@ -541,6 +497,8 @@ var Inv = {
         
         // Invaders run on their own separate time gauge
         this.delay = 800 - (20 * Hud.level); // Delay dynamically changes so reset it
+        
+        var self = this;
         this.timer = requestInterval(self.update, self.delay); // Must use self since it from the global scale
     },
     
@@ -552,13 +510,13 @@ var Inv = {
         
         // Create the invader array
         var invArray = new Array(this.row);
-        for (row = 0; row < this.row; row++) {
+        for (var row = 0; row < this.row; row++) {
             invArray[row] = new Array(this.col);
         }
         
-        //// Loop through invader array data you just created
-        for (row = 0; row < this.row; row++) {
-            for (col=0; col < this.col; col++) {                
+        // Loop through invader array data you just created
+        for (var row = 0; row < this.row; row++) {
+            for (var col=0; col < this.col; col++) {       
                 // Setup the invader's output
                 var el = document.createElementNS(Game.ns, 'svg');
                 el.setAttribute('x', this.locX(col));
@@ -625,56 +583,53 @@ var Inv = {
     
     // Fired from DOM window, cannot use this
     update: function() {
-        var self = Inv;
-        
         var invs = document.getElementsByClassName('invader');
         
         if (invs.length > 0) {
             // Find the first and last invader in the flock
             var xFirst = Game.width;
             var xLast = 0;
-            for (i = 0; i < invs.length; i++) {
-                var x = parseInt(invs[i].getAttribute('x'));
+            for (var count = 0; count < invs.length; count++) {
+                var x = parseInt(invs[count].getAttribute('x'));
                 xFirst = Math.min(xFirst, x);
                 xLast = Math.max(xLast, x);
             }
             
             // Set speed based upon first and last invader results
-            if ((xLast >= (Game.width - 20 - self.width) &&
-                self.ySpeed === 0) ||
-                (xFirst < 21 && self.ySpeed === 0))
-                    self.ySpeed = Math.abs(self.speed);
-            else if ((xLast >= (Game.width - 20 - self.width)) ||
+            if ((xLast >= (Game.width - 20 - Inv.width) &&
+                Inv.ySpeed === 0) ||
+                (xFirst < 21 && Inv.ySpeed === 0))
+                    Inv.ySpeed = Math.abs(Inv.speed);
+            else if ((xLast >= (Game.width - 20 - Inv.width)) ||
                 (xFirst < 21) ||
-                self.ySpeed > 0) {
-                    self.speed = -self.speed;
-                    self.ySpeed = 0;
+                Inv.ySpeed > 0) {
+                    Inv.speed = -Inv.speed;
+                    Inv.ySpeed = 0;
             }
             
             // Update invader positions
-            for (i = 0; i < invs.length; i++) {
+            for (var count = 0; count < invs.length; count++) {
                 // Increment x and y counters
-                var x = parseInt(invs[i].getAttribute('x'));
-                var y = parseInt(invs[i].getAttribute('y'));
-                var xNew = x + self.speed;
-                var yNew = y + self.ySpeed;
+                var x = parseInt(invs[count].getAttribute('x'));
+                var y = parseInt(invs[count].getAttribute('y'));
+                var xNew = x + Inv.speed;
+                var yNew = y + Inv.ySpeed;
                 
                 // Set direction (left, right, down)
-                if (self.ySpeed > 0) {
-                    invs[i].setAttribute('y', yNew);
-                }
-                else {
-                    invs[i].setAttribute('x', xNew);
+                if (Inv.ySpeed > 0) {
+                    invs[count].setAttribute('y', yNew);
+                } else {
+                    invs[count].setAttribute('x', xNew);
                 }
                 
                 // Test if Invaders have pushed far enough to beat the player
-                if (y > Shield.y - 20 - self.height) {
+                if (y > Shield.y - 20 - Inv.height) {
                     return Game.end(); // Exit everything and shut down the game
                 }
             }
             
-            self.animate();
-            self.shoot(invs);
+            Inv.animate();
+            Inv.shoot(invs);
         }
     },
     
@@ -697,15 +652,14 @@ var Inv = {
             var invX = parseInt(invs[invRandom].getAttribute('x'));
             var y = 0;
             
-            // Find bottom invader of current column and shoot with it
-            for (i = 0; i < invs.length; i++) { // Note: change to for loop
-                var currentX = parseInt(invs[i].getAttribute('x'));
+            // Find current column and shoot with it
+            for (var count = 0; count < invs.length; count++) {
+                var currentX = parseInt(invs[count].getAttribute('x'));
                 
                 // If in the same column find the bottom most Invader
                 if (invX === currentX) {
-                    var yVal = parseInt(invs[i].getAttribute('y'));
+                    var yVal = parseInt(invs[count].getAttribute('y'));
                     var y = Math.max(y, yVal);
-                    // Note: might want to throw a break into here or return
                 }
             }
             
@@ -722,20 +676,28 @@ var Inv = {
     }
 };
 
-var Screen = {
-    welcome: document.getElementById('screenWelcome'),
-    restart: document.getElementById('screenGameover')
-};
-
 var Hud = {
+    livesX: 360,
+    livesY: 10,
+    livesGap: 10,
     init: function() {
         this.score = 0;
         this.bonus = 0;
         this.lives = 3;
         this.level = 1;
         
+        // Create life counter
+        for (var life = 0; life < Hud.lives; life++) {
+            var x = this.livesX + (Ship.width * life) + (this.livesGap * life);
+            Ship.build(x, this.livesY, 'life');
+        }
+        
+        // Text creation
         this.build('Lives:', 310, 30, 'textLives');
         this.build('Score: 0', 20, 30, 'textScore');
+        
+        // Store lives (throw them back into the ship to prevent confusion with naming)
+        Ship.lives = document.getElementsByClassName('life');
     },
     
     // Creates text output
@@ -757,9 +719,9 @@ var Hud = {
             Hud.lifePlus();
             
             // Inject new score text
-            element = document.getElementById('textScore');
-            element.removeChild(element.firstChild);
-            element.appendChild(document.createTextNode('Score: ' + Hud.score));
+            el.replaceChild(
+                document.createTextNode('Score: ' + Hud.score),
+                document.getElementById('textScore').firstChild);
         },
         level: function() {
             // count invader kills
@@ -770,22 +732,16 @@ var Hud = {
             if (Inv.counter === invTotal) {
                 Hud.level += 1;
                 Inv.counter = 0;
-                
-                //Inv.delay = 800 - (20 * Hud.level);
-                
-                //console.log(Inv.timer);
+                                
                 clearRequestInterval(Inv.timer);
                 Game.svg.removeChild(Inv.flock);
                 Inv.init();
-            }
-            // Increase invader speed
-            else if (Inv.counter === Math.round(invTotal / 2)) {
+            } else if (Inv.counter === Math.round(invTotal / 2)) { // Increase invader speed
                 Inv.delay -= 250;
                 
                 clearRequestInterval(Inv.timer);
                 Inv.timer = requestInterval(Inv.update, Inv.delay);
-            }
-            else if (Inv.counter === (Inv.col * Inv.row) - 3) {
+            } else if (Inv.counter === (Inv.col * Inv.row) - 3) {
                 Inv.delay -= 300;
                 
                 clearRequestInterval(Inv.timer);
@@ -795,18 +751,15 @@ var Hud = {
     },
     
     lifePlus: function() {
-        //if (this.bonus >= 100) {
-        if (this.bonus >= 2) {
+        if (this.bonus >= 100) {
             // Add an extra life
             if (this.lives < 3) {
-                var x = Ship.livesX + (Ship.width * this.lives) + (Ship.livesGap * this.lives);
-                Ship.build(x, Ship.livesY, 'life');
+                var x = this.livesX + (Ship.width * this.lives) + (this.livesGap * this.lives);
+                Ship.build(x, this.livesY, 'life');
                 
                 this.lives += 1;
                 this.bonus = 0;
-            }
-            // Incase 3 lives are already present set the counter to 0
-            else {
+            } else { // Incase 3 lives are already present set the counter to 0
                 this.bonus = 0;
             }
         }

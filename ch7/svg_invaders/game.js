@@ -148,7 +148,6 @@ var Game = {
     
     end: function() {
         clearRequestInterval(InvShip.timer);
-        clearRequestInterval(Inv.timer);
         
         this.remove.elClass('shield player life laser');
         this.remove.elId('flock invShip textScore textLives');
@@ -375,7 +374,7 @@ var Ship = {
         // Create the main player
         this.build(this.x, this.y, 'player active');
         
-        // Store the lives and player in memory for easy reference
+        // Store the player in memory for easy reference
         this.player = document.getElementsByClassName('player');
     },
     
@@ -443,26 +442,24 @@ var InvShip = {
         el.setAttribute('height', InvShip.height);
         el.setAttributeNS(Game.xlink, 'xlink:href', 'redship.svg');
         Game.svg.appendChild(el);
-        
-        // Store for later use
-        InvShip.el = document.getElementById('invShip');
     },
     
     update: function() {
-        if (this.el) {
-            var x = parseInt(this.el.getAttribute('x'));
+        // Easier to check for element in update than anywhere else (0therwise needs switches... very messy)
+        var el = document.getElementById('invShip');
+        if (el) {
+            var x = parseInt(el.getAttribute('x'));
             
             if (x > Game.width) {
-                Game.svg.removeChild(this.el);
-                this.el = null;
+                Game.svg.removeChild(el);
+                el = null;
             } else
-                this.el.setAttribute('x', x + this.speed);
+                el.setAttribute('x', x + this.speed);
         }
     },
     
     hit: function(el) {
         Hud.update.score(30);
-        this.el = null;
         return Game.svg.removeChild(el);
     }
 };
@@ -498,8 +495,9 @@ var Inv = {
         // Invaders run on their own separate time gauge
         this.delay = 800 - (20 * Hud.level); // Delay dynamically changes so reset it
         
-        var self = this;
-        this.timer = requestInterval(self.update, self.delay); // Must use self since it from the global scale
+        if (this.timer)
+            clearRequestInterval(Inv.timer);
+        this.timer = requestInterval(this.update, this.delay); // Must use self since it from the global scale
     },
     
     build: function() {        
@@ -719,9 +717,10 @@ var Hud = {
             Hud.lifePlus();
             
             // Inject new score text
+            el = document.getElementById('textScore');
             el.replaceChild(
                 document.createTextNode('Score: ' + Hud.score),
-                document.getElementById('textScore').firstChild);
+                el.firstChild);
         },
         level: function() {
             // count invader kills
@@ -779,6 +778,12 @@ var Ctrl = {
     
     keyDown: function(event) {
         switch(event.keyCode) {
+            case 32: // Spacebar
+                var laser = document.getElementsByClassName('negative');
+                var player = document.getElementsByClassName('player');
+                if (! laser.length && player.length)
+                    Laser.build(Ship.x + (Ship.width / 2), Ship.y, true);
+                break;
             case 39: // Left
                 Ctrl.right = true;
                 break;
@@ -816,7 +821,7 @@ var Ctrl = {
     
     click: function(event) {
         var laser = document.getElementsByClassName('negative');
-        var player = document.getElementsByClassName('player')
+        var player = document.getElementsByClassName('player');
         
         if (event.button === 0 &&
             ! laser.length &&

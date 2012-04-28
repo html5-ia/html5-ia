@@ -1,9 +1,11 @@
-/********
-Setup
-********/
-// Grab canvas DOM element via global variable
-//var canvas = document.getElementById('canvas'); 
-    
+/*
+Name: Canvas Break
+Version: 1.0
+Author: Ashton Blue
+Author URL: http://blueashes.com
+Publisher: Manning
+*/
+
 // How to figure out what a user's computer can handle for frames with fallbacks
 // Original by Paul Irish: http://paulirish.com/2011/requestanimationframe-for-smart-animating/
 // Clear interval version here created by Jerome Etienne http://notes.jetienne.com/2011/05/18/cancelRequestAnimFrame-for-paul-irish-requestAnimFrame.html
@@ -16,15 +18,6 @@ window.requestAnimFrame = ( function() {
     function(/* function */ callback, /* DOMElement */ element){
         return window.setTimeout(callback, 1000 / 60);
     };
-})();
-
-window.cancelRequestAnimFrame = ( function() {
-    return window.cancelAnimationFrame          ||
-    window.webkitCancelRequestAnimationFrame    ||
-    window.mozCancelAnimationFrame              ||
-    window.oCancelRequestAnimationFrame         ||
-    window.msCancelRequestAnimationFrame        ||
-    clearTimeout
 })();
 
 var Game = {
@@ -49,13 +42,10 @@ var Game = {
         Bricks.init();
         Ball.init();
         Paddle.init();
-        
-        // Run animation
-        this.animate();
     },
     
     animate: function() {
-        // Self-referring object, so you must use Game instead of this to prevent a crash
+        // Run from the global space, so you must use Game instead of this to prevent a crash
         Game.draw();
         Game.play = requestAnimFrame(Game.animate);
     },
@@ -77,10 +67,12 @@ var Game = {
         run: function() {
             Game.canvas.removeEventListener('click', Game.listen.run, false);
             Game.init();
+            
+            // Run animation
+            Game.animate();
         },
         restart: function() {
             Game.canvas.removeEventListener('click', Game.listen.restart, false);
-            cancelRequestAnimFrame(Game.play);
             Game.init();
         }
     },
@@ -96,8 +88,7 @@ var Game = {
         limit: function(lv) {
             if (lv > 5) {
                 return 5;
-            }
-            else {
+            } else {
                 return lv;
             }
         }
@@ -205,10 +196,14 @@ var Ball = {
         if (this.y < 1) { 
             this.y = 1; // Prevents the ball from getting stuck at fast speeds
             this.sy = -this.sy;
-        }
-        // Bottom
-        else if (this.y > canvas.height) {
-            cancelRequestAnimFrame(Game.play);
+        } else if (this.y > canvas.height) { // Bottom
+            // Stop the ball and hide it
+            // Note: You could use a clear animation frame request,
+            // but its very unstable in all browsers.
+            this.sy = this.sx = 0;
+            this.y = this.x = 1000;
+            
+            // Shut down
             Screen.gameover();
             canvas.addEventListener('click', Game.listen.restart, false);
         }
@@ -217,9 +212,7 @@ var Ball = {
         if (this.x < 1) {
                 this.x = 1; // Prevents the ball from getting stuck at fast speeds
                 this.sx = - this.sx;
-        }
-        // Right
-        else if (this.x > canvas.width) {
+        } else if (this.x > canvas.width) { // Right
                 this.x = canvas.width - 1; // Prevents the ball from getting stuck at fast speeds
                 this.sx = - this.sx;
         }
@@ -278,9 +271,7 @@ var Paddle = {
         // Detect controller input
         if (Ctrl.left && (this.x < (Game.canvas.width - this.w))) {                      
             this.x += this.speed;                                         
-        }                                                             
-
-        else if (Ctrl.right && this.x > 0) {                                  
+        } else if (Ctrl.right && this.x > 0) {                                  
             this.x += -this.speed;                                                    
         }
     },
@@ -351,16 +342,16 @@ var Bricks = {
         var y = this.y(row);
         var grad = Game.ctx.createLinearGradient(0, y, 0, y + this.h);
         switch(row) {                                                    
-                case 0:  grad.addColorStop(0,'#bd06f9');                   
+            case 0:  grad.addColorStop(0,'#bd06f9');                   
                 grad.addColorStop(1,'#9604c7'); break;                     
-        
-                case 1: grad.addColorStop(0,'#F9064A');                    
+    
+            case 1: grad.addColorStop(0,'#F9064A');                    
                 grad.addColorStop(1,'#c7043b'); break;                     
-                
-                case 2: grad.addColorStop(0,'#05fa15');                    
+            
+            case 2: grad.addColorStop(0,'#05fa15');                    
                 grad.addColorStop(1,'#04c711'); break;                     
-                
-                default: grad.addColorStop(0,'#faa105');                   
+            
+            default: grad.addColorStop(0,'#faa105');                   
                 grad.addColorStop(1,'#c77f04'); break;                     
         }
         return Game.ctx.fillStyle = grad;

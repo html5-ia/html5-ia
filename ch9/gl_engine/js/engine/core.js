@@ -1,7 +1,9 @@
 /*
 Name: WebGL Engine
+Version: 1.0
 Author: Ashton Blue
-Author URL: http://twitter.com/#!/ashbluewd
+Author URL: http://blueashes.com
+Publisher: Manning
 Credits: Based on Mozilla's WebGL (https://developer.mozilla.org/en/WebGL) and Giles Thomas' Learning WebGL (http://learningwebgl.com/blog) tutorials.
 */
 
@@ -63,6 +65,7 @@ var Engine = Class.extend({
             alert("Uhhh, your browser doesn't support WebGL. Your options are build a large wooden badger or download Google Chrome.");
         }
     },
+    
     // Configures WebGL after verifying it's okay to do so
     initGL: function() {
         if (this.gl) {
@@ -103,6 +106,7 @@ var Engine = Class.extend({
         this.vertexColorAttribute = this.gl.getAttribLocation(this.shaderProgram, "aVertexColor");
         this.gl.enableVertexAttribArray(this.vertexColorAttribute);
     },
+    
     // Goes into the DOM to get shaders via variable id
     getShader: function(id) {
         this.shaderScript = document.getElementById(id);
@@ -128,11 +132,9 @@ var Engine = Class.extend({
         this.shader;
         if (this.shaderScript.type == 'x-shader/x-fragment') {
             this.shader = this.gl.createShader(this.gl.FRAGMENT_SHADER);
-        }
-        else if (this.shaderScript.type == 'x-shader/x-vertex') {
+        } else if (this.shaderScript.type == 'x-shader/x-vertex') {
             this.shader = this.gl.createShader(this.gl.VERTEX_SHADER);
-        }
-        else {
+        } else {
                 return null; // Type of current shader is unknown
         }
         
@@ -212,8 +214,13 @@ var Engine = Class.extend({
             // Create
             this.setMatrixUniforms();
             // Take the matrix vertex positions and go through all of the elements from 0 to the .numItems object
-            if (this.storage[i].bufDim) this.gl.drawElements(this.gl.TRIANGLES, this.storage[i].bufRows, this.gl.UNSIGNED_SHORT, 0); // Creation of 3D shape
-            else this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, this.storage[i].bufRows); // Creation of 2D shape
+            if (this.storage[i].bufDim) {
+                // Creation of 3D shape
+                this.gl.drawElements(this.gl.TRIANGLES, this.storage[i].bufRows, this.gl.UNSIGNED_SHORT, 0);
+            } else {
+                // Creation of 2D shape
+                this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, this.storage[i].bufRows); 
+            }
         
             // Restore original matrix to prevent objects from inheriting properties
             this.mvPopMatrix();
@@ -247,8 +254,7 @@ var Engine = Class.extend({
         if (m) {  
             this.mvMatrixStack.push(m.dup());  
             mvMatrix = m.dup();  
-        }
-        else {  
+        } else {  
             this.mvMatrixStack.push(mvMatrix.dup());  
         }  
     },  

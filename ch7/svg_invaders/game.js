@@ -1,11 +1,9 @@
 /*
 Name: SVG Invaders
-Version: .4
+Version: 1.0
 Author: Ashton Blue
-Author URL: http://twitter.com/#!/ashbluewd
+Author URL: http://blueashes.com
 Publisher: Manning
-
-Note: to see to-dos search note:
 */
 
 /********

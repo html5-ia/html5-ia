@@ -46,14 +46,23 @@ window.onload = function() {
         ],
         
         rotateInit: 0,
-        rotateSpeed: 2,
+        rotateSpeed: 3,
         rotate: [0, 0, 1],
+        speed: .5,
         
         update: function() {
             if (Ctrl.left) {
                 this.rotateInit += this.rotateSpeed;  
             } else if (Ctrl.right) {
                 this.rotateInit -= this.rotateSpeed;  
+            }
+            
+            if (Ctrl.up) {
+                this.x -= Math.sin( this.rotateInit * Math.PI / 180 ) * this.speed;
+                this.y += Math.cos( this.rotateInit * Math.PI / 180 ) * this.speed;
+            } else if (Ctrl.down) {
+                this.x += Math.sin( this.rotateInit * Math.PI / 180 ) * this.speed;
+                this.y -= Math.cos( this.rotateInit * Math.PI / 180 ) * this.speed;
             }
         }
     });
@@ -75,6 +84,11 @@ window.onload = function() {
                 case 39: // Right
                     Ctrl.right = true;
                     break;
+                case 38: // up
+                    Ctrl.up = true;
+                    break;
+                case 40: // down
+                    Ctrl.down = true;
                 default:
                     break;
             }
@@ -88,6 +102,10 @@ window.onload = function() {
                 case 39: // Right
                     Ctrl.right = false;
                     break;
+                case 38:
+                    Ctrl.up = false;
+                case 40:
+                    Ctrl.down = false;
                 default:
                     break;
             }

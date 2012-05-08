@@ -26,14 +26,13 @@ window.onload = function() {
     ------------*/
     
     var Player = Entity.extend({
-        // Vertices setup
+        // Vertices setup to create a triangle
         bufCols: 3,
         bufRows: 3,
         bufVert: [
              0.0,  2.0,  0.0,  
             -1.0, -1.0,  0.0,
-            1.0, -1.0,  0.0
-             
+             1.0, -1.0,  0.0
         ],
         
         // Color integration
@@ -41,22 +40,34 @@ window.onload = function() {
             // red, green, blue, alpha (aka transparency)
             1, 1, 1, 1,
             1, 1, 1, 1,
-            1, 1, 1, 1,
-            0, 0, 0, 1
+            1, 1, 1, 1
         ],
         
+        // Rotate on the x and y axis
         rotateInit: 0,
         rotateSpeed: 3,
         rotate: [0, 0, 1],
+        
+        // Speed of travel
         speed: .5,
         
+        // Says if the player is allowed to shoot or not
+        shoot: true,
+        
+        // Time in milliseconds to delay firing
+        shootDelay: 300,
+        
         update: function() {
+            var self = this;
+            
+            // Move left or right to rotate the player
             if (Ctrl.left) {
                 this.rotateInit += this.rotateSpeed;  
             } else if (Ctrl.right) {
                 this.rotateInit -= this.rotateSpeed;  
             }
             
+            // Move forward or backward
             if (Ctrl.up) {
                 this.x -= Math.sin( this.rotateInit * Math.PI / 180 ) * this.speed;
                 this.y += Math.cos( this.rotateInit * Math.PI / 180 ) * this.speed;
@@ -64,6 +75,101 @@ window.onload = function() {
                 this.x += Math.sin( this.rotateInit * Math.PI / 180 ) * this.speed;
                 this.y -= Math.cos( this.rotateInit * Math.PI / 180 ) * this.speed;
             }
+            
+            // Detect a player shooting
+            if (Ctrl.space && this.shoot) {
+                // Spawning elements need to take new parameters
+                var temp = World.spawnEntity(Bullet, this.x, this.y, -80, { angle: self.rotateInit });
+                
+                // Create a timer to prevent firing
+                this.shoot = false;
+                window.setTimeout(function() {
+                    self.shoot = true;
+                }, this.shootDelay);
+            }
+        }
+    });
+    
+    // Creates a cube by using multiple vertices
+    var Bullet = Entity.extend({
+        bufCols: 3,
+        bufRows: 12, // Increased due to larger verticies
+        bufVert: [
+            // Front face
+            0.0,  0.3,  0.0,
+           -0.3, -0.3,  0.3,
+            0.3, -0.3,  0.3,
+           // Right face
+            0.0,  0.3,  0.0,
+            0.3, -0.3,  0.3,
+            0.3, -0.3, -0.3,
+           // Back face
+            0.0,  0.3,  0.0,
+            0.3, -0.3, -0.3,
+           -0.3, -0.3, -0.3,
+           // Left face
+            0.0,  0.3,  0.0,
+           -0.3, -0.3, -0.3,
+           -0.3, -0.3,  0.3
+        ],
+        // Maps the square vertices into a cube with dimension
+        //bufDim: [
+        //     0,  1,  2,    0,  2,  3, // front
+        //     4,  5,  6,    4,  6,  7 // back
+        //],
+        rotateInit: 360,
+        rotate: [.5, 1, 1],
+        
+        speed: 1,
+            
+        col: [
+            // red, green, blue, alpha (aka transparency)
+            // Front face
+            1.0, 0.0, 0.0, 1.0,
+            1.0, 0.0, 0.0, 1.0,
+            1.0, 0.0, 0.0, 1.0,
+            // Right face
+            1.0, 0.0, 0.0, 1.0,
+            1.0, 0.0, 0.0, 1.0,
+            1.0, 0.0, 0.0, 1.0,
+            // Back face
+            1.0, 0.0, 0.0, 1.0,
+            1.0, 0.0, 0.0, 1.0,
+            1.0, 0.0, 0.0, 1.0,
+            // Left face
+            1.0, 0.0, 0.0, 1.0,
+            1.0, 0.0, 0.0, 1.0,
+            1.0, 0.0, 0.0, 1.0,
+            // Front face
+            1.0, 0.0, 0.0, 1.0,
+            1.0, 0.0, 0.0, 1.0,
+            1.0, 0.0, 0.0, 1.0,
+            // Right face
+            1.0, 0.0, 0.0, 1.0,
+            1.0, 0.0, 0.0, 1.0,
+            1.0, 0.0, 0.0, 1.0,
+            // Back face
+            1.0, 0.0, 0.0, 1.0,
+            1.0, 0.0, 0.0, 1.0,
+            1.0, 0.0, 0.0, 1.0,
+            // Left face
+            1.0, 0.0, 0.0, 1.0,
+            1.0, 0.0, 0.0, 1.0,
+            1.0, 0.0, 0.0, 1.0,
+        ],
+        update: function() {
+            //this.x -= Math.sin( this.angle * Math.PI / 180 ) * this.speed;
+            //this.y += Math.cos( this.angle * Math.PI / 180 ) * this.speed;
+            
+            // Uses a measurement of time to update and configure your rotation
+            // Originally from Mozilla's WebGL tutorial https://developer.mozilla.org/en/WebGL/Animating_objects_with_WebGL
+            this.currentTime = (new Date).getTime();
+            if (this.lastUpdate < this.currentTime) {  
+                this.delta = (this.currentTime) - this.lastUpdate;  
+                
+                this.rotateInit += (30 * this.delta) / 30.0;  
+            }  
+            this.lastUpdate = this.currentTime;
         }
     });
     
@@ -89,6 +195,10 @@ window.onload = function() {
                     break;
                 case 40: // down
                     Ctrl.down = true;
+                    break;
+                case 32:
+                    Ctrl.space = true;
+                    break;
                 default:
                     break;
             }
@@ -104,8 +214,13 @@ window.onload = function() {
                     break;
                 case 38:
                     Ctrl.up = false;
+                    break;
                 case 40:
                     Ctrl.down = false;
+                    break;
+                case 32:
+                    Ctrl.space = false;
+                    break;
                 default:
                     break;
             }
@@ -123,6 +238,7 @@ window.onload = function() {
     
     // Four example objects on corners
     /*World.spawnEntity(Player, 0, 0, -20);*/ // spawnEntity(entity, x, y, z);
-    World.spawnEntity(Player, 0, 0, -20);
+    World.spawnEntity(Player, 0, 0, -80);
+    World.spawnEntity(Bullet, 20, 20, -80);
     
 } // End onload

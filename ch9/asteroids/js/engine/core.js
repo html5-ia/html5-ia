@@ -178,7 +178,7 @@ var Engine = Class.extend({
         this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
         
         // Field of view in degress, width/height, only get objects between 1, 100 units in distance
-        this.perspectiveMatrix = makePerspective(120, this.horizAspect, 0.1, 100.0);
+        this.perspectiveMatrix = makePerspective(45, this.horizAspect, 0.1, 300.0);
         
         // Loop through every object in storage
         for (var i in this.storage) {

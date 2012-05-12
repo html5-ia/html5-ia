@@ -15,16 +15,33 @@ var Engine = Class.extend({
     canvas: document.getElementById("canvas"),
     width: 400,
     height: 400,
-    storage: new Array(),
+    storage: [],
+    typeA: [],
+    typeB: [],
     id: 0,
     
     
     /* ----- Utilities -----*/
     spawnEntity: function(name, x, y, z) {
+        // temporarily store item
+        var entity = (new name);
+        
         // window[] allows you to process its contents and treat it as a variable
         //window['id' + this.id] = (new name);
         // Pushes your new variable into an array and runs its spawn function
-        this.storage.push((new name).spawn(x, y, z));
+        this.storage.push(entity.spawn(x, y, z));
+        
+        // Push into type storage for quicker collision detection
+        switch (entity.type) {
+            case 'a':
+                this.typeA.push(entity);
+                break;
+            case 'b':
+                this.typeB.push(entity);
+                break;
+            default:
+                break;
+        }
         
         // Set id
         this.storage[this.id].id = this.id;
@@ -252,25 +269,43 @@ var Engine = Class.extend({
             this.mvPopMatrix();
             
             // Collision detection
-            //if (this.storage[obj].type === 'a') {
-            //    // Check all items in the b type array only since its an a type item
-            //    for (var en = this.typeB.length; en--;) {
-            //        // Test for overlap between the two
-            //        if (cp.game.overlap(
-            //        this.storage[obj].x,
-            //        this.storage[obj].y,
-            //        this.storage[obj].width,
-            //        this.storage[obj].height,
-            //        this.typeB[en].x,
-            //        this.typeB[en].y,
-            //        this.typeB[en].width,
-            //        this.typeB[en].height)) {
-            //            // If they have collided, run the collision logic for both entities
-            //            this.storage[obj].collide(this.typeB[en]);
-            //            this.typeB[en].collide(this.storage[obj]);
-            //        }
-            //    }
-            //}
+            if (this.storage[i].type === 'a') {
+                // Check all items in the b type array only since its an a type item
+                for (var en = this.typeB.length; en--;) {
+                    // Test for overlap between the two
+                    if (this.overlap(
+                    this.storage[i].x,
+                    this.storage[i].y,
+                    this.storage[i].width,
+                    this.storage[i].height,
+                    this.typeB[en].x,
+                    this.typeB[en].y,
+                    this.typeB[en].width,
+                    this.typeB[en].height)) {
+                        // If they have collided, run the collision logic for both entities
+                        this.storage[i].collide(this.typeB[en]);
+                        this.typeB[en].collide(this.storage[i]);
+                    }
+                }
+            }
+        }
+    },
+    
+    overlap: function(x1,y1,width1,height1,x2,y2,width2,height2) {
+        // Modify x and y values to take into account center offset
+        x1 = x1 - (width1 / 2);
+        y1 = y1 - (height1 / 2);
+        x2 = x2 - (width2 / 2);
+        y2 = y2 - (height2 / 2);
+        
+        // Test for collision
+        if ( x1 < x2 + width2 &&
+            x1 + width1 > x2 &&
+            y1 < y2 + width2 &&
+            y1 + height1 > y2 ) {
+            return true;
+        } else {
+            return false;
         }
     },
     
@@ -328,6 +363,8 @@ var Engine = Class.extend({
  Entity Pallete
 -----------*/
 var Entity = Class.extend({
+    type: 0,
+    
     // Determines position
     x: 0,
     y: 0,
@@ -344,6 +381,11 @@ var Entity = Class.extend({
     
     // Buffer data for creating dimension (practically folds the object)
     bufDim: null,
+    
+    // Passes an object on collide
+    collide: function(obj) {
+        console.log('test');
+    },
     
     // Buffer data for color
     col: [],

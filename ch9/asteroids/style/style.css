@@ -1,0 +1,60 @@
+body {
+    background: #111;
+    color: #aaa;
+    font-family: Impact, Helvetica, Arial;
+    letter-spacing: 1px;
+}
+
+#container {
+    width: 800px;
+    margin: 40px auto;
+    position: relative;
+}
+
+#canvas {
+    border: 1px solid #333;
+}
+
+#score {
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    margin: 0;
+    font-size: 12px;
+}
+
+#ctrls {
+    text-align: center;
+    font-size: 18px;
+}
+
+.screen {
+    font-size: 34px;
+    text-transform: uppercase;
+    text-align: center;
+    text-align: center;
+    position: absolute;
+    width: 100%;
+    left: 0;
+}
+
+.strong {
+    color: #a00;
+}
+
+.warning {
+    font-size: 50px;
+    display: block;
+}
+
+#start {
+    top: 300px;
+}
+
+#end {
+    top: 200px;
+}
+
+.hide {
+    display: none;
+}

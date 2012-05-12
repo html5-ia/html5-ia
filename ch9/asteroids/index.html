@@ -1,13 +1,28 @@
 <!DOCTYPE html>   
 <html> 
 <head>
-    <title>WebGL Engine</title>
+    <title>Geometry Destroyer</title>
+    <link rel="stylesheet" type="text/css" href="style/style.css" />
 </head>
 
 <body>
-    <canvas id="canvas">
-        Download Chrome to experience the demo!
-    </canvas>
+    <div id="container">
+        
+        <canvas id="canvas">
+            Download Chrome to experience the demo!
+        </canvas>
+        
+        <span id="score">Score: <span id="count">0</span></span>
+        
+        <p id="start" class="screen">Push <span class="strong">Spacebar</span> to Start</p>
+        
+        <p id="end" class="screen hide">
+            <span class="warning strong">Game Over</span>
+            Click to Retry
+        </p>
+        
+        <p id="ctrls">Move: Arrow Keys | Shoot: Spacebar</p>
+    </div>
         
     <!-- Script loading -->
     <script type="text/javascript" src="js/engine/assets/sylvester.js"></script>

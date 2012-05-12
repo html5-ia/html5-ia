@@ -24,9 +24,43 @@ window.onload = function() {
     /*------------
      Object Templates
     ------------*/
+    var Hud = Entity.extend({
+        // score counter
+        score: 0,
+        
+        init: function() {
+            
+        },
+        
+        update: function() {
+            // Check if the score has changed, if so, update the counter
+            
+            
+        },
+        
+        bind: function(el, callback) {
+            
+        },
+        
+        unbind: function() {
+            
+        },
+        
+        // Stores elements
+        el: {
+            score: '',
+            start: '',
+            end: ''
+        }
+        
+        
+    });
     
     var Player = Entity.extend({
         name: 'player',
+        type: 'a',
+        width: 1,
+        height: 1,
         // Vertices setup to create a triangle
         bufCols: 3,
         bufRows: 3,
@@ -104,6 +138,7 @@ window.onload = function() {
     // Creates a cube by using multiple vertices
     var Bullet = Entity.extend({
         angle: 0,
+        type: 'a',
         init: function() {
             var player = World.entityGetVal('name', 'player');
             if (player)
@@ -174,6 +209,10 @@ window.onload = function() {
     });
     
     var Asteroid = Bullet.extend({
+        type: 'b',
+        width: 7,
+        height: 8,
+        
         rotateDelay: 300,
         bufRows: 48, // Increased due to larger verticies
 
@@ -406,7 +445,7 @@ window.onload = function() {
     
     // Four example objects on corners
     World.spawnEntity(Player, 0, 0, 0); // spawnEntity(entity, x, y, z);
-    World.spawnEntity(Asteroid, 10, 10, 0);
+    //World.spawnEntity(Asteroid, 10, 10, 0);
     //World.spawnEntity(Bullet, 0, 0, 0);
     
 } // End onload

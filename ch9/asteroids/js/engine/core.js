@@ -22,9 +22,12 @@ var Engine = Class.extend({
     /* ----- Utilities -----*/
     spawnEntity: function(name, x, y, z) {
         // window[] allows you to process its contents and treat it as a variable
-        window['id' + this.id] = (new name);
+        //window['id' + this.id] = (new name);
         // Pushes your new variable into an array and runs its spawn function
-        this.storage.push(window['id' + this.id].spawn(x, y, z));
+        this.storage.push((new name).spawn(x, y, z));
+        
+        // Set id
+        this.storage[this.id].id = this.id;
         
         // Runs the buffers for your object to create the proper shape data
         this.initBuffers(this.storage[this.id]);
@@ -40,12 +43,35 @@ var Engine = Class.extend({
         // Set WebGL viewport ratio to prevent distortion
         this.horizAspect = this.width / this.height;
     },
+    entityGetVal: function(name, val) {
+        // Setup stack for storage
+        var stack = new Array;
+        
+        // Loop through objects and get matched value
+        if (typeof val != 'undefined') { // Incase no val was passed
+            for (var j in this.storage) {
+                if (this.storage[j][(name)] == val) stack.push(this.storage[j]);
+            }
+        }
+        else {
+            for (var j in this.storage) {
+                if (this.storage[j][(name)]) stack.push(this.storage[j]);
+            }
+        }
+        
+        // Return value or false
+        if (stack.length > 0) {
+            return stack;
+        }
+        else {
+            return false;
+        }
+    },
     
     
     /* ----- Game Engine Functions -----*/
     // All necessary code to get WebGL running
     setup: function() {
-        this.init();
         this.initGL();
         this.initShaders();
     },
@@ -224,6 +250,27 @@ var Engine = Class.extend({
         
             // Restore original matrix to prevent objects from inheriting properties
             this.mvPopMatrix();
+            
+            // Collision detection
+            //if (this.storage[obj].type === 'a') {
+            //    // Check all items in the b type array only since its an a type item
+            //    for (var en = this.typeB.length; en--;) {
+            //        // Test for overlap between the two
+            //        if (cp.game.overlap(
+            //        this.storage[obj].x,
+            //        this.storage[obj].y,
+            //        this.storage[obj].width,
+            //        this.storage[obj].height,
+            //        this.typeB[en].x,
+            //        this.typeB[en].y,
+            //        this.typeB[en].width,
+            //        this.typeB[en].height)) {
+            //            // If they have collided, run the collision logic for both entities
+            //            this.storage[obj].collide(this.typeB[en]);
+            //            this.typeB[en].collide(this.storage[obj]);
+            //        }
+            //    }
+            //}
         }
     },
     
@@ -318,9 +365,6 @@ var Entity = Class.extend({
         return this.col;
     },
     
-    init: function() {
-        // place extra setup code initiated at spawning here
-    },
     update: function() {
         // place code before each draw sequence here
     },
@@ -329,7 +373,7 @@ var Entity = Class.extend({
         if (x) this.x = x;
         if (y) this.y = y;
         if (z) this.z = z;
-        this.init();
-        return this;
+
+         return this;
     }
 });

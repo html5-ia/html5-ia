@@ -26,6 +26,7 @@ window.onload = function() {
     ------------*/
     
     var Player = Entity.extend({
+        name: 'player',
         // Vertices setup to create a triangle
         bufCols: 3,
         bufRows: 3,
@@ -89,7 +90,7 @@ window.onload = function() {
             // Detect a player shooting
             if (Ctrl.space && this.shoot) {
                 // Spawning elements need to take new parameters
-                var temp = World.spawnEntity(Bullet, this.x, this.y, 0, { angle: self.rotateInit });
+                var temp = World.spawnEntity(Bullet, this.x, this.y, 0);
                 
                 // Create a timer to prevent firing
                 this.shoot = false;
@@ -102,6 +103,13 @@ window.onload = function() {
     
     // Creates a cube by using multiple vertices
     var Bullet = Entity.extend({
+        angle: 0,
+        init: function() {
+            var player = World.entityGetVal('name', 'player');
+            if (player)
+                this.angle = player[0].rotateInit;
+        },
+        
         bufCols: 3,
         bufRows: 12, // Increased due to larger verticies
         bufVert: [
@@ -130,7 +138,7 @@ window.onload = function() {
         rotateInit: 360,
         rotate: [.5, .5, 1],
         
-        speed: 1,
+        speed: .8,
             
         col: [
             // red, green, blue, alpha (aka transparency)
@@ -150,8 +158,8 @@ window.onload = function() {
         ],
         rotateDelay: 30,
         update: function() {
-            //this.x -= Math.sin( this.angle * Math.PI / 180 ) * this.speed;
-            //this.y += Math.cos( this.angle * Math.PI / 180 ) * this.speed;
+                this.x -= Math.sin( this.angle * Math.PI / 180 ) * this.speed;
+                this.y += Math.cos( this.angle * Math.PI / 180 ) * this.speed;
             
             // Uses a measurement of time to update and configure your rotation
             // Originally from Mozilla's WebGL tutorial https://developer.mozilla.org/en/WebGL/Animating_objects_with_WebGL
@@ -169,85 +177,99 @@ window.onload = function() {
         rotateDelay: 300,
         bufRows: 48, // Increased due to larger verticies
 
+        init: function() {
+            
+        },
         rotate: null,
         rotate: [1, 1, .5],
+        update: function() {
+            // Uses a measurement of time to update and configure your rotation
+            // Originally from Mozilla's WebGL tutorial https://developer.mozilla.org/en/WebGL/Animating_objects_with_WebGL
+            this.currentTime = (new Date).getTime();
+            if (this.lastUpdate < this.currentTime) {  
+                this.delta = (this.currentTime) - this.lastUpdate;  
                 
+                this.rotateInit += (30 * this.delta) / this.rotateDelay;  
+            }  
+            this.lastUpdate = this.currentTime;
+        },
+        
         bufVert: [
             // Top triangle
             // Front face
-            0.0,  2,  0.0,
-           -1, .5,  1,
-            1, .5,  1,
+            0.0,  7,  0.0,
+           -4, 2,  4,
+            4, 2,  4,
            // Right face
-            0.0,  2,  0.0,
-            1, .5,  1,
-            1, .5, -1,
+            0.0,  7,  0.0,
+            4, 2,  4,
+            4, 2, -4,
            // Back face
-            0.0,  2,  0.0,
-            1, .5, -1,
-           -1, .5, -1,
+            0.0,  7,  0.0,
+            4, 2, -4,
+           -4, 2, -4,
            // Left face
-            0.0,  2,  0.0,
-           -1, .5, -1,
-           -1, .5,  1,
+            0.0,  7,  0.0,
+           -4, 2, -4,
+           -4, 2,  4,
            
            // Middle plates
             // Plate
-             -1, .5, 1,
-             -1, -1, 1,
-             -1, -1, -1,
+             -4, 2, 4,
+             -4, -5, 4,
+             -4, -5, -4,
              
-             -1, .5, 1,
-             -1, .5, -1,
-             -1, -1, -1,
-             
-             // Plate
-             -1, .5, -1,
-             -1, -1, -1,
-             1, -1, -1,
-             
-            -1, .5, -1,  
-             1, .5, -1,  
-             1,  -1, -1,
+             -4, 2, 4,
+             -4, 2, -4,
+             -4, -5, -4,
              
              // Plate
-                          1, .5, 1,
-             1, .5, -1,
-             1, -1, -1,
+             -4, 2, -4,
+             -4, -5, -4,
+             4, -5, -4,
              
-            1, .5, 1,
-             1, -1, 1,
-             1, -1, -1,
+            -4, 2, -4,  
+             4, 2, -4,  
+             4,  -5, -4,
+             
+             // Plate
+            4, 2, 4,
+             4, 2, -4,
+             4, -5, -4,
+             
+            4, 2, 4,
+            4, -5, 4,
+             4, -5, -4,
              
 
              
             // Plate  
-            -1, .5, 1,  
-             1, .5, 1,  
-             1,  -1, 1,
+            -4, 2, 4,  
+             4, 2, 4,  
+             4,  -5, 4,
              
-             -1, .5, 1,
-             -1, -1, 1,
-             1, -1, 1,
+             -4, 2, 4,
+             -4, -5, 4,
+             4, -5, 4,
 
            
            // Bottom triangle
             // Front face
-            0.0,  -2,  0.0,
-           -1, -1,  1,
-            1, -1,  1,
+            0.0,  -10,  0.0,
+           -4, -5,  4,
+            4, -5,  4,
            // Right face
-            0.0,  -2,  0.0,
-            1, -1,  1,
-            1, -1, -1,
+            0.0,  -10,  0.0,
+            4, -5,  4,
+            4, -5, -4,
            // Back face
-            0.0,  -2,  0.0,
-            1, -1, -1,
-           -1, -1, -1,
+            0.0,  -10,  0.0,
+            4, -5, -4,
+           -4, -5, -4,
             //Left face
-            0.0,  -2,  0.0,
-           -1, -1, -1,
-           -1, -1,  1
+            0.0,  -10,  0.0,
+           -4, -5, -4,
+           -4, -5,  4
         ],
         col: [
             // red, green, blue, alpha (aka transparency)
@@ -383,8 +405,8 @@ window.onload = function() {
     // Each object receives a unique ID so you don't have to worry about conflicting names
     
     // Four example objects on corners
-    World.spawnEntity(Player, -43, 31, 0); // spawnEntity(entity, x, y, z);
-    World.spawnEntity(Asteroid, 0, 0, 0);
-    World.spawnEntity(Bullet, 0, 0, 0);
+    World.spawnEntity(Player, 0, 0, 0); // spawnEntity(entity, x, y, z);
+    World.spawnEntity(Asteroid, 10, 10, 0);
+    //World.spawnEntity(Bullet, 0, 0, 0);
     
 } // End onload

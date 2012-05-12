@@ -285,8 +285,9 @@ var Entity = Class.extend({
     x: 0,
     y: 0,
     z: 0,
+    zoom: -80,
     posVert: function() {
-        return [ this.x, this.y, this.z ];
+        return [ this.x, this.y, this.z + this.zoom ];
     },
     
     // Buffer data for drawing

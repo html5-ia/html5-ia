@@ -67,7 +67,6 @@ window.onload = function() {
                 this.rotateInit -= this.rotateSpeed;  
             }
             
-            // Move forward or backward
             if (Ctrl.up) {
                 this.x -= Math.sin( this.rotateInit * Math.PI / 180 ) * this.speed;
                 this.y += Math.cos( this.rotateInit * Math.PI / 180 ) * this.speed;
@@ -76,10 +75,21 @@ window.onload = function() {
                 this.y -= Math.cos( this.rotateInit * Math.PI / 180 ) * this.speed;
             }
             
+            // Move forward or backward
+            if (this.x < -43) {
+                return this.x = -43;
+            } else if (this.x > 43) {
+                return this.x = 43;
+            } else if (this.y < -31) {
+                return this.y = -31;
+            } else if (this.y > 31) {
+                return this.y = 31;
+            }
+            
             // Detect a player shooting
             if (Ctrl.space && this.shoot) {
                 // Spawning elements need to take new parameters
-                var temp = World.spawnEntity(Bullet, this.x, this.y, -80, { angle: self.rotateInit });
+                var temp = World.spawnEntity(Bullet, this.x, this.y, 0, { angle: self.rotateInit });
                 
                 // Create a timer to prevent firing
                 this.shoot = false;
@@ -128,65 +138,13 @@ window.onload = function() {
             1.0, 0.0, 0.0, 1.0,
             1.0, 0.0, 0.0, 1.0,
             1.0, 0.0, 0.0, 1.0,
-            // Right face
-            0, 1.0, 0.0, 1.0,
-            0, 1.0, 0.0, 1.0,
-            0, 1.0, 0.0, 1.0,
-            // Back face
-            0.0, 0.0, 1.0, 1.0,
-            0.0, 0.0, 1.0, 1.0,
-            0.0, 0.0, 1.0, 1.0,
-            // Left face
-            1.0, 0.0, 1.0, 1.0,
-            1.0, 0.0, 1.0, 1.0,
-            1.0, 0.0, 1.0, 1.0,
-            // Front face
-            1.0, 0.0, 1.0, 1.0,
-            1.0, 0.0, 1.0, 1.0,
-            1.0, 0.0, 1.0, 1.0,
-            // Right face
-            1.0, 0.0, 1.0, 1.0,
-            1.0, 0.0, 1.0, 1.0,
-            1.0, 0.0, 1.0, 1.0,
-            // Back face
-            1.0, 0.0, 1.0, 1.0,
-            1.0, 0.0, 1.0, 1.0,
-            1.0, 0.0, 1.0, 1.0,
-            // Left face
-            1.0, 0.0, 1.0, 1.0,
-            1.0, 0.0, 1.0, 1.0,
-            1.0, 0.0, 1.0, 1.0,
-                        // red, green, blue, alpha (aka transparency)
-            // Front face
-            1.0, 0.0, 1.0, 1.0,
-            1.0, 0.0, 1.0, 1.0,
-            1.0, 0.0, 1.0, 1.0,
-            // Right face
-            1.0, 0.0, 1.0, 1.0,
-            1.0, 0.0, 1.0, 1.0,
-            1.0, 0.0, 1.0, 1.0,
-            // Back face
-            1.0, 0.0, 1.0, 1.0,
-            1.0, 0.0, 1.0, 1.0,
-            1.0, 0.0, 1.0, 1.0,
-            // Left face
-            1.0, 0.0, 1.0, 1.0,
-            1.0, 0.0, 1.0, 1.0,
-            1.0, 0.0, 1.0, 1.0,
-            // Front face
-            1.0, 1.0, 0.0, 1.0,
-            1.0, 1.0, 0.0, 1.0,
-            1.0, 1.0, 0.0, 1.0,
-            // Right face
-            0, 0.0, 1.0, 1.0,
-            0, 0.0, 1.0, 1.0,
-            0, 0.0, 1.0, 1.0,
-            // Back face
-            1.0, 1.0, 1.0, 1.0,
-            1.0, 1.0, 1.0, 1.0,
-            1.0, 1.0, 1.0, 1.0,
-            // Left face
             1.0, 0.0, 0.0, 1.0,
+            1.0, 0.0, 0.0, 1.0,
+            1.0, 0.0, 0.0, 1.0,
+                        1.0, 0.0, 0.0, 1.0,
+            1.0, 0.0, 0.0, 1.0,
+            1.0, 0.0, 0.0, 1.0,
+                        1.0, 0.0, 0.0, 1.0,
             1.0, 0.0, 0.0, 1.0,
             1.0, 0.0, 0.0, 1.0
         ],
@@ -212,7 +170,7 @@ window.onload = function() {
         bufRows: 48, // Increased due to larger verticies
 
         rotate: null,
-                rotate: [1, 1, .5],
+        rotate: [1, 1, .5],
                 
         bufVert: [
             // Top triangle
@@ -290,6 +248,74 @@ window.onload = function() {
             0.0,  -2,  0.0,
            -1, -1, -1,
            -1, -1,  1
+        ],
+        col: [
+            // red, green, blue, alpha (aka transparency)
+            // Front face
+            1.0, 0.0, 0.0, 1.0,
+            1.0, 0.0, 0.0, 1.0,
+            1.0, 0.0, 0.0, 1.0,
+            // Right face
+            0, 1.0, 0.0, 1.0,
+            0, 1.0, 0.0, 1.0,
+            0, 1.0, 0.0, 1.0,
+            // Back face
+            0.0, 0.0, 1.0, 1.0,
+            0.0, 0.0, 1.0, 1.0,
+            0.0, 0.0, 1.0, 1.0,
+            // Left face
+            0.0, 1.0, 1.0, 1.0,
+            0.0, 1.0, 1.0, 1.0,
+            0.0, 1.0, 1.0, 1.0,
+            // Front face
+            1.0, 0.0, 1.0, 1.0,
+            1.0, 0.0, 1.0, 1.0,
+            1.0, 0.0, 1.0, 1.0,
+            // Right face
+            1.0, 0.0, 1.0, 1.0,
+            1.0, 0.0, 1.0, 1.0,
+            1.0, 0.0, 1.0, 1.0,
+            // Back face
+            1.0, 0.0, 1.0, 1.0,
+            1.0, 0.0, 1.0, 1.0,
+            1.0, 0.0, 1.0, 1.0,
+            // Left face
+            1.0, 0.0, 1.0, 1.0,
+            1.0, 0.0, 1.0, 1.0,
+            1.0, 0.0, 1.0, 1.0,
+                        // red, green, blue, alpha (aka transparency)
+            // Front face
+            1.0, 0.0, 1.0, 1.0,
+            1.0, 0.0, 1.0, 1.0,
+            1.0, 0.0, 1.0, 1.0,
+            // Right face
+            1.0, 0.0, 1.0, 1.0,
+            1.0, 0.0, 1.0, 1.0,
+            1.0, 0.0, 1.0, 1.0,
+            // Back face
+            1.0, 0.0, 1.0, 1.0,
+            1.0, 0.0, 1.0, 1.0,
+            1.0, 0.0, 1.0, 1.0,
+            // Left face
+            1.0, 0.0, 1.0, 1.0,
+            1.0, 0.0, 1.0, 1.0,
+            1.0, 0.0, 1.0, 1.0,
+            // Front face
+            1.0, 1.0, 0.0, 1.0,
+            1.0, 1.0, 0.0, 1.0,
+            1.0, 1.0, 0.0, 1.0,
+            // Right face
+            0, 0.0, 1.0, 1.0,
+            0, 0.0, 1.0, 1.0,
+            0, 0.0, 1.0, 1.0,
+            // Back face
+            1.0, 1.0, 1.0, 1.0,
+            1.0, 1.0, 1.0, 1.0,
+            1.0, 1.0, 1.0, 1.0,
+            // Left face
+            1.0, 0.0, 0.0, 1.0,
+            1.0, 0.0, 0.0, 1.0,
+            1.0, 0.0, 0.0, 1.0
         ]
     });
     
@@ -357,8 +383,8 @@ window.onload = function() {
     // Each object receives a unique ID so you don't have to worry about conflicting names
     
     // Four example objects on corners
-    /*World.spawnEntity(Player, 0, 0, -20);*/ // spawnEntity(entity, x, y, z);
-    World.spawnEntity(Asteroid, 0, 0, -10);
-    World.spawnEntity(Bullet, 0, 0, -10);
+    World.spawnEntity(Player, -43, 31, 0); // spawnEntity(entity, x, y, z);
+    World.spawnEntity(Asteroid, 0, 0, 0);
+    World.spawnEntity(Bullet, 0, 0, 0);
     
 } // End onload

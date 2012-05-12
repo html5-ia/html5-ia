@@ -118,7 +118,7 @@ window.onload = function() {
         //     4,  5,  6,    4,  6,  7 // back
         //],
         rotateInit: 360,
-        rotate: [.5, 1, 1],
+        rotate: [.5, .5, 1],
         
         speed: 1,
             
@@ -129,34 +129,35 @@ window.onload = function() {
             1.0, 0.0, 0.0, 1.0,
             1.0, 0.0, 0.0, 1.0,
             // Right face
-            1.0, 0.0, 0.0, 1.0,
-            1.0, 0.0, 0.0, 1.0,
-            1.0, 0.0, 0.0, 1.0,
+            0, 1.0, 0.0, 1.0,
+            0, 1.0, 0.0, 1.0,
+            0, 1.0, 0.0, 1.0,
             // Back face
-            1.0, 0.0, 0.0, 1.0,
-            1.0, 0.0, 0.0, 1.0,
-            1.0, 0.0, 0.0, 1.0,
+            0.0, 0.0, 1.0, 1.0,
+            0.0, 0.0, 1.0, 1.0,
+            0.0, 0.0, 1.0, 1.0,
             // Left face
-            1.0, 0.0, 0.0, 1.0,
-            1.0, 0.0, 0.0, 1.0,
-            1.0, 0.0, 0.0, 1.0,
+            1.0, 0.0, 1.0, 1.0,
+            1.0, 0.0, 1.0, 1.0,
+            1.0, 0.0, 1.0, 1.0,
             // Front face
-            1.0, 0.0, 0.0, 1.0,
-            1.0, 0.0, 0.0, 1.0,
-            1.0, 0.0, 0.0, 1.0,
+            1.0, 1.0, 0.0, 1.0,
+            1.0, 1.0, 0.0, 1.0,
+            1.0, 1.0, 0.0, 1.0,
             // Right face
-            1.0, 0.0, 0.0, 1.0,
-            1.0, 0.0, 0.0, 1.0,
-            1.0, 0.0, 0.0, 1.0,
+            0, 0.0, 1.0, 1.0,
+            0, 0.0, 1.0, 1.0,
+            0, 0.0, 1.0, 1.0,
             // Back face
-            1.0, 0.0, 0.0, 1.0,
-            1.0, 0.0, 0.0, 1.0,
-            1.0, 0.0, 0.0, 1.0,
+            1.0, 1.0, 1.0, 1.0,
+            1.0, 1.0, 1.0, 1.0,
+            1.0, 1.0, 1.0, 1.0,
             // Left face
             1.0, 0.0, 0.0, 1.0,
             1.0, 0.0, 0.0, 1.0,
             1.0, 0.0, 0.0, 1.0,
         ],
+        rotateDelay: 30,
         update: function() {
             //this.x -= Math.sin( this.angle * Math.PI / 180 ) * this.speed;
             //this.y += Math.cos( this.angle * Math.PI / 180 ) * this.speed;
@@ -167,10 +168,84 @@ window.onload = function() {
             if (this.lastUpdate < this.currentTime) {  
                 this.delta = (this.currentTime) - this.lastUpdate;  
                 
-                this.rotateInit += (30 * this.delta) / 30.0;  
+                this.rotateInit += (30 * this.delta) / this.rotateDelay;  
             }  
             this.lastUpdate = this.currentTime;
         }
+    });
+    
+    var Asteroid = Bullet.extend({
+        rotateDelay: 300,
+        bufRows: 24, // Increased due to larger verticies
+
+        rotate: null,
+                //rotate: [0, 1, 0],
+                
+        bufVert: [
+            // Top triangle
+            // Front face
+            0.0,  2,  0.0,
+           -1, .5,  1,
+            1, .5,  1,
+           // Right face
+            0.0,  2,  0.0,
+            1, .5,  1,
+            1, .5, -1,
+           // Back face
+            0.0,  2,  0.0,
+            1, .5, -1,
+           -1, .5, -1,
+           // Left face
+            0.0,  2,  0.0,
+           -1, .5, -1,
+           -1, .5,  1,
+           
+           // Middle plates
+            // Plate
+             -1, .5, 1,
+             -1, -1, 1,
+             -1, -1, -1,
+             
+             -1, .5, 1,
+             -1, .5, -1,
+             -1, -1, -1,
+             
+             // Plate
+             -1, .5, -1,
+             -1, -1, -1,
+             1, -1, -1,
+            -1, .5, -1,  
+             1, .5, -1,  
+             1,  -1, -1,
+             
+            // Plate  
+            //-1, .5, 1,  
+            // 1, .5, 1,  
+            // 1,  -1, 1,
+            // 
+            // -1, .5, 1,
+            // -1, -1, 1,
+            // 1, -1, 1
+
+           
+           //// Bottom triangle
+           // // Front face
+           // 0.0,  -2,  0.0,
+           //-1, -1,  1,
+           // 1, -1,  1,
+           //// Right face
+           // 0.0,  -2,  0.0,
+           // 1, -1,  1,
+           // 1, -1, -1,
+           //// Back face
+           // 0.0,  -2,  0.0,
+           // 1, -1, -1,
+           //-1, -1, -1,
+           // //Left face
+           // 0.0,  -2,  0.0,
+           //-1, -1, -1,
+           //-1, -1,  1
+        ],
     });
     
     /***************************
@@ -238,7 +313,7 @@ window.onload = function() {
     
     // Four example objects on corners
     /*World.spawnEntity(Player, 0, 0, -20);*/ // spawnEntity(entity, x, y, z);
-    World.spawnEntity(Player, 0, 0, -80);
-    World.spawnEntity(Bullet, 20, 20, -80);
+    World.spawnEntity(Asteroid, 0, 0, -10);
+    World.spawnEntity(Bullet, 0, 0, -10);
     
 } // End onload

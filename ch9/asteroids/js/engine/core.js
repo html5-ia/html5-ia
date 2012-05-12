@@ -44,13 +44,15 @@ var Engine = Class.extend({
         }
         
         // Set id
-        this.storage[this.id].id = this.id;
+        entity.id = this.id;
         
         // Runs the buffers for your object to create the proper shape data
-        this.initBuffers(this.storage[this.id]);
+        if (entity.bufVert) {
+            this.initBuffers(entity);
+        }
         
         // Increment the id so the next shape is a unique variable
-        this.id += 1;
+        this.id++;
     },
     screen: function() {
         // Apply Engine's width to the Canvas
@@ -288,7 +290,65 @@ var Engine = Class.extend({
                     }
                 }
             }
+            
+            // Clean out killed items
+            this.graveyardPurge();
         }
+    },
+    
+    // Used to destroy entities when necessary instead of doing it during the loop and potentially blowing
+    // everything up by accident.
+    graveyard: [],
+    
+    // Permanently erases all graveyard items at the end of a loop
+    graveyardPurge: function() {
+        if (this.graveyard) {
+            for (var obj = this.graveyard.length; obj--;) {
+                this.remove(this.graveyard[obj]);
+            }
+            this.graveyard = [];
+        }
+    },
+    
+    random: function(max, min) {
+        if (!min) min = 1;
+        return Math.floor(Math.random() * (max - min + 1) + min);
+    },
+    
+    // Cleans the killed object completely out of memory permanently
+    remove: function(object) {
+        // Remove from main storage
+        for (var i = this.storage.length; i--;) {
+            if (this.storage[i] == object)
+                this.storage.splice(i,1);
+        }
+        
+        // Remove from type storage
+        switch (object.type) {
+            case 'a':
+                for (var i = this.typeA.length; i--;) {
+                    if(this.typeA[i] == object)
+                        this.typeA.splice(i,1);
+                }
+                break;
+            case 'b':
+                for (var i = this.typeB.length; i--;) {
+                    if(this.typeB[i] == object)
+                        this.typeB.splice(i,1);
+                }
+                break;
+            default:
+                break;
+        }
+        
+        // Remove from main storage
+        for (var i = this.storage.length; i--;) {
+            if(this.storage[i] == object)
+                this.storage.splice(i,1);
+        }
+        
+        // Clean out of browser's memory permanently
+        delete object;
     },
     
     overlap: function(x1,y1,width1,height1,x2,y2,width2,height2) {
@@ -374,6 +434,10 @@ var Entity = Class.extend({
         return [ this.x, this.y, this.z + this.zoom ];
     },
     
+    kill: function() {
+        World.graveyard.push(this);
+    },
+    
     // Buffer data for drawing
     bufCols: 0,
     bufRows: 0,
@@ -384,7 +448,8 @@ var Entity = Class.extend({
     
     // Passes an object on collide
     collide: function(obj) {
-        console.log('test');
+        console.log('collide');
+        this.kill();
     },
     
     // Buffer data for color

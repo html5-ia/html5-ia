@@ -15,6 +15,15 @@ var Engine = Class.extend({
     canvas: document.getElementById("canvas"),
     width: 400,
     height: 400,
+    size: {
+        width: 400,
+        height: 400,
+        // x and y coordinate information
+        max: {
+            x: 43,
+            y: 32
+        }
+    },
     storage: [],
     typeA: [],
     typeB: [],
@@ -47,7 +56,7 @@ var Engine = Class.extend({
         entity.id = this.id;
         
         // Runs the buffers for your object to create the proper shape data
-        if (entity.bufVert) {
+        if (entity.bufVert || entity.bufDim) {
             this.initBuffers(entity);
         }
         
@@ -436,6 +445,7 @@ var Entity = Class.extend({
     
     kill: function() {
         World.graveyard.push(this);
+        console.log('kill');
     },
     
     // Buffer data for drawing
@@ -477,9 +487,9 @@ var Entity = Class.extend({
     },
     
     spawn: function(x,y,z) {
-        if (x) this.x = x;
-        if (y) this.y = y;
-        if (z) this.z = z;
+        if (x !== undefined) this.x = x;
+        if (y !== undefined) this.y = y;
+        if (z !== undefined) this.z = z;
 
          return this;
     }

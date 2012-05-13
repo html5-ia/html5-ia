@@ -45,6 +45,7 @@ window.onload = function() {
                 window.removeEventListener('keydown', hud[0].start, true);
                 
                 // Create asteroid generator
+                AsteroidGen.init();
                 
                 // Hide text
                 hud[0].el.start.style.display = 'none';
@@ -56,22 +57,35 @@ window.onload = function() {
         end: function() {
             var self = this;
             
+            console.log('Game Over');
+            
             // Show end game text
             this.el.end.style.display = 'block';
             
-            // add restart listener
-            window.addEventListener('keydown', function() {
+            // callback
+            var callback = function() {
                 // Spawn player
+                World.spawnEntity(Player);
                 
-                // 
-            }, true);
+                // Remove text
+                self.el.end.style.display = 'none';
+                
+                // Debind listener
+                window.removeEventListener('click', callback, true);
+                
+                // Reset score
+                self.score.current = 0;
+            };
+            
+            // add restart listener
+            window.addEventListener('click', callback, true);
         },
         
         update: function() {
             // Check if the score has changed, if so, update the counter
-            if (this.score.current > this.score.prev) {
+            if (this.score.current !== this.score.prev) {
                 // Replace score text
-                this.el.score.innherHTML = this.score.current;
+                this.el.score.innerHTML = this.score.current;
             }
             this.score.prev = this.score.current;
         },
@@ -86,8 +100,12 @@ window.onload = function() {
         
     });
     
+    
     var Player = Entity.extend({
         name: 'player',
+        x: 0,
+        y: 0,
+        z: 0,
         type: 'a',
         width: 1,
         height: 1,
@@ -100,12 +118,14 @@ window.onload = function() {
              1.0, -1.0,  0.0
         ],
         
-        init: function() {
-            // Add key binding logic
-        },
-        
         kill: function() {
-            // Ends game and debinds keys
+            this._super();
+            
+            // Clear timeout
+            
+            // End game screen
+            var hud = World.entityGetVal('name', 'hud')[0];
+            hud.end();
         },
         
         // Color integration
@@ -148,15 +168,15 @@ window.onload = function() {
                 this.y -= Math.cos( this.rotateInit * Math.PI / 180 ) * this.speed;
             }
             
-            // Move forward or backward
-            if (this.x < -43) {
-                return this.x = -43;
-            } else if (this.x > 43) {
-                return this.x = 43;
-            } else if (this.y < -31) {
-                return this.y = -31;
-            } else if (this.y > 31) {
-                return this.y = 31;
+            // Level boundaries
+            if (this.x < - World.size.max.x) {
+                return this.x = - World.size.max.x;
+            } else if (this.x > World.size.max.x) {
+                return this.x = World.size.max.x;
+            } else if (this.y < - World.size.max.y) {
+                return this.y = - World.size.max.y;
+            } else if (this.y > World.size.max.y) {
+                return this.y = World.size.max.y;
             }
             
             // Detect a player shooting
@@ -175,6 +195,9 @@ window.onload = function() {
     
     // Creates a cube by using multiple vertices
     var Bullet = Entity.extend({
+        x: 0,
+        y: 0,
+        z: 0,
         angle: 0,
         type: 'a',
         width: .6,
@@ -183,6 +206,11 @@ window.onload = function() {
             var player = World.entityGetVal('name', 'player');
             if (player)
                 this.angle = player[0].rotateInit;
+        },
+        collide: function() {
+            this._super();
+            var hud = World.entityGetVal('name', 'hud')[0];
+            hud.score.current++;
         },
         
         bufCols: 3,
@@ -229,8 +257,20 @@ window.onload = function() {
         ],
         rotateDelay: 30,
         update: function() {
-                this.x -= Math.sin( this.angle * Math.PI / 180 ) * this.speed;
-                this.y += Math.cos( this.angle * Math.PI / 180 ) * this.speed;
+            // Level boundaries
+            if (this.x < - World.size.max.x - this.width) {
+                return this.kill();
+            } else if (this.x > World.size.max.x + this.width) {
+                return this.kill();
+            } else if (this.y < - World.size.max.y - this.height) {
+                return this.kill();
+            } else if (this.y > World.size.max.y + this.height) {
+                return this.kill();
+            }
+            
+            // Movement
+            this.x -= Math.sin( this.angle * Math.PI / 180 ) * this.speed;
+            this.y += Math.cos( this.angle * Math.PI / 180 ) * this.speed;
             
             // Uses a measurement of time to update and configure your rotation
             // Originally from Mozilla's WebGL tutorial https://developer.mozilla.org/en/WebGL/Animating_objects_with_WebGL
@@ -243,7 +283,52 @@ window.onload = function() {
             this.lastUpdate = this.currentTime;
         }
     });
+        
     
+    var AsteroidGen = {
+        delay: 7000,
+        
+        speed: 30000,
+        
+        init: function() {
+            var self = this;
+            
+            // Spawn first asteroid
+            World.spawnEntity(Asteroid);
+            
+            // Setup spawn timer
+            this.create = window.setInterval(function() {
+                World.spawnEntity(Asteroid);
+            }, this.delay);
+            
+            // Difficulty modifier
+            this.difficulty = window.setInterval(function() {
+                self.faster();
+            }, this.speed);
+        },
+        
+        faster: function() {
+            // Clear spawner
+            window.clearTimeout(this.create);
+            
+            // Increase speed
+            if (this.delay > 1000)
+                this.delay -= 1000;
+            
+            this.create = window.setTimeout(function() {
+                World.spawnEntity(Asteroid);
+            }, this.delay);
+        },
+        
+        clear: function() {
+            // Clear timers
+            window.clearTimeout(this.create);
+            window.clearTimeout(this.difficulty);
+            
+            // Set speed back to the default
+            this.delay = 5000;
+        }
+    }
     var Asteroid = Bullet.extend({
         type: 'b',
         width: 7,
@@ -253,6 +338,45 @@ window.onload = function() {
         bufRows: 48, 
 
         init: function() {
+            // Randomly generate speed
+            this.speed = {
+                x: World.random(10, 4) / 100,
+                y: World.random(10, 4) / 100
+            }
+            
+            // Randomly spawn from one of four sides
+            var side = World.random(4, 1);
+            
+            //top
+            if (side === 1) {
+                this.angle = World.random(200, 160);
+                var range = World.size.max.x - this.width;
+                this.x = World.random(range, -range);
+                this.y = World.size.max.y + this.height;
+                
+            // right
+            } else if (side === 2) { 
+                this.angle = World.random(290, 250);
+                var range = World.size.max.y - this.height;
+                this.x = (World.size.max.x + this.width) * -1;
+                this.y = World.random(range, -range);
+                
+            // bottom
+            } else if (side === 3) {
+                this.angle = World.random(380, 340);
+                var range = World.size.max.x - this.width;
+                this.x = World.random(range, -range);
+                this.y = (this.height + World.size.max.y) * -1;
+                
+            // left
+            } else {
+                this.angle = World.random(110, 70);
+                var range = World.size.max.y - this.height;
+                this.x = World.size.max.x + this.width;
+                this.y = World.random(range, -range);
+            }
+            
+            // Speed of rotation
             this.rotateDelay = World.random(500, 100);
             
             // Randomly generate axis rotation
@@ -290,6 +414,10 @@ window.onload = function() {
         },
         rotate: [1, 1, .5],
         update: function() {
+            // Logic for acceleration
+            this.x -= Math.sin( this.angle * Math.PI / 180 ) * this.speed.x;
+            this.y += Math.cos( this.angle * Math.PI / 180 ) * this.speed.y;
+            
             // Uses a measurement of time to update and configure your rotation
             // Originally from Mozilla's WebGL tutorial https://developer.mozilla.org/en/WebGL/Animating_objects_with_WebGL
             this.currentTime = (new Date).getTime();
@@ -300,15 +428,20 @@ window.onload = function() {
             }  
             this.lastUpdate = this.currentTime;
         },
-        collide: function(obj) {
-            this.kill();
-            
+        collide: function(obj) {            
             // Generate a random number of particles spawned at current center
-            var num = World.random(9, 3) / 10;
-            //for ();
+            var num = World.random(40, 10);
+            for ( var p = num; p--; ) {
+                World.spawnEntity(Particle, this.x, this.y, this.z);
+            }
             
             // Generate a random number of cubes spawned at current center
-            var num = World.random(9, 3) / 10;
+            num = World.random(7, 3);
+            for ( var c = num; c--; ) {
+                World.spawnEntity(Cube, this.x, this.y, this.z);
+            }
+            
+            this.kill();
         },
         
         bufVert: [
@@ -392,48 +525,72 @@ window.onload = function() {
     });
     
     var Cube = Entity.extend({
+        type: 'b',
+        size: {
+            max: 3,
+            min: 1,
+            divider: 1
+        },
         init: function() {
-            // Random color of R, G, or B
-            
             // Random axis rotation
+            this.rotate = [
+                World.random(10, 1) / 10,
+                World.random(10, 1) / 10,
+                World.random(10, 1) / 10
+            ];
             
             // Random rotation speed
+            this.rotateDelay = World.random(300, 30);
             
             // Random x and y acceleration
+            this.speed = {
+                x: World.random(50, 1) / 100,
+                y: World.random(50, 1) / 100
+            };
+            
+            // Random direction
+            this.angle = this.rotateInit = World.random(360);
+            
+            // Random size
+            var s = World.random(this.size.max, this.size.min) / this.size.divider;
+            this.width = s * 2;
+            this.height = s * 2;
+            this.bufVert = [
+                // Front  
+                -s, -s, s,  
+                 s, -s, s,  
+                 s,  s, s,  
+                -s,  s, s,  
+                // Back  
+                -s, -s, -s,  
+                -s,  s, -s,  
+                 s,  s, -s,  
+                 s, -s, -s,  
+                // Top  
+                -s,  s, -s,  
+                -s,  s,  s,  
+                 s,  s,  s,  
+                 s,  s, -s,  
+                // Bottom  
+                -s, -s, -s,  
+                 s, -s, -s,  
+                 s, -s,  s,  
+                -s, -s,  s,  
+                // Right  
+                 s, -s, -s,  
+                 s,  s, -s,  
+                 s,  s,  s,  
+                 s, -s,  s,  
+                // Left  
+                -s, -s, -s,  
+                -s, -s,  s,  
+                -s,  s,  s,  
+                -s,  s, -s  
+            ]
         },
+        
+        bufCols: 3,
         bufRows: 36, // Increased due to larger verticies
-        bufVert: [
-            // Front  
-            -1, -1, 1,  
-             1, -1, 1,  
-             1,  1, 1,  
-            -1,  1, 1,  
-            // Back  
-            -1, -1, -1,  
-            -1,  1, -1,  
-             1,  1, -1,  
-             1, -1, -1,  
-            // Top  
-            -1,  1, -1,  
-            -1,  1,  1,  
-             1,  1,  1,  
-             1,  1, -1,  
-            // Bottom  
-            -1, -1, -1,  
-             1, -1, -1,  
-             1, -1,  1,  
-            -1, -1,  1,  
-            // Right  
-             1, -1, -1,  
-             1,  1, -1,  
-             1,  1,  1,  
-             1, -1,  1,  
-            // Left  
-            -1, -1, -1,  
-            -1, -1,  1,  
-            -1,  1,  1,  
-            -1,  1, -1  
-        ],
         // Maps the square vertices into a cube with dimension
         bufDim: [
              0,  1,  2,    0,  2,  3, // front
@@ -455,15 +612,12 @@ window.onload = function() {
             [0, 1, 1, 1]  // Left face: purple  
         ],
         
-        // Variables can be created on the fly
-        rotate: [1,0,1],
-        rotateInit: 0,
-        
         // Occurs at each frame update
         // Init: function() {} can also be called to alter an object right when its created
         update: function() {
             // Logic for acceleration
-            
+            this.x -= Math.sin( this.angle * Math.PI / 180 ) * this.speed.x;
+            this.y += Math.cos( this.angle * Math.PI / 180 ) * this.speed.y;
             
             // Uses a measurement of time to update and configure your rotation
             // Originally from Mozilla's WebGL tutorial https://developer.mozilla.org/en/WebGL/Animating_objects_with_WebGL
@@ -471,9 +625,32 @@ window.onload = function() {
             if (this.lastUpdate < this.currentTime) {  
                 this.delta = this.currentTime - this.lastUpdate;  
                 
-                this.rotateInit += (30 * this.delta) / 1000.0;  
+                this.rotateInit += (30 * this.delta) / this.rotateDelay;  
             }  
             this.lastUpdate = this.currentTime;  
+        }
+    });
+    
+    var Particle = Cube.extend({
+        type: 0,
+        size: {
+            min: 1,
+            max: 3,
+            divider: 10
+        },
+        speed: {
+            z: 0
+        },
+        init: function() {
+            this.speed.z = World.random(10);
+            
+            this._super();
+        },
+        update: function() {
+            // Add z axis to make the cube fly 3D
+            this.z += 1;
+            
+            this._super();
         }
     });
     
@@ -542,10 +719,9 @@ window.onload = function() {
     // You can respawn any object as many times as you want
     // Each object receives a unique ID so you don't have to worry about conflicting names
     
-    // Four example objects on corners
+    // Note: x, y, and z should not be required
     World.spawnEntity(Player, 0, 0, 0); // spawnEntity(entity, x, y, z);
     World.spawnEntity(Hud, 0, 0, 0);
-    World.spawnEntity(Asteroid, 10, 10, 0);
     //World.spawnEntity(Bullet, 0, 0, 0);
     
 } // End onload

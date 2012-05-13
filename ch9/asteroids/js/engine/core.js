@@ -324,6 +324,10 @@ var Engine = Class.extend({
         return Math.floor(Math.random() * (max - min + 1) + min);
     },
     
+    randomPosNeg: function() {
+        return Math.random() < 0.5 ? -1 : 1;
+    },
+    
     // Cleans the killed object completely out of memory permanently
     remove: function(object) {
         // Remove from main storage
@@ -445,7 +449,6 @@ var Entity = Class.extend({
     
     kill: function() {
         World.graveyard.push(this);
-        console.log('kill');
     },
     
     // Buffer data for drawing
@@ -458,7 +461,6 @@ var Entity = Class.extend({
     
     // Passes an object on collide
     collide: function(obj) {
-        console.log('collide');
         this.kill();
     },
     

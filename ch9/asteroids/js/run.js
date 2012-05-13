@@ -38,7 +38,7 @@ window.onload = function() {
         },
         
         start: function(e) {
-            if (e.keyCode === 32) {
+            if (Ctrl.space) {
                 var hud = World.entityGetVal('name', 'hud');
                 
                 // Remove listener
@@ -49,21 +49,25 @@ window.onload = function() {
                 
                 // Hide text
                 hud[0].el.start.style.display = 'none';
-                
-                console.log('start');
+                hud[0].el.title.style.display = 'none';
             }
         },
         
         end: function() {
             var self = this;
             
-            console.log('Game Over');
-            
             // Show end game text
             this.el.end.style.display = 'block';
             
             // callback
             var callback = function() {
+                // Run kill on everything in storage
+                for ( var o = World.storage.length; o--; ) {
+                    // Note: Not the best way to do this, but it works... Should call the actual kill
+                    if (World.storage[o].name !== 'hud')
+                        World.graveyard.push(World.storage[o]);
+                }
+                
                 // Spawn player
                 World.spawnEntity(Player);
                 
@@ -75,6 +79,9 @@ window.onload = function() {
                 
                 // Reset score
                 self.score.current = 0;
+                
+                // Begin asteroid generation
+                AsteroidGen.init();
             };
             
             // add restart listener
@@ -94,7 +101,8 @@ window.onload = function() {
         el: {
             score: document.getElementById('count'),
             start: document.getElementById('start'),
-            end: document.getElementById('end')
+            end: document.getElementById('end'),
+            title: document.getElementById('title')
         }
         
         
@@ -121,7 +129,8 @@ window.onload = function() {
         kill: function() {
             this._super();
             
-            // Clear timeout
+            // Clear timeout for leveling
+            AsteroidGen.clear();
             
             // End game screen
             var hud = World.entityGetVal('name', 'hud')[0];
@@ -148,11 +157,11 @@ window.onload = function() {
         shoot: true,
         
         // Time in milliseconds to delay firing
-        shootDelay: 300,
+        shootDelay: 400,
         
         update: function() {
             var self = this;
-            
+                        
             // Move left or right to rotate the player
             if (Ctrl.left) {
                 this.rotateInit += this.rotateSpeed;  
@@ -284,11 +293,12 @@ window.onload = function() {
         }
     });
         
-    
+    // Note: Make sure to clear asteroid generation upon death
     var AsteroidGen = {
         delay: 7000,
-        
-        speed: 30000,
+        count: 1,
+        //speed: 20000,
+        speed: 10000,
         
         init: function() {
             var self = this;
@@ -302,31 +312,39 @@ window.onload = function() {
             }, this.delay);
             
             // Difficulty modifier
-            this.difficulty = window.setInterval(function() {
+            this.difficulty = window.setInterval( function() {
                 self.faster();
             }, this.speed);
         },
         
         faster: function() {
+            var self = this;
+            
             // Clear spawner
-            window.clearTimeout(this.create);
+            window.clearInterval(self.create);
             
             // Increase speed
             if (this.delay > 1000)
                 this.delay -= 1000;
             
-            this.create = window.setTimeout(function() {
-                World.spawnEntity(Asteroid);
+            // Increase count
+            this.count++;
+            
+            this.create = window.setTimeout( function() {
+                for (var c = self.count; c--;) {
+                    World.spawnEntity(Asteroid);
+                }
             }, this.delay);
         },
         
         clear: function() {
             // Clear timers
-            window.clearTimeout(this.create);
-            window.clearTimeout(this.difficulty);
+            window.clearInterval(this.create);
+            window.clearInterval(this.difficulty);
             
             // Set speed back to the default
-            this.delay = 5000;
+            this.count = 0;
+            this.delay = 7000;
         }
     }
     var Asteroid = Bullet.extend({
@@ -414,6 +432,17 @@ window.onload = function() {
         },
         rotate: [1, 1, .5],
         update: function() {
+            // Level boundaries
+            if (this.x < - World.size.max.x - this.width) {
+                return this.kill();
+            } else if (this.x > World.size.max.x + this.width) {
+                return this.kill();
+            } else if (this.y < - World.size.max.y - this.height) {
+                return this.kill();
+            } else if (this.y > World.size.max.y + this.height) {
+                return this.kill();
+            }
+            
             // Logic for acceleration
             this.x -= Math.sin( this.angle * Math.PI / 180 ) * this.speed.x;
             this.y += Math.cos( this.angle * Math.PI / 180 ) * this.speed.y;
@@ -525,12 +554,14 @@ window.onload = function() {
     });
     
     var Cube = Entity.extend({
+        z: 0,
         type: 'b',
         size: {
             max: 3,
             min: 1,
             divider: 1
         },
+        alpha: 1,
         init: function() {
             // Random axis rotation
             this.rotate = [
@@ -544,8 +575,8 @@ window.onload = function() {
             
             // Random x and y acceleration
             this.speed = {
-                x: World.random(50, 1) / 100,
-                y: World.random(50, 1) / 100
+                x: (World.random(50, 1) / 100) * World.randomPosNeg(),
+                y: (World.random(50, 1) / 100) * World.randomPosNeg()
             };
             
             // Random direction
@@ -604,17 +635,28 @@ window.onload = function() {
         colRows: 6,
         colCols: 4,
         colVert: [
-            [1, 0, 0, 1], // Front: red  
-            [0, 1, 0, 1], // Back: green  
-            [0, 0, 1, 1], // Top: blue  
-            [1, 1, 0, 1], // Bottom: blue  
-            [1, 0, 1, 1], // Right face: yellow  
-            [0, 1, 1, 1]  // Left face: purple  
+            [1, 0, 0, this.alpha], // Front: red  
+            [0, 1, 0, this.alpha], // Back: green  
+            [0, 0, 1, this.alpha], // Top: blue  
+            [1, 1, 0, this.alpha], // Bottom: blue  
+            [1, 0, 1, this.alpha], // Right face: yellow  
+            [0, 1, 1, this.alpha]  // Left face: purple  
         ],
         
         // Occurs at each frame update
         // Init: function() {} can also be called to alter an object right when its created
         update: function() {
+            // Level boundaries
+            if (this.x < - World.size.max.x - this.width) {
+                return this.kill();
+            } else if (this.x > World.size.max.x + this.width) {
+                return this.kill();
+            } else if (this.y < - World.size.max.y - this.height) {
+                return this.kill();
+            } else if (this.y > World.size.max.y + this.height) {
+                return this.kill();
+            }
+            
             // Logic for acceleration
             this.x -= Math.sin( this.angle * Math.PI / 180 ) * this.speed.x;
             this.y += Math.cos( this.angle * Math.PI / 180 ) * this.speed.y;
@@ -642,12 +684,15 @@ window.onload = function() {
             z: 0
         },
         init: function() {
-            this.speed.z = World.random(10);
-            
             this._super();
+            
+            var self = this;
+            this.create = window.setTimeout(function() {
+                self.kill();
+            }, 2000);
         },
         update: function() {
-            // Add z axis to make the cube fly 3D
+            // Add z axis to make the cube fly in 3D
             this.z += 1;
             
             this._super();
@@ -664,21 +709,20 @@ window.onload = function() {
         },
         
         keyDown: function(event) {
-            
             switch(event.keyCode) {
-                case 37: // Left
-                    Ctrl.left = true;
-                    break;
-                case 39: // Right
-                    Ctrl.right = true;
-                    break;
                 case 38: // up
                     Ctrl.up = true;
                     break;
                 case 40: // down
                     Ctrl.down = true;
                     break;
-                case 32:
+                case 37: // Left
+                    Ctrl.left = true;
+                    break;
+                case 39: // Right
+                    Ctrl.right = true;
+                    break;
+                case 88:
                     Ctrl.space = true;
                     break;
                 default:
@@ -689,19 +733,19 @@ window.onload = function() {
         keyUp: function(event) {
             
             switch(event.keyCode) {
-                case 37: // Left
-                    Ctrl.left = false;
-                    break;
-                case 39: // Right
-                    Ctrl.right = false;
-                    break;
                 case 38:
                     Ctrl.up = false;
                     break;
                 case 40:
                     Ctrl.down = false;
                     break;
-                case 32:
+                case 37: // Left
+                    Ctrl.left = false;
+                    break;
+                case 39: // Right
+                    Ctrl.right = false;
+                    break;
+                case 88:
                     Ctrl.space = false;
                     break;
                 default:

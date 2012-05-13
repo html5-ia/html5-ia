@@ -47,6 +47,12 @@ body {
     display: block;
 }
 
+#title {
+    top: 214px;
+    font-size: 50px;
+    word-spacing: 20px;
+}
+
 #start {
     top: 300px;
 }

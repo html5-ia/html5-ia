@@ -5,8 +5,10 @@ window.onload = function() {
     ------------*/
     // Setup your own engine
     var MyEngine = Engine.extend({
-        width: 800,
-        height: 600
+        size: {
+            width: 800,
+            height: 600
+        }
     });
     
     // Create and activate it
@@ -111,9 +113,6 @@ window.onload = function() {
     
     var Player = Entity.extend({
         name: 'player',
-        x: 0,
-        y: 0,
-        z: 0,
         type: 'a',
         width: 1,
         height: 1,
@@ -178,14 +177,14 @@ window.onload = function() {
             }
             
             // Level boundaries
-            if (this.x < - World.size.max.x) {
-                return this.x = - World.size.max.x;
-            } else if (this.x > World.size.max.x) {
-                return this.x = World.size.max.x;
-            } else if (this.y < - World.size.max.y) {
-                return this.y = - World.size.max.y;
-            } else if (this.y > World.size.max.y) {
-                return this.y = World.size.max.y;
+            if (this.x < - gd.game.size.width) {
+                return this.x = - gd.game.size.width;
+            } else if (this.x > gd.game.size.width) {
+                return this.x = gd.game.size.width;
+            } else if (this.y < - gd.game.size.height) {
+                return this.y = - gd.game.size.height;
+            } else if (this.y > gd.game.size.height) {
+                return this.y = gd.game.size.height;
             }
             
             // Detect a player shooting
@@ -267,13 +266,13 @@ window.onload = function() {
         rotateDelay: 30,
         update: function() {
             // Level boundaries
-            if (this.x < - World.size.max.x - this.width) {
+            if (this.x < - gd.game.size.width - this.width) {
                 return this.kill();
-            } else if (this.x > World.size.max.x + this.width) {
+            } else if (this.x > gd.game.size.width + this.width) {
                 return this.kill();
-            } else if (this.y < - World.size.max.y - this.height) {
+            } else if (this.y < - gd.game.size.height - this.height) {
                 return this.kill();
-            } else if (this.y > World.size.max.y + this.height) {
+            } else if (this.y > gd.game.size.height + this.height) {
                 return this.kill();
             }
             
@@ -368,29 +367,29 @@ window.onload = function() {
             //top
             if (side === 1) {
                 this.angle = World.random(200, 160);
-                var range = World.size.max.x - this.width;
+                var range = gd.game.size.width - this.width;
                 this.x = World.random(range, -range);
-                this.y = World.size.max.y + this.height;
+                this.y = gd.game.size.height + this.height;
                 
             // right
             } else if (side === 2) { 
                 this.angle = World.random(290, 250);
-                var range = World.size.max.y - this.height;
-                this.x = (World.size.max.x + this.width) * -1;
+                var range = gd.game.size.height - this.height;
+                this.x = (gd.game.size.width + this.width) * -1;
                 this.y = World.random(range, -range);
                 
             // bottom
             } else if (side === 3) {
                 this.angle = World.random(380, 340);
-                var range = World.size.max.x - this.width;
+                var range = gd.game.size.width - this.width;
                 this.x = World.random(range, -range);
-                this.y = (this.height + World.size.max.y) * -1;
+                this.y = (this.height + gd.game.size.height) * -1;
                 
             // left
             } else {
                 this.angle = World.random(110, 70);
-                var range = World.size.max.y - this.height;
-                this.x = World.size.max.x + this.width;
+                var range = gd.game.size.height - this.height;
+                this.x = gd.game.size.width + this.width;
                 this.y = World.random(range, -range);
             }
             
@@ -433,13 +432,13 @@ window.onload = function() {
         rotate: [1, 1, .5],
         update: function() {
             // Level boundaries
-            if (this.x < - World.size.max.x - this.width) {
+            if (this.x < - gd.game.size.width - this.width) {
                 return this.kill();
-            } else if (this.x > World.size.max.x + this.width) {
+            } else if (this.x > gd.game.size.width + this.width) {
                 return this.kill();
-            } else if (this.y < - World.size.max.y - this.height) {
+            } else if (this.y < - gd.game.size.height - this.height) {
                 return this.kill();
-            } else if (this.y > World.size.max.y + this.height) {
+            } else if (this.y > gd.game.size.height + this.height) {
                 return this.kill();
             }
             
@@ -647,13 +646,13 @@ window.onload = function() {
         // Init: function() {} can also be called to alter an object right when its created
         update: function() {
             // Level boundaries
-            if (this.x < - World.size.max.x - this.width) {
+            if (this.x < - gd.game.size.width - this.width) {
                 return this.kill();
-            } else if (this.x > World.size.max.x + this.width) {
+            } else if (this.x > gd.game.size.width + this.width) {
                 return this.kill();
-            } else if (this.y < - World.size.max.y - this.height) {
+            } else if (this.y < - gd.game.size.height - this.height) {
                 return this.kill();
-            } else if (this.y > World.size.max.y + this.height) {
+            } else if (this.y > gd.game.size.height + this.height) {
                 return this.kill();
             }
             
@@ -764,7 +763,7 @@ window.onload = function() {
     // Each object receives a unique ID so you don't have to worry about conflicting names
     
     // Note: x, y, and z should not be required
-    World.spawnEntity(Player, 0, 0, 0); // spawnEntity(entity, x, y, z);
+    World.spawnEntity(Player, -1.4, 0, 0); // spawnEntity(entity, x, y, z);
     World.spawnEntity(Hud, 0, 0, 0);
     //World.spawnEntity(Bullet, 0, 0, 0);
     

@@ -14,15 +14,15 @@
         
         <span id="score">Score: <span id="count">0</span></span>
         
-        <p id="title" class="strong screen">Geomerty Destoyer</p>
+        <p id="title" class="strong screen">Geomerty Destroyer</p>
         <p id="start" class="screen">Push <span class="strong">X</span> to Start</p>
         
         <p id="end" class="screen hide">
-            <span class="warning strong">Game Over</span>
+            <span id="warning" class="strong">Game Over</span>
             Click to retry
         </p>
         
-        <p id="ctrls">Move: Arrow Keys | Shoot: X</p>
+        <p id="ctrls">Move: Arrow Keys | Shoot: Hold X</p>
     </div>
         
     <!-- Script loading -->
@@ -31,10 +31,12 @@
     <script type="text/javascript" src="js/engine/assets/animation.js"></script>
     <script type="text/javascript" src="js/engine/assets/classes.js"></script>
     <script type="text/javascript" src="js/engine/core.js"></script>
+    <script type="text/javascript" src="js/engine/game.js"></script>
+    <script type="text/javascript" src="js/engine/template.js"></script>
     <script type="text/javascript" src="js/run.js"></script>
         
     <!-- Color fragments -->
-    <script id="shader-fs" type="x-shader/x-fragment">
+    <script id="shader-fragment" type="x-shader/x-fragment">
         varying lowp vec4 vColor;
     
         void main(void) {
@@ -43,7 +45,7 @@
     </script>
         
     <!-- Vertex position and shape -->
-    <script id="shader-vs" type="x-shader/x-vertex">  
+    <script id="shader-vertex" type="x-shader/x-vertex">  
         attribute vec3 aVertexPosition;
         attribute vec4 aVertexColor;
         

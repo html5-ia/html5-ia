@@ -1,11 +1,18 @@
 /*
-Name: WebGL Engine
+Name: Engine Core
 Version: 1.0
 Author: Ashton Blue
 Author URL: http://blueashes.com
 Publisher: Manning
-Credits: Based on Mozilla's WebGL (https://developer.mozilla.org/en/WebGL) and Giles Thomas' Learning WebGL (http://learningwebgl.com/blog) tutorials.
+Credits: Based on Mozilla's WebGL (https://developer.mozilla.org/en/WebGL)
+and Giles Thomas' Learning WebGL (http://learningwebgl.com/blog) tutorials.
+
+Desc: Contains all the components that handle setup and object generation.
+Important, shouldn't contain any functions run during a game. Those should
+be stored in game.js. All classes are stored in template.js.
 */
+
+var gd = gd || {};
 
 /*---------
  Core game logic
@@ -13,24 +20,24 @@ Credits: Based on Mozilla's WebGL (https://developer.mozilla.org/en/WebGL) and G
 var Engine = Class.extend({
     /* ----- Default Values -----*/
     canvas: document.getElementById("canvas"),
-    width: 400,
-    height: 400,
     size: {
         width: 400,
-        height: 400,
-        // x and y coordinate information
-        max: {
-            x: 43,
-            y: 32
-        }
+        height: 400
     },
     storage: [],
     typeA: [],
     typeB: [],
-    id: 0,
     
+    /*
+    storage: {
+        main: [],
+        a: [],
+        b: []
+    }
+    */
     
     /* ----- Utilities -----*/
+    // Note: delete this
     spawnEntity: function(name, x, y, z) {
         // temporarily store item
         var entity = (new name);
@@ -52,25 +59,20 @@ var Engine = Class.extend({
                 break;
         }
         
-        // Set id
-        entity.id = this.id;
-        
         // Runs the buffers for your object to create the proper shape data
         if (entity.bufVert || entity.bufDim) {
             this.initBuffers(entity);
         }
-        
-        // Increment the id so the next shape is a unique variable
-        this.id++;
     },
     screen: function() {
         // Apply Engine's width to the Canvas
-        this.canvas.width = this.width;
-        this.canvas.height = this.height;
+        this.canvas.width = this.size.width;
+        this.canvas.height = this.size.height;
         
         // Set WebGL viewport ratio to prevent distortion
-        this.horizAspect = this.width / this.height;
+        this.horizAspect = this.size.width / this.size.height;
     },
+    // Note: delete
     entityGetVal: function(name, val) {
         // Setup stack for storage
         var stack = new Array;
@@ -133,8 +135,8 @@ var Engine = Class.extend({
     // Sets up shaders
     initShaders: function() {
         // Literally pulls shader programs from the DOM
-        this.fragmentShader = this.getShader('shader-fs');
-        this.vertexShader = this.getShader('shader-vs');
+        this.fragmentShader = this.getShader('shader-fragment');
+        this.vertexShader = this.getShader('shader-vertex');
         
         // Attaches both elements to a 'program'
         // Each program can hold one fragment and one vertex shader
@@ -319,11 +321,11 @@ var Engine = Class.extend({
         }
     },
     
+    // Note: delete
     random: function(max, min) {
         if (!min) min = 1;
         return Math.floor(Math.random() * (max - min + 1) + min);
     },
-    
     randomPosNeg: function() {
         return Math.random() < 0.5 ? -1 : 1;
     },

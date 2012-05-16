@@ -18,14 +18,13 @@ body {
 #score {
     position: absolute;
     top: 5px;
-    left: 5px;
+    left: 8px;
     margin: 0;
     font-size: 15px;
 }
 
-#ctrls {
-    text-align: center;
-    font-size: 18px;
+.strong {
+    color: #a00;
 }
 
 .screen {
@@ -38,11 +37,7 @@ body {
     left: 0;
 }
 
-.strong {
-    color: #a00;
-}
-
-.warning {
+#warning {
     font-size: 50px;
     display: block;
 }
@@ -59,8 +54,10 @@ body {
 
 #end {
     top: 200px;
+    display: none;
 }
 
-.hide {
-    display: none;
+#ctrls {
+    text-align: center;
+    font-size: 18px;
 }

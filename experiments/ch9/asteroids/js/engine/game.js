@@ -11,19 +11,16 @@ http://ejohn.org/blog/simple-javascript-inheritance/
 var gd = gd || {};
 
 gd.game = {
-    // Note: should be in the run file, not here
-    // x and y coordinate information for 3D space, manually retrieved
-    size: {
-        width: 43,
-        height: 32
-    },
-    
+    // Creates a new object from a class
     spawn: function(name, params) {
         // temporarily store item for reference purposes
         var entity = (new name);
         
+        // Set the id
+        entity.id = gd.core.id.get();
+        
         // Store entity in main array
-        gd.core.storage.push(entity);
+        gd.core.storage.all.push(entity);
         
         // Store in sub arrays for faster collision detection
         switch (entity.type) {
@@ -38,54 +35,41 @@ gd.game = {
         }
         
         // Apply the passed parameters as an init
-        if (entity.init) {
+        if (arguments.length > 1) {
             // Remove name argument
             var args = [].slice.call(arguments, 1);
-            // Fire the init with arguments
+            // Fire the init with proper arguments
             entity.init.apply(this, arguments);
         }
-        
-        // Fire new object's buffers
-        gd.core.initBuffers(entity);
     },
     
-    // Note: cleanup
-    entityGetVal: function(name, val) {
-        // Setup stack for storage
-        var stack = new Array;
-        
+    // Gets a single game object and returns it
+    get: function(key, val) {
         // Loop through objects and get matched value
-        if (typeof val != 'undefined') { // Incase no val was passed
-            for (var j in this.storage) {
-                if (this.storage[j][(name)] == val) stack.push(this.storage[j]);
-            }
-        }
-        else {
-            for (var j in this.storage) {
-                if (this.storage[j][(name)]) stack.push(this.storage[j]);
-            }
+        for (var obj = gd.core.storage.all.length; obj--;) {
+            if (gd.core.storage.all[obj][key] === val) 
+                return gd.core.storage[obj];
+                break; // Note: Might not be necessary
         }
         
-        // Return value or false
-        if (stack.length > 0) {
-            return stack;
+        // Note: Double check this doesn't happen on success too
+        return false;
+    },
+    
+    // Random number generators
+    random: {
+        polarity: function() {
+            return Math.random() < 0.5 ? -1 : 1;
+        },
+        number: function(max, min) {
+            if (!min) min = 1;
+            return Math.floor(Math.random() * (max - min + 1) + min);
         }
-        else {
-            return false;
-        }
     },
     
-    random: function(max, min) {
-        if (!min) min = 1;
-        return Math.floor(Math.random() * (max - min + 1) + min);
-    },
-    
-    randomPosNeg: function() {
-        return Math.random() < 0.5 ? -1 : 1;
-    },
-    
-    // Kill everything and place it in the graveyard
+    // Kill everything, kill them all!
     armageddon: function() {
-        
+        for (var obj = gd.core.storage.all.length; obj--;)
+            graveyard.push(gd.core.storage.all[obj]);
     }
 };

@@ -27,6 +27,15 @@ gd.core = {
         this.horizAspect = width / height;
     },
     
+    // Unique identifier key
+    id: {
+        count: 0,
+        get: function() {
+            count++;
+            return this.count;
+        }
+    },
+    
     // Contains all active game elements
     storage: {
         all: [],
@@ -56,7 +65,7 @@ gd.core = {
         }
         
         // Setup WebGL
-        this.initShaders();
+        this.shader.init();
         this.animate();
         
         // Fire run code when everything is ready
@@ -68,70 +77,75 @@ gd.core = {
         gd.core.draw();
     },
     
-    shaders: {
+    shader: {
         // Creates the shader base
         init: function() {
             // Literally pulls shader programs from the DOM
-            this.fragmentShader = this.getShader('shader-fragment');
-            this.vertexShader = this.getShader('shader-vertex');
+            this.fragments = this.get('shader-fragment');
+            this.vertex = this.get('shader-vertex');
             
             // Attaches both elements to a 'program'
             // Each program can hold one fragment and one vertex shader
-            this.shaderProgram = gd.gl.createProgram();
+            this.program = gd.gl.createProgram();
             // Attaches shaders to webGL
-            gd.gl.attachShader(this.shaderProgram, this.vertexShader);
-            gd.gl.attachShader(this.shaderProgram, this.fragmentShader);
+            gd.gl.attachShader(this.program, this.vertex);
+            gd.gl.attachShader(this.program, this.fragments);
             // Attach the new program we created
-            gd.gl.linkProgram(this.shaderProgram);
+            gd.gl.linkProgram(this.program);
             
             // Failsafe incase shaders fail and backfire
             // Great for catching errors in your setup scripting
-            if (! gd.gl.getProgramParameter(this.shaderProgram, gd.gl.LINK_STATUS)) {
-                alert("Shaders have FAILED to load.");
+            if (! gd.gl.getProgramParameter(this.program, gd.gl.LINK_STATUS)) {
+                return alert("Shaders have FAILED to load.");
             }
-            gd.gl.useProgram(this.shaderProgram);
             
-                        
-            // Note: call store
+            // Tell WebGL its okay to use the assembled program
+            gd.gl.useProgram(this.program);
+            
+            // Create stored shader data for later usage
+            this.store();
         },
         
         // Gets the shaders from the DOM
-        get: function() {
-            this.shaderScript = document.getElementById(id);
+        get: function(id) {
+            this.script = document.getElementById(id);
             
             // No shader script in the DOM? Return nothing!
-            if (!this.shaderScript) {
+            if (! this.script) {
+                alert('The requested shader script was not found in the DOM. Make sure that shader.get(id) is properly setup.');
                 return null;
             }
             
-            this.theSource = "";
-            this.currentChild = this.shaderScript.firstChild;
+            this.source = "";
+            this.currentChild = this.script.firstChild;
             
             // Return compiled shader program
             while (this.currentChild) {
                 if (this.currentChild.nodeType == this.currentChild.TEXT_NODE) {
-                    this.theSource += this.currentChild.textContent; // Dump shader data here
+                    this.source += this.currentChild.textContent; // Dump shader data here
                 }
                 this.currentChild = this.currentChild.nextSibling;
             }
             
             // Get shader MIME type to test for vertex or fragment shader
             // Create shader based upon return value
-            this.shader;
-            if (this.shaderScript.type == 'x-shader/x-fragment') {
+            this.shader; // Note: Is this even necessary??? Probably could be a simple variable.
+            
+            // Check for the type of shader accessed and process as necessary
+            if (this.script.type == 'x-shader/x-fragment') {
                 this.shader = gd.gl.createShader(gd.gl.FRAGMENT_SHADER);
             } else if (this.shaderScript.type == 'x-shader/x-vertex') {
                 this.shader = gd.gl.createShader(gd.gl.VERTEX_SHADER);
             } else {
-                    return null; // Type of current shader is unknown
+                return null; // Type of current shader is unknown
             }
             
             // Get data and compile it together
-            gd.gl.shaderSource(this.shader, this.theSource);
+            gd.gl.shaderSource(this.shader, this.source);
             gd.gl.compileShader(this.shader);
             
             // Compile success? If not fire an error.
-            if (!gd.gl.getShaderParameter(this.shader, gd.gl.COMPILE_STATUS)) {
+            if (! gd.gl.getShaderParameter(this.shader, gd.gl.COMPILE_STATUS)) {
                 alert('Shader compiling error: ' + gd.gl.getShaderInfoLog(this.shader));
                 return null;
             }
@@ -143,11 +157,11 @@ gd.core = {
         // Stores shader data in other places for easy usage later 
         store: function() {
             // Store the shader's attribute in an object so you can use it again later
-            this.vertexPositionAttribute = gd.gl.getAttribLocation(this.shaderProgram, "aVertexPosition");
+            this.vertexPositionAttribute = gd.gl.getAttribLocation(this.program, "aVertexPosition");
             gd.gl.enableVertexAttribArray(this.vertexPositionAttribute);
             
             // Allow usage of color data with shaders
-            this.vertexColorAttribute = gd.gl.getAttribLocation(this.shaderProgram, "aVertexColor");
+            this.vertexColorAttribute = gd.gl.getAttribLocation(this.program, "aVertexColor");
             gd.gl.enableVertexAttribArray(this.vertexColorAttribute);
         }
     },
@@ -178,32 +192,54 @@ gd.core = {
             this.mvTranslate(this.storage.all[i].posVert());
             this.mvPushMatrix();
             
-            // Pass rotate data
-            if (this.storage.all[i].rotate) this.mvRotate(this.storage.all[i].rotateInit, this.storage.all[i].rotate);
+            // Pass rotate data if present
+            if (this.storage.all[i].rotate.axis)
+                this.mvRotate(
+                    this.storage.all[i].rotate.angle,
+                    this.storage.all[i].rotate.axis);
             
             // Pass shape data
-            gd.gl.bindBuffer(gd.gl.ARRAY_BUFFER, this.storage.all[i].buffer); 
-            gd.gl.vertexAttribPointer(this.vertexPositionAttribute, this.storage.all[i].bufCols, gd.gl.FLOAT, false, 0, 0); // Pass position data
+            gd.gl.bindBuffer(
+                gd.gl.ARRAY_BUFFER,
+                this.storage.all[i].buffer.shape.storage); 
+            gd.gl.vertexAttribPointer(
+                this.shader.vertexPositionAttribute,
+                this.storage.all[i].buffer.shape.columns,
+                gd.gl.FLOAT,
+                false, 0, 0); // Pass position data
             
             // Pass color data
-            gd.gl.bindBuffer(gd.gl.ARRAY_BUFFER, this.storage.all[i].colorBuffer);  
-            gd.gl.vertexAttribPointer(this.vertexColorAttribute, 4, gd.gl.FLOAT, false, 0, 0);
+            gd.gl.bindBuffer(
+                gd.gl.ARRAY_BUFFER,
+                this.storage.all[i].buffer.color.storage);  
+            gd.gl.vertexAttribPointer(
+                this.shader.vertexColorAttribute,
+                this.storage.all[i].buffer.color.columns,
+                gd.gl.FLOAT,
+                false, 0, 0);
             
             // Create
             this.setMatrixUniforms();
             // Take the matrix vertex positions and go through all of the elements from 0 to the .numItems object
-            if (this.storage.all[i].bufDim) {
+            if (this.storage.all[i].buffer.dimension.storage) {
                 // Creation of 3D shape
-                gd.gl.drawElements(gd.gl.TRIANGLES, this.storage.all[i].bufRows, gd.gl.UNSIGNED_SHORT, 0);
+                gd.gl.drawElements(
+                    gd.gl.TRIANGLES,
+                    this.storage.all[i].buffer.dimension.rows,
+                    gd.gl.UNSIGNED_SHORT,
+                    0);
             } else {
                 // Creation of 2D shape
-                gd.gl.drawArrays(gd.gl.TRIANGLE_STRIP, 0, this.storage.all[i].bufRows); 
+                gd.gl.drawArrays(
+                    gd.gl.TRIANGLE_STRIP,
+                    0,
+                    this.storage.all[i].buffer.shape.rows); 
             }
         
             // Restore original matrix to prevent objects from inheriting properties
             this.mvPopMatrix();
             
-            // Collision detection
+            // Collision detection for 2D elements only
             if (this.storage.all[i].type === 'a') {
                 // Check all items in the b type array only since its an a type item
                 for (var en = this.storage.b.length; en--;) {
@@ -225,7 +261,7 @@ gd.core = {
             }
             
             // Clean out killed items
-            this.graveyardPurge();
+            this.graveyard.purge();
         }
     },
     
@@ -233,62 +269,51 @@ gd.core = {
     // everything up by accident.
     graveyard: {
         storage: [],
-        clean: function(object) {
-            
-        },
-        remove: function() {
-            
-        }
-    },
-    graveyard: [],
-    
-    // Permanently erases all graveyard items at the end of a loop
-    graveyardPurge: function() {
-        if (this.graveyard) {
-            for (var obj = this.graveyard.length; obj--;) {
-                this.remove(this.graveyard[obj]);
+        purge: function() {
+            if (this.storage) {
+                for (var obj = this.storage.length; obj--;) {
+                    this.remove(this.storage[obj]);
+                }
+                this.graveyard = [];
             }
-            this.graveyard = [];
+        },
+        remove: function(object) {
+            // Remove from main storage
+            for (var obj = this.storage.all.length; i--;) {
+                if (this.storage.all[obj].id === object.id) {
+                    this.storage.all.splice(obj, 1);
+                    break;
+                }
+            }
+            
+            // Remove from specialized storage
+            switch (object.type) {
+                case 'a':
+                    for (var obj = this.storage.a.length; obj--;) {
+                        if (this.storage.a[obj].id === object.id) {
+                            this.storage.a.splice(obj, 1);
+                            break;
+                        }
+                    }
+                    break;
+                case 'b':
+                    for (var obj = this.storage.b.length; obj--;) {
+                        if (this.storage.b[obj].id === object.id) {
+                            this.storage.b.splice(obj, 1);
+                            break;
+                        }
+                    }
+                    break;
+                default:
+                    break;
+            }
+            
+            // Clean out of browser's memory permanently
+            delete object;
         }
     },
     
-    // Cleans the killed object completely out of memory permanently
-    remove: function(object) {
-        // Remove from main storage.all
-        for (var i = this.storage.all.length; i--;) {
-            if (this.storage.all[i] == object)
-                this.storage.all.splice(i,1);
-        }
-        
-        // Remove from type storage.all
-        switch (object.type) {
-            case 'a':
-                for (var i = this.storage.a.length; i--;) {
-                    if(this.storage.a[i] == object)
-                        this.storage.a.splice(i,1);
-                }
-                break;
-            case 'b':
-                for (var i = this.storage.b.length; i--;) {
-                    if(this.storage.b[i] == object)
-                        this.storage.b.splice(i,1);
-                }
-                break;
-            default:
-                break;
-        }
-        
-        // Remove from main storage.all
-        for (var i = this.storage.all.length; i--;) {
-            if(this.storage.all[i] == object)
-                this.storage.all.splice(i,1);
-        }
-        
-        // Clean out of browser's memory permanently
-        delete object;
-    },
-    
-    overlap: function(x1,y1,width1,height1,x2,y2,width2,height2) {
+    overlap: function(x1, y1, width1, height1, x2, y2, width2, height2) {
         // Modify x and y values to take into account center offset
         x1 = x1 - (width1 / 2);
         y1 = y1 - (height1 / 2);
@@ -297,9 +322,9 @@ gd.core = {
         
         // Test for collision
         if ( x1 < x2 + width2 &&
-            x1 + width1 > x2 &&
-            y1 < y2 + width2 &&
-            y1 + height1 > y2 ) {
+        x1 + width1 > x2 &&
+        y1 < y2 + width2 &&
+        y1 + height1 > y2 ) {
             return true;
         } else {
             return false;

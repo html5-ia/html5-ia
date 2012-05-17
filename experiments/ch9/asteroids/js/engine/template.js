@@ -36,6 +36,11 @@ gd.template = {
             this.buffer.dimension.init();
         },
         
+        rotate: {
+            angle: 0,
+            axis: false
+        },
+        
         // Creates 3D data at bootup
         buffer: {
             shape: {
@@ -65,7 +70,7 @@ gd.template = {
                         // Create complete verticy array
                         for (var v = 0; v < this.vertices.length; i++) {
                             var colorLine = this.vertices[v];
-                            for (var k = 0; k < this.columns; k++) {
+                            for (var c = 0; c < this.columns; c++) {
                                 colorNew = colorNew.concat(colorLine);
                             }
                         }
@@ -105,7 +110,7 @@ gd.template = {
         },
         
         // Passes the object hit during a collision for processing
-        collide: function(obj) {
+        collide: function(object) {
             this.kill();
         },
         

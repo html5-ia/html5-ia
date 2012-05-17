@@ -6,10 +6,7 @@ Author URL: http://blueashes.com
 Publisher: Manning
 Credits: Uses a modified version of John Resig's class extension script http://ejohn.org/blog/simple-javascript-inheritance/
 
-Desc: Store location for all classes.
-
-Notes:
-- Is it better to declar unused variables as false or undefined
+Desc: Storage location for all classes.
 */
 
 var gd = gd || {};
@@ -33,8 +30,73 @@ gd.template = {
         zoom: -80,
         
         // Returns an assembled position array
-        position: function() {
-            return [ this.x, this.y, this.z + this.zoom ];
+        init: function() {
+            this.buffer.shape.init();
+            this.buffer.color.init();
+            this.buffer.dimension.init();
+        },
+        
+        // Creates 3D data at bootup
+        buffer: {
+            shape: {
+                init: function() {
+                    // Graphic storage
+                    gd.gl.bindBuffer(gd.gl.ARRAY_BUFFER, this.storage);
+                    
+                    // Uses float32 to change the array into a webGL edible format.
+                    gd.gl.bufferData(gd.gl.ARRAY_BUFFER, new Float32Array(this.vetices), gd.gl.STATIC_DRAW);
+                    
+                    // Count rows
+                    this.rows = this.vertices.length / this.columns;
+                },
+                storage: gd.gl.createBuffer(),
+                vetices: [],
+                columns: 3,
+                rows: 0
+            },
+            color: {
+                init: function() {
+                    // Map colors for a complex object such as a cube, before doing so, check if the first array element is a string
+                    // as it should be an array
+                    if (typeof this.vertices[0] === 'array') {
+                        // temporary storage location for new vertices
+                        var colorNew = [];
+                        
+                        // Create complete verticy array
+                        for (var v = 0; v < this.vertices.length; i++) {
+                            var colorLine = this.vertices[v];
+                            for (var k = 0; k < this.columns; k++) {
+                                colorNew = colorNew.concat(colorLine);
+                            }
+                        }
+                        
+                        // Apply new verticy array
+                        this.vertices = colorNew;
+                    }
+                    
+                    // Bind buffers as buffer.shape
+                    gd.gl.bindBuffer(gd.gl.ARRAY_BUFFER, this.storage);
+                    gd.gl.bufferData(gd.gl.ARRAY_BUFFER, new Float32Array(this.vetices), gd.gl.STATIC_DRAW);
+                    
+                    this.rows = this.vertices.length / this.columns;
+                },
+                storage: gd.gl.createBuffer(),
+                vetices: [],
+                columns: 4,
+                rows: 0
+            },
+            // Note: I don't think dimension is accurate, as I believe this just connects 2 triangles together, maybe snap is a better name?
+            dimension: {
+                init: function() {
+                    // Verify this init even needs to run
+                    if (! this.vertices) return;
+
+                    gd.gl.bindBuffer(gd.gl.ELEMENT_ARRAY_BUFFER, this.storage);
+                    gd.gl.bufferData(gd.gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.vertices), gd.gl.STATIC_DRAW);
+                },
+                storage: gd.gl.createBuffer(),
+                vertices: false
+            }
         },
         
         // Logic fired at object destruction
@@ -42,41 +104,9 @@ gd.template = {
             World.graveyard.push(this);
         },
         
-        buffer: {
-            // Buffer data for drawing
-            vertices: undefined,
-            
-            // Buffer data for creating dimension (practically folds a passed object together)
-            dimension: undefined
-        },
-        
         // Passes the object hit during a collision for processing
         collide: function(obj) {
             this.kill();
-        },
-        
-        // Buffer data for color
-        color: {
-            // Used for a basic array of colors
-            basic: undefined,
-            
-            // Used to map colors onto a complex shape
-            advanced: undefined,
-            map: function(array) {
-                // Note: Convert this to be used by map and pass the value to this.advanced
-                //if (this.colVert) {
-                //    // Reset color incase something is already present
-                //    this.col = [];
-                //    // Generating colors for the cube by setting them along proper vertices
-                //    for (i=0; i<this.colRows; i++) {
-                //        var c = this.colVert[i];
-                //        for (var k=0; k<this.colCols; k++) {
-                //            this.col = this.col.concat(c);
-                //        }
-                //    }
-                //}
-                //return this.col;
-            }
         },
         
         update: function() {

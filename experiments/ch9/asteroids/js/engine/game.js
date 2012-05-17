@@ -26,16 +26,23 @@ gd.game = {
         gd.core.storage.push(entity);
         
         // Store in sub arrays for faster collision detection
-        // Push into type storage for quicker collision detection
         switch (entity.type) {
             case 'a':
-                gd.core.storage.typeA.push(entity);
+                gd.core.storage.a.push(entity);
                 break;
             case 'b':
-                gd.core.storage.typeB.push(entity);
+                gd.core.storage.b.push(entity);
                 break;
             default:
                 break;
+        }
+        
+        // Apply the passed parameters as an init
+        if (entity.init) {
+            // Remove name argument
+            var args = [].slice.call(arguments, 1);
+            // Fire the init with arguments
+            entity.init.apply(this, arguments);
         }
         
         // Fire new object's buffers

@@ -1,7 +1,7 @@
 gd.core.init(800, 600, function() {
-    gd.game.spawnEntity(Player);
-    gd.game.spawnEntity(Hud);
-    gd.game.spawnEntity(Bullet);
+    //gd.game.spawnEntity(Player);
+    //gd.game.spawnEntity(Hud);
+    //gd.game.spawnEntity(Bullet);
 });
 
 // x and y coordinate information for 3D space, manually retrieved
@@ -13,89 +13,86 @@ gd.core.size = {
 /*------------
  Object Templates
 ------------*/
-//var Hud = Entity.extend({
-//    name: 'hud',
-//    // score counter
-//    score: {
-//        current: 0,
-//        prev: 0
-//    },
-//    
-//    init: function() {
-//        // Begin game on click
-//        window.addEventListener('keydown', this.start, true);
-//    },
-//    
-//    start: function(e) {
-//        if (Ctrl.space) {
-//            var hud = World.entityGetVal('name', 'hud');
-//            
-//            // Remove listener
-//            window.removeEventListener('keydown', hud[0].start, true);
-//            
-//            // Create asteroid generator
-//            AsteroidGen.init();
-//            
-//            // Hide text
-//            hud[0].el.start.style.display = 'none';
-//            hud[0].el.title.style.display = 'none';
-//        }
-//    },
-//    
-//    end: function() {
-//        var self = this;
-//        
-//        // Show end game text
-//        this.el.end.style.display = 'block';
-//        
-//        // callback
-//        var callback = function() {
-//            // Run kill on everything in storage
-//            for ( var o = World.storage.length; o--; ) {
-//                // Note: Not the best way to do this, but it works... Should call the actual kill
-//                if (World.storage[o].name !== 'hud')
-//                    World.graveyard.push(World.storage[o]);
-//            }
-//            
-//            // Spawn player
-//            World.spawnEntity(Player);
-//            
-//            // Remove text
-//            self.el.end.style.display = 'none';
-//            
-//            // Debind listener
-//            window.removeEventListener('click', callback, true);
-//            
-//            // Reset score
-//            self.score.current = 0;
-//            
-//            // Begin asteroid generation
-//            AsteroidGen.init();
-//        };
-//        
-//        // add restart listener
-//        window.addEventListener('click', callback, true);
-//    },
-//    
-//    update: function() {
-//        // Check if the score has changed, if so, update the counter
-//        if (this.score.current !== this.score.prev) {
-//            // Replace score text
-//            this.el.score.innerHTML = this.score.current;
-//        }
-//        this.score.prev = this.score.current;
-//    },
-//    
-//    // Stores elements
-//    el: {
-//        score: document.getElementById('count'),
-//        start: document.getElementById('start'),
-//        end: document.getElementById('end'),
-//        title: document.getElementById('title')
-//    }
-//    
-//    
-//});
+var Hud = {
+    // score counter
+    score: {
+        current: 0,
+        prev: 0
+    },
+    
+    init: function() {
+        // Begin game on click
+        window.addEventListener('keydown', this.start, true);
+    },
+    
+    start: function(e) {
+        if (Ctrl.space) {
+            var hud = World.entityGetVal('name', 'hud');
+            
+            // Remove listener
+            window.removeEventListener('keydown', hud[0].start, true);
+            
+            // Create asteroid generator
+            AsteroidGen.init();
+            
+            // Hide text
+            hud[0].el.start.style.display = 'none';
+            hud[0].el.title.style.display = 'none';
+        }
+    },
+    
+    end: function() {
+        var self = this;
+        
+        // Show end game text
+        this.el.end.style.display = 'block';
+        
+        // callback
+        var callback = function() {
+            // Run kill on everything in storage
+            for ( var o = World.storage.length; o--; ) {
+                // Note: Not the best way to do this, but it works... Should call the actual kill
+                if (World.storage[o].name !== 'hud')
+                    World.graveyard.push(World.storage[o]);
+            }
+            
+            // Spawn player
+            World.spawnEntity(Player);
+            
+            // Remove text
+            self.el.end.style.display = 'none';
+            
+            // Debind listener
+            window.removeEventListener('click', callback, true);
+            
+            // Reset score
+            self.score.current = 0;
+            
+            // Begin asteroid generation
+            AsteroidGen.init();
+        };
+        
+        // add restart listener
+        window.addEventListener('click', callback, true);
+    },
+    
+    update: function() {
+        // Check if the score has changed, if so, update the counter
+        if (this.score.current !== this.score.prev) {
+            // Replace score text
+            this.el.score.innerHTML = this.score.current;
+        }
+        this.score.prev = this.score.current;
+    },
+    
+    // Stores elements
+    el: {
+        score: document.getElementById('count'),
+        start: document.getElementById('start'),
+        end: document.getElementById('end'),
+        title: document.getElementById('title')
+    }
+};
 //
 //
 //var Player = Entity.extend({

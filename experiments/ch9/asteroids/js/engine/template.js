@@ -45,6 +45,8 @@ gd.template = {
         buffer: {
             shape: {
                 init: function() {
+                    this.storage = gd.gl.createBuffer();
+                    
                     // Graphic storage
                     gd.gl.bindBuffer(gd.gl.ARRAY_BUFFER, this.storage);
                     
@@ -54,13 +56,14 @@ gd.template = {
                     // Count rows
                     this.rows = this.vertices.length / this.columns;
                 },
-                storage: gd.gl.createBuffer(),
                 vetices: [],
                 columns: 3,
                 rows: 0
             },
             color: {
                 init: function() {
+                    this.storage = gd.gl.createBuffer();
+                    
                     // Map colors for a complex object such as a cube, before doing so, check if the first array element is a string
                     // as it should be an array
                     if (typeof this.vertices[0] === 'array') {
@@ -85,7 +88,6 @@ gd.template = {
                     
                     this.rows = this.vertices.length / this.columns;
                 },
-                storage: gd.gl.createBuffer(),
                 vetices: [],
                 columns: 4,
                 rows: 0
@@ -93,13 +95,14 @@ gd.template = {
             // Note: I don't think dimension is accurate, as I believe this just connects 2 triangles together, maybe snap is a better name?
             dimension: {
                 init: function() {
+                    this.storage = gd.gl.createBuffer();
+                    
                     // Verify this init even needs to run
                     if (! this.vertices) return;
 
                     gd.gl.bindBuffer(gd.gl.ELEMENT_ARRAY_BUFFER, this.storage);
                     gd.gl.bufferData(gd.gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.vertices), gd.gl.STATIC_DRAW);
                 },
-                storage: gd.gl.createBuffer(),
                 vertices: false
             }
         },

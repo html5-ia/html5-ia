@@ -134,7 +134,7 @@ gd.core = {
             // Check for the type of shader accessed and process as necessary
             if (this.script.type == 'x-shader/x-fragment') {
                 this.shader = gd.gl.createShader(gd.gl.FRAGMENT_SHADER);
-            } else if (this.shaderScript.type == 'x-shader/x-vertex') {
+            } else if (this.script.type == 'x-shader/x-vertex') {
                 this.shader = gd.gl.createShader(gd.gl.VERTEX_SHADER);
             } else {
                 return null; // Type of current shader is unknown

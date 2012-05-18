@@ -639,14 +639,14 @@ gd.template.Cube = gd.template.Entity.extend({
             [0, 1, 1, 1]  // Left face: purple  
         ]);
         
-        //this.rotate = {
-        //    axis: [
-        //        gd.game.random.number(10, 1) / 10,
-        //        gd.game.random.number(10, 1) / 10,
-        //        gd.game.random.number(10, 1) / 10],
-        //    angle: gd.game.random.number(350),
-        //    speed: gd.game.random.number(400, 200)
-        //};
+        this.rotate = {
+            axis: [
+                gd.game.random.number(10, 1) / 10,
+                gd.game.random.number(10, 1) / 10,
+                gd.game.random.number(10, 1) / 10],
+            angle: gd.game.random.number(350),
+            speed: gd.game.random.number(400, 200)
+        };
     },
     
     // Occurs at each frame update
@@ -677,6 +677,9 @@ gd.template.Particle = gd.template.Cube.extend({
         divider: 10
     },
     count: 0,
+    init: function(x, y) {
+        console.log(this._super(x, y));
+    },
     update: function() {
         // Add z axis to make the cube fly in 3D
         if (this.count > 200) {

@@ -77,20 +77,20 @@ gd.template = {
             
             // Map colors for a complex object such as a cube, before doing so, check if the first array element is a string
             // as it should be an array
-            if (typeof vertices[0] === 'array') {
+            if (typeof vertices[0] === 'object') {
                 // temporary storage location for new vertices
                 var colorNew = [];
                 
                 // Create complete verticy array
-                for (var v = 0; v < vertices; i++) {
+                for (var v = 0; v < vertices.length; v++) {
                     var colorLine = vertices[v];
                     for (var c = 0; c < 4; c++) {
                         colorNew = colorNew.concat(colorLine);
                     }
                 }
-        
+                
                 // Apply new verticy array
-                vertices = colorNew;
+                vertices = colorNew;                
             }
             
             // Bind buffers as buffer.shape

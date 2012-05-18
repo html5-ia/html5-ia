@@ -82,9 +82,9 @@ gd.game = {
     rotate: function(obj) {
         var currentTime = (new Date).getTime();
         if (obj.lastUpdate < currentTime) {  
-            obj.delta = currentTime - obj.lastUpdate;  
+            var delta = currentTime - obj.lastUpdate;  
             
-            obj.rotate.angle += (30 * obj.delta) / obj.rotate.speed;  
+            obj.rotate.angle += (30 * delta) / obj.rotate.speed;  
         }  
         obj.lastUpdate = currentTime;
     },
@@ -104,6 +104,6 @@ gd.game = {
     // Kill everything, kill them all!
     armageddon: function() {
         for (var obj = gd.core.storage.all.length; obj--;)
-            graveyard.push(gd.core.storage.all[obj]);
+            gd.core.graveyard.push(gd.core.storage.all[obj]);
     }
 };

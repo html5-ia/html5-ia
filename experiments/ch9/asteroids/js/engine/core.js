@@ -286,7 +286,6 @@ gd.core = {
                     break;
                 }
             }
-            console.log('test');
             
             // Remove from specialized storage
             switch (object.type) {
@@ -375,10 +374,10 @@ gd.core = {
         return mvMatrix;  
     },
       
-    mvRotate: function(angle, v) {  
-      this.inRadians = angle * Math.PI / 180.0;  
-        
-      this.m = Matrix.Rotation(this.inRadians, $V([v[0], v[1], v[2]])).ensure4x4();  
-      this.multMatrix(this.m);  
+    mvRotate: function(angle, v) {
+        var inRadians = angle * Math.PI / 180.0;  
+          
+        var m = Matrix.Rotation(inRadians, $V([v[0], v[1], v[2]])).ensure4x4();  
+        this.multMatrix(m);  
     }  
 }

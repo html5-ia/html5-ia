@@ -14,7 +14,7 @@ gd.game = {
     // Creates a new object from a class
     spawn: function(name, params) {
         // temporarily store item for reference purposes
-        var entity = (new name);
+        var entity = new gd.template[name];
         
         // Set the id
         entity.id = gd.core.id.get();
@@ -35,11 +35,14 @@ gd.game = {
         }
         
         // Apply the passed parameters as an init
+        //entity.init();
         if (arguments.length > 1) {
             // Remove name argument
             var args = [].slice.call(arguments, 1);
             // Fire the init with proper arguments
-            entity.init.apply(this, arguments);
+            entity.init.apply(entity, args);
+        } else {
+            entity.init();
         }
     },
     
@@ -55,6 +58,37 @@ gd.game = {
         // Note: Double check this doesn't happen on success too
         return false;
     },
+    
+    size: {
+        width: 0,
+        height: 0
+    },
+    
+    // Detects if boundaries have been violated and fires a callback if so
+    boundaries: function(obj, top, right, bottom, left) {
+        if (obj.x < - this.size.width) {
+            return left();
+        } else if (obj.x > this.size.width) {
+            return right();
+        } else if (obj.y < - this.size.height) {
+            return bottom();
+        } else if (obj.y > this.size.height) {
+            return top();
+        }
+    },
+    
+    // Basic equation for rotation based upon time
+    // Originally from Mozilla's WebGL tutorial https://developer.mozilla.org/en/WebGL/Animating_objects_with_WebGL
+    rotate: function(obj) {
+        var currentTime = (new Date).getTime();
+        if (obj.lastUpdate < currentTime) {  
+            obj.delta = currentTime - obj.lastUpdate;  
+            
+            obj.rotate.angle += (30 * obj.delta) / obj.rotate.speed;  
+        }  
+        obj.lastUpdate = currentTime;
+    },
+
     
     // Random number generators
     random: {

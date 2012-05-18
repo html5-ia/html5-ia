@@ -1,44 +1,190 @@
+// Note: Make sure to replace timeout functions with animate based timeouts 
+
 gd.core.init(800, 600, function() {
-    //gd.game.spawnEntity(Player);
-    //gd.game.spawnEntity(Hud);
-    //gd.game.spawnEntity(Bullet);
+    Ctrl.init();
+    gd.game.spawn('Player');
+
+    //Hud.init();
 });
 
 // x and y coordinate information for 3D space, manually retrieved
-gd.core.size = {
+gd.game.size = {
     width: 43,
     height: 32
 };
 
-/*------------
- Object Templates
-------------*/
-var Hud = {
-    // score counter
-    score: {
-        current: 0,
-        prev: 0
+Ctrl = {
+    init: function() {
+        window.addEventListener('keydown', this.keyDown, true);
+        window.addEventListener('keyup', this.keyUp, true);
     },
+    
+    keyDown: function(event) {
+        switch(event.keyCode) {
+            case 38: // up
+                Ctrl.up = true;
+                break;
+            case 40: // down
+                Ctrl.down = true;
+                break;
+            case 37: // Left
+                Ctrl.left = true;
+                break;
+            case 39: // Right
+                Ctrl.right = true;
+                break;
+            case 88:
+                Ctrl.space = true;
+                break;
+            default:
+                break;
+        }
+    },
+    
+    keyUp: function(event) {
+        switch(event.keyCode) {
+            case 38:
+                Ctrl.up = false;
+                break;
+            case 40:
+                Ctrl.down = false;
+                break;
+            case 37: // Left
+                Ctrl.left = false;
+                break;
+            case 39: // Right
+                Ctrl.right = false;
+                break;
+            case 88:
+                Ctrl.space = false;
+                break;
+            default:
+                break;
+        }
+    }
+};
+
+gd.template.Player = gd.template.Entity.extend({
+    // Name of player for searching
+    name: 'player',
+    
+    // Hit collision a = friendly, b = enemy
+    type: 'a',
+    
+    // Spawning info
+    x: -1.4,
+    
+    // Hitbox information
+    width: 1,
+    height: 1,
+    
+    // Rotate on the x and y axis information
+    rotate: {
+        angle: 0,
+        axis: [0, 0, 1],
+        speed: 3
+    },
+    
+    // Speed of travel
+    speed: .5,
+    
+    // Says if the player is allowed to shoot or not
+    shoot: true,
+    
+    // Time in milliseconds to delay firing
+    shootDelay: 400,
     
     init: function() {
-        // Begin game on click
-        window.addEventListener('keydown', this.start, true);
+        // Setup triangle shape
+        this.shape([
+            0.0,  2.0,  0.0, // top
+           -1.0, -1.0,  0.0, // left
+            1.0, -1.0,  0.0  // right
+        ]);
+        
+        // Setup white color
+        this.color([
+            // red, green, blue, alpha (aka transparency)
+            1.0, 1.0, 1.0, 1.0, // top
+            1.0, 1.0, 1.0, 1.0, // left
+            1.0, 1.0, 1.0, 1.0  // right
+        ]);
+        
+        // Run graphic buffers
+        this._super();
     },
     
-    start: function(e) {
-        if (Ctrl.space) {
-            var hud = World.entityGetVal('name', 'hud');
-            
-            // Remove listener
-            window.removeEventListener('keydown', hud[0].start, true);
-            
-            // Create asteroid generator
-            AsteroidGen.init();
-            
-            // Hide text
-            hud[0].el.start.style.display = 'none';
-            hud[0].el.title.style.display = 'none';
+    update: function() {
+        var self = this;
+                    
+        // Move left or right to rotate the player
+        if (Ctrl.left) {
+            this.rotate.angle += this.rotate.speed;  
+        } else if (Ctrl.right) {
+            this.rotate.angle -= this.rotate.speed;  
         }
+        
+        if (Ctrl.up) {
+            this.x -= Math.sin( this.rotate.angle * Math.PI / 180 ) * this.speed;
+            this.y += Math.cos( this.rotate.angle * Math.PI / 180 ) * this.speed;
+        } else if (Ctrl.down) {
+            this.x += Math.sin( this.rotate.angle * Math.PI / 180 ) * this.speed;
+            this.y -= Math.cos( this.rotate.angle * Math.PI / 180 ) * this.speed;
+        }
+        
+        // Level boundaries logic
+        var top = function() { self.y = gd.game.size.height },
+        right = function() { self.x = gd.game.size.width },
+        bottom = function() { self.y = - gd.game.size.height },
+        left = function() { self.x = - gd.game.size.width };
+        gd.game.boundaries(this, top, right, bottom, left);
+        
+        // Detect a player shooting
+        if (Ctrl.space && this.shoot) {
+            // Spawning elements need to take new parameters
+            gd.game.spawn('Bullet', this.rotate.angle, this.x, this.y);
+            
+            // Create a timer to prevent firing
+            this.shoot = false;
+            window.setTimeout(function() {
+                self.shoot = true;
+            }, this.shootDelay);
+        }
+    },
+    
+    kill: function() {
+        this._super();
+        
+        // Clear timeout for leveling
+        asteroidGen.clear();
+        
+        // End game screen
+        Hud.end();
+    }
+});
+
+// heads up display
+Hud = {
+    init: function() {
+        var self = this;
+        
+        // Setup start callback
+        var callback = function() {
+            if (Ctrl.space) {            
+                // Remove listener
+                window.removeEventListener('keydown', callback, true);
+                
+                // Create asteroid generator
+                //EnemyGen.init();
+                
+                // Hide text
+                self.el.start.style.display = 'none';
+                self.el.title.style.display = 'none';
+            }
+        }
+        
+        // Add click start listener
+        window.addEventListener('keydown', callback, true);
     },
     
     end: function() {
@@ -50,14 +196,10 @@ var Hud = {
         // callback
         var callback = function() {
             // Run kill on everything in storage
-            for ( var o = World.storage.length; o--; ) {
-                // Note: Not the best way to do this, but it works... Should call the actual kill
-                if (World.storage[o].name !== 'hud')
-                    World.graveyard.push(World.storage[o]);
-            }
+            gd.game.armageddon();
             
             // Spawn player
-            World.spawnEntity(Player);
+            gd.game.spawn('Player');
             
             // Remove text
             self.el.end.style.display = 'none';
@@ -66,23 +208,24 @@ var Hud = {
             window.removeEventListener('click', callback, true);
             
             // Reset score
-            self.score.current = 0;
+            self.score.count = 0;
             
             // Begin asteroid generation
-            AsteroidGen.init();
+            //EnemyGen.init();
         };
         
         // add restart listener
         window.addEventListener('click', callback, true);
     },
     
-    update: function() {
-        // Check if the score has changed, if so, update the counter
-        if (this.score.current !== this.score.prev) {
+    score: {
+        count: 0,
+        update: function() {
+            count++;
+            
             // Replace score text
-            this.el.score.innerHTML = this.score.current;
+            Hud.el.score.innerHTML = this.count;
         }
-        this.score.prev = this.score.current;
     },
     
     // Stores elements
@@ -93,191 +236,78 @@ var Hud = {
         title: document.getElementById('title')
     }
 };
-//
-//
-//var Player = Entity.extend({
-//    name: 'player',
-//    type: 'a',
-//    width: 1,
-//    height: 1,
-//    // Vertices setup to create a triangle
-//    bufCols: 3,
-//    bufRows: 3,
-//    bufVert: [
-//         0.0,  2.0,  0.0,  
-//        -1.0, -1.0,  0.0,
-//         1.0, -1.0,  0.0
-//    ],
-//    
-//    kill: function() {
-//        this._super();
-//        
-//        // Clear timeout for leveling
-//        AsteroidGen.clear();
-//        
-//        // End game screen
-//        var hud = World.entityGetVal('name', 'hud')[0];
-//        hud.end();
-//    },
-//    
-//    // Color integration
-//    col: [
-//        // red, green, blue, alpha (aka transparency)
-//        1, 1, 1, 1,
-//        1, 1, 1, 1,
-//        1, 1, 1, 1
-//    ],
-//    
-//    // Rotate on the x and y axis
-//    rotateInit: 0,
-//    rotateSpeed: 3,
-//    rotate: [0, 0, 1],
-//    
-//    // Speed of travel
-//    speed: .5,
-//    
-//    // Says if the player is allowed to shoot or not
-//    shoot: true,
-//    
-//    // Time in milliseconds to delay firing
-//    shootDelay: 400,
-//    
-//    update: function() {
-//        var self = this;
-//                    
-//        // Move left or right to rotate the player
-//        if (Ctrl.left) {
-//            this.rotateInit += this.rotateSpeed;  
-//        } else if (Ctrl.right) {
-//            this.rotateInit -= this.rotateSpeed;  
-//        }
-//        
-//        if (Ctrl.up) {
-//            this.x -= Math.sin( this.rotateInit * Math.PI / 180 ) * this.speed;
-//            this.y += Math.cos( this.rotateInit * Math.PI / 180 ) * this.speed;
-//        } else if (Ctrl.down) {
-//            this.x += Math.sin( this.rotateInit * Math.PI / 180 ) * this.speed;
-//            this.y -= Math.cos( this.rotateInit * Math.PI / 180 ) * this.speed;
-//        }
-//        
-//        // Level boundaries
-//        if (this.x < - gd.game.size.width) {
-//            return this.x = - gd.game.size.width;
-//        } else if (this.x > gd.game.size.width) {
-//            return this.x = gd.game.size.width;
-//        } else if (this.y < - gd.game.size.height) {
-//            return this.y = - gd.game.size.height;
-//        } else if (this.y > gd.game.size.height) {
-//            return this.y = gd.game.size.height;
-//        }
-//        
-//        // Detect a player shooting
-//        if (Ctrl.space && this.shoot) {
-//            // Spawning elements need to take new parameters
-//            var temp = World.spawnEntity(Bullet, this.x, this.y, 0);
-//            
-//            // Create a timer to prevent firing
-//            this.shoot = false;
-//            window.setTimeout(function() {
-//                self.shoot = true;
-//            }, this.shootDelay);
-//        }
-//    }
-//});
-//
-//// Creates a cube by using multiple vertices
-//var Bullet = Entity.extend({
-//    x: 0,
-//    y: 0,
-//    z: 0,
-//    angle: 0,
-//    type: 'a',
-//    width: .6,
-//    height: .6,
-//    init: function() {
-//        var player = World.entityGetVal('name', 'player');
-//        if (player)
-//            this.angle = player[0].rotateInit;
-//    },
-//    collide: function() {
-//        this._super();
-//        var hud = World.entityGetVal('name', 'hud')[0];
-//        hud.score.current++;
-//    },
-//    
-//    bufCols: 3,
-//    bufRows: 12, // Increased due to larger verticies
-//    bufVert: [
-//        // Front face
-//        0.0,  0.3,  0.0,
-//       -0.3, -0.3,  0.3,
-//        0.3, -0.3,  0.3,
-//       // Right face
-//        0.0,  0.3,  0.0,
-//        0.3, -0.3,  0.3,
-//        0.3, -0.3, -0.3,
-//       // Back face
-//        0.0,  0.3,  0.0,
-//        0.3, -0.3, -0.3,
-//       -0.3, -0.3, -0.3,
-//       // Left face
-//        0.0,  0.3,  0.0,
-//       -0.3, -0.3, -0.3,
-//       -0.3, -0.3,  0.3
-//    ],
-//
-//    rotateInit: 360,
-//    rotate: [.5, .5, 1],
-//    
-//    speed: .8,
-//        
-//    col: [
-//        // red, green, blue, alpha (aka transparency)
-//        // Front face
-//        1.0, 0.0, 0.0, 1.0,
-//        1.0, 0.0, 0.0, 1.0,
-//        1.0, 0.0, 0.0, 1.0,
-//        1.0, 0.0, 0.0, 1.0,
-//        1.0, 0.0, 0.0, 1.0,
-//        1.0, 0.0, 0.0, 1.0,
-//        1.0, 0.0, 0.0, 1.0,
-//        1.0, 0.0, 0.0, 1.0,
-//        1.0, 0.0, 0.0, 1.0,
-//        1.0, 0.0, 0.0, 1.0,
-//        1.0, 0.0, 0.0, 1.0,
-//        1.0, 0.0, 0.0, 1.0
-//    ],
-//    rotateDelay: 30,
-//    update: function() {
-//        // Level boundaries
-//        if (this.x < - gd.game.size.width - this.width) {
-//            return this.kill();
-//        } else if (this.x > gd.game.size.width + this.width) {
-//            return this.kill();
-//        } else if (this.y < - gd.game.size.height - this.height) {
-//            return this.kill();
-//        } else if (this.y > gd.game.size.height + this.height) {
-//            return this.kill();
-//        }
-//        
-//        // Movement
-//        this.x -= Math.sin( this.angle * Math.PI / 180 ) * this.speed;
-//        this.y += Math.cos( this.angle * Math.PI / 180 ) * this.speed;
-//        
-//        // Uses a measurement of time to update and configure your rotation
-//        // Originally from Mozilla's WebGL tutorial https://developer.mozilla.org/en/WebGL/Animating_objects_with_WebGL
-//        this.currentTime = (new Date).getTime();
-//        if (this.lastUpdate < this.currentTime) {  
-//            this.delta = (this.currentTime) - this.lastUpdate;  
-//            
-//            this.rotateInit += (30 * this.delta) / this.rotateDelay;  
-//        }  
-//        this.lastUpdate = this.currentTime;
-//    }
-//});
-//    
-//// Note: Make sure to clear asteroid generation upon death
-//var AsteroidGen = {
+
+// Creates a cube by using multiple vertices
+gd.template.Bullet = gd.template.Entity.extend({
+    type: 'a',
+    width: .6,
+    height: .6,
+    speed: .8,
+    angle: 0,
+    
+    rotate: {
+        angle: 0,
+        axis: [.5, .5, 1],
+        speed: 30
+    },
+    
+    init: function(angle, x, y) {
+        // Setup double sided triangle
+        this.shape([
+            // Front face
+            0.0,  0.3,  0.0,
+           -0.3, -0.3,  0.3,
+            0.3, -0.3,  0.3,
+           // Right face
+            0.0,  0.3,  0.0,
+            0.3, -0.3,  0.3,
+            0.3, -0.3, -0.3,
+           // Back face
+            0.0,  0.3,  0.0,
+            0.3, -0.3, -0.3,
+           -0.3, -0.3, -0.3,
+           // Left face
+            0.0,  0.3,  0.0,
+           -0.3, -0.3, -0.3,
+           -0.3, -0.3,  0.3
+        ]);
+        
+        // Setup bullet color by repeating
+        var stack = [];
+        for (var line = this.shapeRows; line--;)
+            stack.push(1.0, 0.0, 0.0, 1.0);
+        this.color(stack);
+        
+        // Set angle and location from parameters    
+        this.angle = angle;
+        this.x = x;
+        this.y = y;
+    },
+    
+    update: function() {
+        var self = this;
+        
+        // Kill if the item goes outside a boundary
+        var side = function() { self.kill() };
+        gd.game.boundaries(this, side, side, side, side);
+        
+        // Movement
+        this.x -= Math.sin( this.angle * Math.PI / 180 ) * this.speed;
+        this.y += Math.cos( this.angle * Math.PI / 180 ) * this.speed;
+        
+        // Uses a measurement of time to update and configure your rotation
+        gd.game.rotate(this);
+    },
+    
+    collide: function() {
+        this._super();
+
+        Hud.score.count++;
+    }
+});
+    
+// Note: Make sure to clear asteroid generation upon death
+//AsteroidGen = {
 //    delay: 7000,
 //    count: 1,
 //    //speed: 20000,
@@ -682,58 +712,3 @@ var Hud = {
 //    }
 //});
 //
-///***************************
-//Game Controllers
-//***************************/
-//var Ctrl = {
-//    init: function() {
-//        window.addEventListener('keydown', this.keyDown, true);
-//        window.addEventListener('keyup', this.keyUp, true);
-//    },
-//    
-//    keyDown: function(event) {
-//        switch(event.keyCode) {
-//            case 38: // up
-//                Ctrl.up = true;
-//                break;
-//            case 40: // down
-//                Ctrl.down = true;
-//                break;
-//            case 37: // Left
-//                Ctrl.left = true;
-//                break;
-//            case 39: // Right
-//                Ctrl.right = true;
-//                break;
-//            case 88:
-//                Ctrl.space = true;
-//                break;
-//            default:
-//                break;
-//        }
-//    },
-//    
-//    keyUp: function(event) {
-//        
-//        switch(event.keyCode) {
-//            case 38:
-//                Ctrl.up = false;
-//                break;
-//            case 40:
-//                Ctrl.down = false;
-//                break;
-//            case 37: // Left
-//                Ctrl.left = false;
-//                break;
-//            case 39: // Right
-//                Ctrl.right = false;
-//                break;
-//            case 88:
-//                Ctrl.space = false;
-//                break;
-//            default:
-//                break;
-//        }
-//    }
-//};
-//Ctrl.init();

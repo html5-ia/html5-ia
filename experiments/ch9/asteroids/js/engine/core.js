@@ -31,7 +31,7 @@ gd.core = {
     id: {
         count: 0,
         get: function() {
-            count++;
+            this.count++;
             return this.count;
         }
     },
@@ -189,43 +189,44 @@ gd.core = {
             
             // Draw at location x, y, z
             // Other objects drawn before refreshing will be drawn relative to this position
-            this.mvTranslate(this.storage.all[i].posVert());
+            this.mvTranslate(this.storage.all[i].position());
             this.mvPushMatrix();
             
             // Pass rotate data if present
-            if (this.storage.all[i].rotate.axis)
+            if (this.storage.all[i].rotate.axis) {
                 this.mvRotate(
                     this.storage.all[i].rotate.angle,
                     this.storage.all[i].rotate.axis);
+            }
             
             // Pass shape data
             gd.gl.bindBuffer(
                 gd.gl.ARRAY_BUFFER,
-                this.storage.all[i].buffer.shape.storage); 
+                this.storage.all[i].shapeStorage); 
             gd.gl.vertexAttribPointer(
                 this.shader.vertexPositionAttribute,
-                this.storage.all[i].buffer.shape.columns,
+                this.storage.all[i].shapeColumns,
                 gd.gl.FLOAT,
                 false, 0, 0); // Pass position data
             
             // Pass color data
             gd.gl.bindBuffer(
                 gd.gl.ARRAY_BUFFER,
-                this.storage.all[i].buffer.color.storage);  
+                this.storage.all[i].colorStorage);  
             gd.gl.vertexAttribPointer(
                 this.shader.vertexColorAttribute,
-                this.storage.all[i].buffer.color.columns,
+                this.storage.all[i].colorColumns,
                 gd.gl.FLOAT,
                 false, 0, 0);
-            
-            // Create
+                        
             this.setMatrixUniforms();
+            
             // Take the matrix vertex positions and go through all of the elements from 0 to the .numItems object
-            if (this.storage.all[i].buffer.dimension.storage) {
+            if (this.storage.all[i].dimensionStorage) {
                 // Creation of 3D shape
                 gd.gl.drawElements(
                     gd.gl.TRIANGLES,
-                    this.storage.all[i].buffer.dimension.rows,
+                    this.storage.all[i].shapeRows,
                     gd.gl.UNSIGNED_SHORT,
                     0);
             } else {
@@ -233,7 +234,7 @@ gd.core = {
                 gd.gl.drawArrays(
                     gd.gl.TRIANGLE_STRIP,
                     0,
-                    this.storage.all[i].buffer.shape.rows); 
+                    this.storage.all[i].shapeRows); 
             }
         
             // Restore original matrix to prevent objects from inheriting properties
@@ -279,27 +280,28 @@ gd.core = {
         },
         remove: function(object) {
             // Remove from main storage
-            for (var obj = this.storage.all.length; i--;) {
-                if (this.storage.all[obj].id === object.id) {
-                    this.storage.all.splice(obj, 1);
+            for (var obj = gd.core.storage.all.length; obj--;) {
+                if (gd.core.storage.all[obj].id === object.id) {
+                    gd.core.storage.all.splice(obj, 1);
                     break;
                 }
             }
+            console.log('test');
             
             // Remove from specialized storage
             switch (object.type) {
                 case 'a':
-                    for (var obj = this.storage.a.length; obj--;) {
-                        if (this.storage.a[obj].id === object.id) {
-                            this.storage.a.splice(obj, 1);
+                    for (var obj = gd.core.storage.a.length; obj--;) {
+                        if (gd.core.storage.a[obj].id === object.id) {
+                            gd.core.storage.a.splice(obj, 1);
                             break;
                         }
                     }
                     break;
                 case 'b':
-                    for (var obj = this.storage.b.length; obj--;) {
-                        if (this.storage.b[obj].id === object.id) {
-                            this.storage.b.splice(obj, 1);
+                    for (var obj = gd.core.storage.b.length; obj--;) {
+                        if (gd.core.storage.b[obj].id === object.id) {
+                            gd.core.storage.b.splice(obj, 1);
                             break;
                         }
                     }
@@ -344,10 +346,11 @@ gd.core = {
         this.multMatrix(Matrix.Translation($V([v[0], v[1], v[2]])).ensure4x4()); 
     },
     setMatrixUniforms: function() {
-        var pUniform = gd.gl.getUniformLocation(this.shaderProgram, "uPMatrix");  
+        var pUniform = gd.gl.getUniformLocation(this.shader.program, "uPMatrix");  
         gd.gl.uniformMatrix4fv(pUniform, false, new Float32Array(this.perspectiveMatrix.flatten()));  
         
-        var mvUniform = gd.gl.getUniformLocation(this.shaderProgram, "uMVMatrix");  
+        //Note: mvMatrix should be part of this
+        var mvUniform = gd.gl.getUniformLocation(this.shader.program, "uMVMatrix");  
         gd.gl.uniformMatrix4fv(mvUniform, false, new Float32Array(mvMatrix.flatten())); 
     },
     
@@ -364,7 +367,7 @@ gd.core = {
     },  
       
     mvPopMatrix: function() {  
-        if (!this.mvMatrixStack.length) {  
+        if (! this.mvMatrixStack.length) {  
             throw("Can't pop from an empty matrix stack.");  
         }  
         

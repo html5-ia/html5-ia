@@ -22,94 +22,24 @@ gd.template = {
         y: 0,
         z: 0,
         
-        // Width and height relative to 3D world
-        width: 0,
-        height: 0,
-        
         // Creates an artifical zoom without a complex transformation matrix or camera
         zoom: -80,
         
-        // Returns an assembled position array
+        // Returns x, y, z in an array
+        position: function() {
+            return [this.x, this.y, this.z + this.zoom];
+        },
+        
+        // Width and height relative to 3D world, manually set
+        width: 0,
+        height: 0,
+        
         init: function() {
-            this.buffer.shape.init();
-            this.buffer.color.init();
-            this.buffer.dimension.init();
+            // Place code launched at booted here, can also take parameters
         },
         
-        rotate: {
-            angle: 0,
-            axis: false
-        },
-        
-        // Creates 3D data at bootup
-        buffer: {
-            shape: {
-                init: function() {
-                    this.storage = gd.gl.createBuffer();
-                    
-                    // Graphic storage
-                    gd.gl.bindBuffer(gd.gl.ARRAY_BUFFER, this.storage);
-                    
-                    // Uses float32 to change the array into a webGL edible format.
-                    gd.gl.bufferData(gd.gl.ARRAY_BUFFER, new Float32Array(this.vetices), gd.gl.STATIC_DRAW);
-                    
-                    // Count rows
-                    this.rows = this.vertices.length / this.columns;
-                },
-                vetices: [],
-                columns: 3,
-                rows: 0
-            },
-            color: {
-                init: function() {
-                    this.storage = gd.gl.createBuffer();
-                    
-                    // Map colors for a complex object such as a cube, before doing so, check if the first array element is a string
-                    // as it should be an array
-                    if (typeof this.vertices[0] === 'array') {
-                        // temporary storage location for new vertices
-                        var colorNew = [];
-                        
-                        // Create complete verticy array
-                        for (var v = 0; v < this.vertices.length; i++) {
-                            var colorLine = this.vertices[v];
-                            for (var c = 0; c < this.columns; c++) {
-                                colorNew = colorNew.concat(colorLine);
-                            }
-                        }
-                        
-                        // Apply new verticy array
-                        this.vertices = colorNew;
-                    }
-                    
-                    // Bind buffers as buffer.shape
-                    gd.gl.bindBuffer(gd.gl.ARRAY_BUFFER, this.storage);
-                    gd.gl.bufferData(gd.gl.ARRAY_BUFFER, new Float32Array(this.vetices), gd.gl.STATIC_DRAW);
-                    
-                    this.rows = this.vertices.length / this.columns;
-                },
-                vetices: [],
-                columns: 4,
-                rows: 0
-            },
-            // Note: I don't think dimension is accurate, as I believe this just connects 2 triangles together, maybe snap is a better name?
-            dimension: {
-                init: function() {
-                    this.storage = gd.gl.createBuffer();
-                    
-                    // Verify this init even needs to run
-                    if (! this.vertices) return;
-
-                    gd.gl.bindBuffer(gd.gl.ELEMENT_ARRAY_BUFFER, this.storage);
-                    gd.gl.bufferData(gd.gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.vertices), gd.gl.STATIC_DRAW);
-                },
-                vertices: false
-            }
-        },
-        
-        // Logic fired at object destruction
-        kill: function() {
-            World.graveyard.push(this);
+        update: function() {
+            // place code before animating here
         },
         
         // Passes the object hit during a collision for processing
@@ -117,8 +47,66 @@ gd.template = {
             this.kill();
         },
         
-        update: function() {
-            // place code before animating here
+        // Logic fired at object destruction
+        kill: function() {
+            gd.core.graveyard.storage.push(this);
+        },
+        
+        // Rotation information, used in core.js
+        rotate: {
+            angle: 0,
+            axis: false
+        },
+        
+        shape: function(vertices) {
+            this.shapeStorage = gd.gl.createBuffer();
+
+            // Graphic storage
+            gd.gl.bindBuffer(gd.gl.ARRAY_BUFFER, this.shapeStorage);
+            
+            // Uses float32 to change the array into a webGL edible format.
+            gd.gl.bufferData(gd.gl.ARRAY_BUFFER, new Float32Array(vertices), gd.gl.STATIC_DRAW);
+            
+            // Count rows
+            this.shapeColumns = 3;
+            this.shapeRows = vertices.length / this.shapeColumns;
+        },
+        
+        color: function(vertices) {
+            this.colorStorage = gd.gl.createBuffer();
+            
+            // Map colors for a complex object such as a cube, before doing so, check if the first array element is a string
+            // as it should be an array
+            if (typeof vertices[0] === 'array') {
+                // temporary storage location for new vertices
+                var colorNew = [];
+                
+                // Create complete verticy array
+                for (var v = 0; v < vertices; i++) {
+                    var colorLine = vertices[v];
+                    for (var c = 0; c < 4; c++) {
+                        colorNew = colorNew.concat(colorLine);
+                    }
+                }
+        
+                // Apply new verticy array
+                vertices = colorNew;
+            }
+            
+            // Bind buffers as buffer.shape
+            gd.gl.bindBuffer(gd.gl.ARRAY_BUFFER, this.colorStorage);
+            gd.gl.bufferData(gd.gl.ARRAY_BUFFER, new Float32Array(vertices), gd.gl.STATIC_DRAW);
+
+            // Count rows
+            this.colorColumns = 4;
+            this.colorRows = vertices.length / this.colorColumns;
+        },
+
+        // Note: I don't think dimension is accurate, as I believe this just connects 2 triangles together, maybe snap is a better name?
+        dimension: function(vertices) {
+            this.dimensionStorage = gd.gl.createBuffer();
+            gd.gl.bindBuffer(gd.gl.ELEMENT_ARRAY_BUFFER, this.dimensionStorage);
+            gd.gl.bufferData(gd.gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(vertices), gd.gl.STATIC_DRAW);
         }
     })
 };

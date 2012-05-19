@@ -107,6 +107,9 @@ gd.template = {
             this.dimensionStorage = gd.gl.createBuffer();
             gd.gl.bindBuffer(gd.gl.ELEMENT_ARRAY_BUFFER, this.dimensionStorage);
             gd.gl.bufferData(gd.gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(vertices), gd.gl.STATIC_DRAW);
+            
+            // Important, drawing with a dimension buffer combines triangles, so you're drawing with half the normal amount
+            this.dimensionRows = vertices.length;
         }
     })
 };

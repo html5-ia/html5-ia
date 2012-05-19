@@ -1,7 +1,7 @@
 // Note: Make sure to replace timeout functions with animate based timeouts
-// Limit spawner to 10 asteroids at a time
-// Note: Respawn broken
-// Note: cubes broken
+// Rectangles break before clearing. Side processing needs to take an offset
+
+
 
 gd.core.init(800, 600, function() {
     Ctrl.init();
@@ -111,9 +111,6 @@ gd.template.Player = gd.template.Entity.extend({
             1.0, 1.0, 1.0, 1.0, // left
             1.0, 1.0, 1.0, 1.0  // right
         ]);
-        
-        // Run graphic buffers
-        this._super();
     },
     
     update: function() {
@@ -227,7 +224,6 @@ Hud = {
             
             // Replace score text
             Hud.el.score.innerHTML = this.count;
-            console.log(Hud.el.score);
         }
     },
     
@@ -247,12 +243,6 @@ gd.template.Bullet = gd.template.Entity.extend({
     height: .6,
     speed: .8,
     angle: 0,
-    
-    rotate: {
-        angle: 0,
-        axis: [.5, .5, 1],
-        speed: 30
-    },
     
     init: function(angle, x, y) {
         // Setup double sided triangle
@@ -297,9 +287,6 @@ gd.template.Bullet = gd.template.Entity.extend({
         // Movement
         this.x -= Math.sin( this.angle * Math.PI / 180 ) * this.speed;
         this.y += Math.cos( this.angle * Math.PI / 180 ) * this.speed;
-        
-        // Uses a measurement of time to update and configure your rotation
-        gd.game.rotate(this);
     },
     
     collide: function() {
@@ -312,50 +299,32 @@ gd.template.Bullet = gd.template.Entity.extend({
 // Note: Make sure to clear asteroid generation upon death
 AsteroidGen = {
     delay: 7000,
-    speed: 10000,
-    count: 1,
+    limit: 9,
     
     init: function() {
         var self = this;
         
         // Spawn first asteroid
+        this.count = 1;
         gd.game.spawn('Asteroid');
         
         // Setup spawn timer
         this.create = window.setInterval(function() {
-            gd.game.spawn('Asteroid');
-        }, this.delay);
-        
-        // Difficulty modifier
-        this.difficulty = window.setInterval( function() {
-            self.faster();
-        }, this.speed);
-    },
-    
-    faster: function() {
-        var self = this;
-        
-        // Clear spawner
-        window.clearInterval(self.create);
-        
-        // Increase speed
-        if (this.delay > 1000)
-            this.delay -= 1000;
-        
-        // Increase count
-        this.count++;
-        
-        this.create = window.setTimeout( function() {
-            for (var c = self.count; c--;) {
-                gd.game.spawn('Asteroid');
+            if (gd.core.storage.b.length < self.limit) {
+                // Increase count
+                if (self.count < 3)
+                    self.count++;
+                
+                for (var c = self.count; c--;) {
+                    gd.game.spawn('Asteroid');
+                }   
             }
-        }, this.delay);
+        }, self.delay);
     },
     
     clear: function() {
         // Clear timers
         window.clearInterval(this.create);
-        window.clearInterval(this.difficulty);
         
         // Set speed back to the default
         this.count = 0;
@@ -549,14 +518,17 @@ gd.template.Asteroid = gd.template.Entity.extend({
 
     collide: function() {            
         // Generate a number of particles spawned at current center
-        for ( var p = 5; p--; ) {
-            gd.game.spawn('Particle', this.x, this.y);
-        }
-        
-        // Generate a random number of cubes spawned at current center
-        num = gd.game.random.number(7, 3);
-        for ( var c = num; c--; ) {
-            gd.game.spawn('Cube', this.x, this.y);
+        // But only if the game has enough memory to support it
+        if (gd.core.storage.all.length < 35) {
+            for ( var p = 7; p--; ) {
+                gd.game.spawn('Particle', this.x, this.y);
+            }
+            
+            // Generate a random number of cubes spawned at current center
+            num = gd.game.random.number(1, 3);
+            for ( var c = num; c--; ) {
+                gd.game.spawn('Cube', this.x, this.y);
+            }
         }
         
         this.kill();
@@ -567,58 +539,64 @@ gd.template.Cube = gd.template.Entity.extend({
     type: 'b',
     size: {
         max: 3,
-        min: 1,
+        min: 2,
         divider: 1
+    },
+    pressure: 50,
+    
+    meta: function() {
+        // Random x and y acceleration
+        this.speed = {
+            x: (gd.game.random.number(this.pressure) / 100) * gd.game.random.polarity(),
+            y: (gd.game.random.number(this.pressure) / 100) * gd.game.random.polarity()
+        };
+                
+        // Random direction
+        this.angle = gd.game.random.number(360);
+        
+        // Random size
+        this.s = gd.game.random.number(this.size.max, this.size.min) / this.size.divider;
+        this.width = this.s * 2;
+        this.height = this.s * 2;
     },
 
     init: function(x, y) {
         this.x = x;
         this.y = y;
         
-        // Random x and y acceleration
-        this.speed = {
-            x: (gd.game.random.number(50, 1) / 100) * gd.game.random.polarity(),
-            y: (gd.game.random.number(50, 1) / 100) * gd.game.random.polarity()
-        };
-        
-        // Random direction
-        this.angle = gd.game.random.number(360);
-        
-        // Random size
-        var s = gd.game.random.number(this.size.max, this.size.min) / this.size.divider;
-        this.width = s * 2;
-        this.height = s * 2;
+        this.meta();
+
         this.shape([
             // Front  
-            -s, -s,  s,  
-             s, -s,  s,  
-             s,  s,  s,  
-            -s,  s,  s,  
+            -this.s, -this.s,  this.s,  
+             this.s, -this.s,  this.s,  
+             this.s,  this.s,  this.s,  
+            -this.s,  this.s,  this.s,  
             // Back  
-            -s, -s, -s,  
-            -s,  s, -s,  
-             s,  s, -s,  
-             s, -s, -s,  
+            -this.s, -this.s, -this.s,  
+            -this.s,  this.s, -this.s,  
+             this.s,  this.s, -this.s,  
+             this.s, -this.s, -this.s,  
             // Top  
-            -s,  s, -s,  
-            -s,  s,  s,  
-             s,  s,  s,  
-             s,  s, -s,  
+            -this.s,  this.s, -this.s,  
+            -this.s,  this.s,  this.s,  
+             this.s,  this.s,  this.s,  
+             this.s,  this.s, -this.s,  
             // Bottom  
-            -s, -s, -s,  
-             s, -s, -s,  
-             s, -s,  s,  
-            -s, -s,  s,  
+            -this.s, -this.s, -this.s,  
+             this.s, -this.s, -this.s,  
+             this.s, -this.s,  this.s,  
+            -this.s, -this.s,  this.s,  
             // Right  
-             s, -s, -s,  
-             s,  s, -s,  
-             s,  s,  s,  
-             s, -s,  s,  
+             this.s, -this.s, -this.s,  
+             this.s,  this.s, -this.s,  
+             this.s,  this.s,  this.s,  
+             this.s, -this.s,  this.s,  
             // Left  
-            -s, -s, -s,  
-            -s, -s,  s,  
-            -s,  s,  s,  
-            -s,  s, -s  
+            -this.s, -this.s, -this.s,  
+            -this.s, -this.s,  this.s,  
+            -this.s,  this.s,  this.s,  
+            -this.s,  this.s, -this.s  
         ]);
         
         this.dimension([
@@ -639,14 +617,15 @@ gd.template.Cube = gd.template.Entity.extend({
             [0, 1, 1, 1]  // Left face: purple  
         ]);
         
-        this.rotate = {
-            axis: [
-                gd.game.random.number(10, 1) / 10,
-                gd.game.random.number(10, 1) / 10,
-                gd.game.random.number(10, 1) / 10],
-            angle: gd.game.random.number(350),
-            speed: gd.game.random.number(400, 200)
-        };
+        if (this.rotate)
+            this.rotate = {
+                axis: [
+                    gd.game.random.number(10) / 10,
+                    gd.game.random.number(10) / 10,
+                    gd.game.random.number(10) / 10],
+                angle: gd.game.random.number(350),
+                speed: gd.game.random.number(400, 200)
+            };
     },
     
     // Occurs at each frame update
@@ -665,29 +644,52 @@ gd.template.Cube = gd.template.Entity.extend({
         
         // Uses a measurement of time to update and configure your rotation
         // Originally from Mozilla's WebGL tutorial https://developer.mozilla.org/en/WebGL/Animating_objects_with_WebGL
-        gd.game.rotate(this);
+        if (this.rotate)
+            gd.game.rotate(this);
     }
 });
 
 gd.template.Particle = gd.template.Cube.extend({
+    pressure: 20,
     type: 0,
     size: {
-        min: 1,
-        max: 3,
+        min: 2,
+        max: 6,
         divider: 10
     },
-    count: 0,
+
     init: function(x, y) {
-        console.log(this._super(x, y));
-    },
-    update: function() {
-        // Add z axis to make the cube fly in 3D
-        if (this.count > 200) {
-            this.kill();
-        } else {
-            this.count++;
-        }
+        this.x = x;
+        this.y = y;
         
+        this.meta();
+        
+        // Setup flat rectangle shape
+        this.shape([
+             this.s,  this.s,  0.0,  
+            -this.s,  this.s,  0.0,  
+             this.s, -this.s,  0.0,  
+            -this.s, -this.s,  0.0
+        ]);
+        
+        // Setup random color
+        var r = gd.game.random.number(10, 0) / 10,
+        g = gd.game.random.number(10, 0) / 10,
+        b = gd.game.random.number(10, 0) / 10;
+        this.color([
+            r, g, b, 1,
+            r, g, b, 1,
+            r, g, b, 1,
+            r, g, b, 1
+        ]);
+        
+        var self = this;
+        this.create = window.setTimeout(function() {
+            self.kill();
+        }, 5000);
+    },
+    
+    update: function() {
         this._super();
     }
 });

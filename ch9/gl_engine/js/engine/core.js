@@ -216,6 +216,7 @@ var Engine = Class.extend({
             // Take the matrix vertex positions and go through all of the elements from 0 to the .numItems object
             if (this.storage[i].bufDim) {
                 // Creation of 3D shape
+                console.log(this.storage[i].bufRows);
                 this.gl.drawElements(this.gl.TRIANGLES, this.storage[i].bufRows, this.gl.UNSIGNED_SHORT, 0);
             } else {
                 // Creation of 2D shape

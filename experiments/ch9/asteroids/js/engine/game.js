@@ -80,7 +80,7 @@ gd.game = {
     // Basic equation for rotation based upon time
     // Originally from Mozilla's WebGL tutorial https://developer.mozilla.org/en/WebGL/Animating_objects_with_WebGL
     rotate: function(obj) {
-        var currentTime = (new Date).getTime();
+        var currentTime = Date.now();
         if (obj.lastUpdate < currentTime) {  
             var delta = currentTime - obj.lastUpdate;  
             
@@ -104,6 +104,6 @@ gd.game = {
     // Kill everything, kill them all!
     armageddon: function() {
         for (var obj = gd.core.storage.all.length; obj--;)
-            gd.core.graveyard.push(gd.core.storage.all[obj]);
+            gd.core.graveyard.storage.push(gd.core.storage.all[obj]);
     }
 };

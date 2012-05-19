@@ -226,7 +226,7 @@ gd.core = {
                 // Creation of 3D shape
                 gd.gl.drawElements(
                     gd.gl.TRIANGLES,
-                    this.storage.all[i].shapeRows,
+                    this.storage.all[i].dimensionRows,
                     gd.gl.UNSIGNED_SHORT,
                     0);
             } else {

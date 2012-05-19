@@ -223,11 +223,11 @@ gd.core = {
             this.setMatrixUniforms();
             
             // Take the matrix vertex positions and go through all of the elements from 0 to the .numItems object
-            if (this.storage.all[i].dimensionStorage) {
+            if (this.storage.all[i].indicesStorage) {
                 // Creation of 3D shape
                 gd.gl.drawElements(
                     gd.gl.TRIANGLES,
-                    this.storage.all[i].dimensionCount,
+                    this.storage.all[i].indicesCount,
                     gd.gl.UNSIGNED_SHORT,
                     0);
             } else {

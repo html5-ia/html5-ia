@@ -98,14 +98,13 @@ gd.template = {
             this.colorRows = vertices.length / this.colorColumns;
         },
 
-        // Note: I don't think dimension is accurate, as I believe this just connects 2 triangles together, maybe snap is a better name?
-        dimension: function(vertices) {
-            this.dimensionStorage = gd.gl.createBuffer();
-            gd.gl.bindBuffer(gd.gl.ELEMENT_ARRAY_BUFFER, this.dimensionStorage);
+        indices: function(vertices) {
+            this.indicesStorage = gd.gl.createBuffer();
+            gd.gl.bindBuffer(gd.gl.ELEMENT_ARRAY_BUFFER, this.indicesStorage);
             gd.gl.bufferData(gd.gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(vertices), gd.gl.STATIC_DRAW);
             
-            // Important, drawing with a dimension buffer combines triangles, so you're drawing with half the normal amount
-            this.dimensionCount = vertices.length;
+            // Important, drawing with a indices buffer combines triangles, so you're drawing with half the normal amount
+            this.indicesCount = vertices.length;
         }
     })
 };

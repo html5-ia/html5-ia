@@ -565,7 +565,7 @@ gd.template.Cube = gd.template.Entity.extend({
             -this.s,  this.s, -this.s  
         ]);
         
-        this.dimension([
+        this.indices([
              0,  1,  2,    0,  2,  3, // front
              4,  5,  6,    4,  6,  7, // back
              8,  9, 10,    8, 10, 11, // top

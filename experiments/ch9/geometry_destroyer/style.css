@@ -1,0 +1,59 @@
+body {
+    background: #111;
+    color: #aaa;
+    font-family: Impact, Helvetica, Arial;
+    letter-spacing: 1px;
+}
+
+#container {
+    width: 800px;
+    margin: 40px auto;
+    position: relative;
+}
+
+#canvas {
+    border: 1px solid #333;
+}
+
+#score {
+    position: absolute;
+    top: 5px;
+    left: 8px;
+    margin: 0;
+    font-size: 15px;
+}
+
+.strong {
+    color: #a00;
+}
+
+.screen {
+    font-size: 34px;
+    text-transform: uppercase;
+    text-align: center;
+    text-align: center;
+    position: absolute;
+    width: 100%;
+    left: 0;
+}
+
+#title {
+    top: 214px;
+    font-size: 50px;
+    word-spacing: 20px;
+}
+
+#start {
+    top: 300px;
+}
+
+#end {
+    top: 220px;
+    display: none;
+    font-size: 50px;
+}
+
+#ctrls {
+    text-align: center;
+    font-size: 18px;
+}

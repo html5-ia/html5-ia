@@ -46,33 +46,23 @@ gd.game = {
         }
     },
     
-    // Gets a single game object and returns it
-    get: function(key, val) {
-        // Loop through objects and get matched value
-        for (var obj = gd.core.storage.all.length; obj--;) {
-            if (gd.core.storage.all[obj][key] === val) 
-                return gd.core.storage[obj];
-                break; // Note: Might not be necessary
-        }
-        
-        // Note: Double check this doesn't happen on success too
-        return false;
-    },
-    
     size: {
         width: 0,
         height: 0
     },
     
     // Detects if boundaries have been violated and fires a callback if so
-    boundaries: function(obj, top, right, bottom, left) {
-        if (obj.x < - this.size.width) {
+    boundaries: function(obj, top, right, bottom, left, offset) {
+        if (offset === undefined)
+            offset = 0;
+        
+        if (obj.x < - this.size.width - offset) {
             return left();
-        } else if (obj.x > this.size.width) {
+        } else if (obj.x > this.size.width + offset) {
             return right();
-        } else if (obj.y < - this.size.height) {
+        } else if (obj.y < - this.size.height - offset) {
             return bottom();
-        } else if (obj.y > this.size.height) {
+        } else if (obj.y > this.size.height + offset) {
             return top();
         }
     },

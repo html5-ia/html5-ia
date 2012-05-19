@@ -38,8 +38,7 @@ body {
 }
 
 #warning {
-    font-size: 50px;
-    display: block;
+
 }
 
 #title {
@@ -53,8 +52,9 @@ body {
 }
 
 #end {
-    top: 200px;
+    top: 220px;
     display: none;
+    font-size: 50px;
 }
 
 #ctrls {

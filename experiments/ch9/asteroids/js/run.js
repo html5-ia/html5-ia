@@ -1,8 +1,3 @@
-// Note: Make sure to replace timeout functions with animate based timeouts
-// Rectangles break before clearing. Side processing needs to take an offset
-
-
-
 gd.core.init(800, 600, function() {
     Ctrl.init();
     Hud.init();
@@ -145,7 +140,7 @@ gd.template.Player = gd.template.Entity.extend({
             
             // Create a timer to prevent firing
             this.shoot = false;
-            window.setTimeout(function() {
+            window.requestTimeout(function() {
                 self.shoot = true;
             }, this.shootDelay);
         }
@@ -191,30 +186,6 @@ Hud = {
         
         // Show end game text
         this.el.end.style.display = 'block';
-        
-        // callback
-        var callback = function() {
-            // Run kill on everything in storage
-            gd.game.armageddon();
-            
-            // Spawn player
-            gd.game.spawn('Player');
-            
-            // Remove text
-            self.el.end.style.display = 'none';
-            
-            // Debind listener
-            window.removeEventListener('click', callback, true);
-            
-            // Reset score
-            self.score.count = 0;
-            
-            // Begin asteroid generation
-            AsteroidGen.init();
-        };
-        
-        // add restart listener
-        window.addEventListener('click', callback, true);
     },
     
     score: {
@@ -296,7 +267,6 @@ gd.template.Bullet = gd.template.Entity.extend({
     }
 });
     
-// Note: Make sure to clear asteroid generation upon death
 AsteroidGen = {
     delay: 7000,
     limit: 9,
@@ -309,7 +279,7 @@ AsteroidGen = {
         gd.game.spawn('Asteroid');
         
         // Setup spawn timer
-        this.create = window.setInterval(function() {
+        this.create = window.requestInterval(function() {
             if (gd.core.storage.b.length < self.limit) {
                 // Increase count
                 if (self.count < 3)
@@ -324,7 +294,7 @@ AsteroidGen = {
     
     clear: function() {
         // Clear timers
-        window.clearInterval(this.create);
+        window.clearRequestInterval(this.create);
         
         // Set speed back to the default
         this.count = 0;
@@ -519,17 +489,18 @@ gd.template.Asteroid = gd.template.Entity.extend({
     collide: function() {            
         // Generate a number of particles spawned at current center
         // But only if the game has enough memory to support it
-        if (gd.core.storage.all.length < 35) {
-            for ( var p = 7; p--; ) {
+        if (gd.core.storage.all.length < 20) {
+            for ( var p = 3; p--; ) {
                 gd.game.spawn('Particle', this.x, this.y);
             }
-            
-            // Generate a random number of cubes spawned at current center
-            num = gd.game.random.number(1, 3);
-            for ( var c = num; c--; ) {
-                gd.game.spawn('Cube', this.x, this.y);
-            }
         }
+            
+        // Generate a random number of cubes spawned at current center
+        num = gd.game.random.number(2, 4);
+        for ( var c = num; c--; ) {
+            gd.game.spawn('Cube', this.x, this.y);
+        }
+
         
         this.kill();
     }
@@ -633,10 +604,9 @@ gd.template.Cube = gd.template.Entity.extend({
     update: function() {
         var self = this;
         
-        // Level boundaries
         // Kill if the item goes outside a boundary
         var side = function() { self.kill() };
-        gd.game.boundaries(this, side, side, side, side);
+        gd.game.boundaries(this, side, side, side, side, this.width);
         
         // Logic for acceleration
         this.x -= Math.sin( this.angle * Math.PI / 180 ) * this.speed.x;
@@ -684,7 +654,7 @@ gd.template.Particle = gd.template.Cube.extend({
         ]);
         
         var self = this;
-        this.create = window.setTimeout(function() {
+        this.create = window.requestTimeout(function() {
             self.kill();
         }, 5000);
     },

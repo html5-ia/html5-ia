@@ -127,10 +127,6 @@ gd.core = {
                 this.currentChild = this.currentChild.nextSibling;
             }
             
-            // Get shader MIME type to test for vertex or fragment shader
-            // Create shader based upon return value
-            this.shader; // Note: Is this even necessary??? Probably could be a simple variable.
-            
             // Check for the type of shader accessed and process as necessary
             if (this.script.type == 'x-shader/x-fragment') {
                 this.shader = gd.gl.createShader(gd.gl.FRAGMENT_SHADER);
@@ -272,7 +268,8 @@ gd.core = {
         storage: [],
         purge: function() {
             if (this.storage) {
-                for (var obj = this.storage.length; obj--;) {
+                for (var obj = this.storage.length; obj--;) {                    
+                    // Remove object from memory and delete
                     this.remove(this.storage[obj]);
                 }
                 this.graveyard = [];
@@ -348,7 +345,6 @@ gd.core = {
         var pUniform = gd.gl.getUniformLocation(this.shader.program, "uPMatrix");  
         gd.gl.uniformMatrix4fv(pUniform, false, new Float32Array(this.perspectiveMatrix.flatten()));  
         
-        //Note: mvMatrix should be part of this
         var mvUniform = gd.gl.getUniformLocation(this.shader.program, "uMVMatrix");  
         gd.gl.uniformMatrix4fv(mvUniform, false, new Float32Array(mvMatrix.flatten())); 
     },

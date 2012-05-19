@@ -4,8 +4,9 @@ Version: 1.0
 Author: Ashton Blue
 Author URL: http://blueashes.com
 Publisher: Manning
-Credits: Uses a modified version of John Resig's class extension script
-http://ejohn.org/blog/simple-javascript-inheritance/
+
+Desc: Contains a series of re-usable game functions for
+interacting with the engine.
 */
 
 var gd = gd || {};
@@ -16,7 +17,7 @@ gd.game = {
         // temporarily store item for reference purposes
         var entity = new gd.template[name];
         
-        // Set the id
+        // Set the id, faster for object searching than a object comparison
         entity.id = gd.core.id.get();
         
         // Store entity in main array
@@ -35,24 +36,18 @@ gd.game = {
         }
         
         // Apply the passed parameters as an init
-        //entity.init();
-        if (arguments.length > 1) {
+        if (arguments.length > 1 && entity.init) {
             // Remove name argument
             var args = [].slice.call(arguments, 1);
             // Fire the init with proper arguments
             entity.init.apply(entity, args);
-        } else {
+        } else if (entity.init) {
             entity.init();
         }
     },
     
-    size: {
-        width: 0,
-        height: 0
-    },
-    
     // Detects if boundaries have been violated and fires a callback if so
-    boundaries: function(obj, top, right, bottom, left, offset) {
+    boundaries: function(obj, top, right, bottom, left, offset) {        
         if (offset === undefined)
             offset = 0;
         
@@ -89,11 +84,5 @@ gd.game = {
             if (!min) min = 1;
             return Math.floor(Math.random() * (max - min + 1) + min);
         }
-    },
-    
-    // Kill everything, kill them all!
-    armageddon: function() {
-        for (var obj = gd.core.storage.all.length; obj--;)
-            gd.core.graveyard.storage.push(gd.core.storage.all[obj]);
     }
 };

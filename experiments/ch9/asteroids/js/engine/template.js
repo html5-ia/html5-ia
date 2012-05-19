@@ -34,10 +34,6 @@ gd.template = {
         width: 0,
         height: 0,
         
-        init: function() {
-            // Place code launched at booted here, can also take parameters
-        },
-        
         update: function() {
             // place code before animating here
         },
@@ -109,7 +105,7 @@ gd.template = {
             gd.gl.bufferData(gd.gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(vertices), gd.gl.STATIC_DRAW);
             
             // Important, drawing with a dimension buffer combines triangles, so you're drawing with half the normal amount
-            this.dimensionRows = vertices.length;
+            this.dimensionCount = vertices.length;
         }
     })
 };

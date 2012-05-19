@@ -1,3 +1,13 @@
+/*
+Name: Run File
+Version: 1.0
+Author: Ashton Blue
+Author URL: http://blueashes.com
+Publisher: Manning
+
+Desc: All templates, objects, and other code connected to running the game.
+*/
+
 gd.core.init(800, 600, function() {
     Ctrl.init();
     Hud.init();
@@ -225,15 +235,7 @@ gd.template.Bullet = gd.template.Entity.extend({
            // Right face
             0.0,  0.3,  0.0,
             0.3, -0.3,  0.3,
-            0.3, -0.3, -0.3,
-           // Back face
-            0.0,  0.3,  0.0,
-            0.3, -0.3, -0.3,
-           -0.3, -0.3, -0.3,
-           // Left face
-            0.0,  0.3,  0.0,
-           -0.3, -0.3, -0.3,
-           -0.3, -0.3,  0.3
+            0.3, -0.3, -0.3
         ]);
         
         // Setup bullet color by repeating
@@ -468,16 +470,10 @@ gd.template.Asteroid = gd.template.Entity.extend({
     },
     
     update: function() {
-        // Kill if the item goes outside a boundary
-        if (this.x < - gd.game.size.width - this.width) {
-            return this.kill();
-        } else if (this.x > gd.game.size.width + this.width) {
-            return this.kill();
-        } else if (this.y < - gd.game.size.height - this.height) {
-            return this.kill();
-        } else if (this.y > gd.game.size.height + this.height) {
-            return this.kill();
-        }
+        var self = this;
+        
+        var side = function() { return self.kill() };
+        gd.game.boundaries(this, side, side, side, side, (this.width * 2));
         
         // Logic for acceleration
         this.x -= Math.sin( this.angle * Math.PI / 180 ) * this.speed.x;
@@ -500,7 +496,6 @@ gd.template.Asteroid = gd.template.Entity.extend({
         for ( var c = num; c--; ) {
             gd.game.spawn('Cube', this.x, this.y);
         }
-
         
         this.kill();
     }
@@ -657,9 +652,5 @@ gd.template.Particle = gd.template.Cube.extend({
         this.create = window.requestTimeout(function() {
             self.kill();
         }, 5000);
-    },
-    
-    update: function() {
-        this._super();
     }
 });

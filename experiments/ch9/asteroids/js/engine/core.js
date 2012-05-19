@@ -104,6 +104,11 @@ gd.core = {
             
             // Create stored shader data for later usage
             this.store();
+            
+            // Delete assembled shader DOM data to save memory
+            gd.gl.deleteShader(this.fragments);
+            gd.gl.deleteShader(this.vertex);
+            gd.gl.deleteProgram(this.program);
         },
         
         // Gets the shaders from the DOM
@@ -222,7 +227,7 @@ gd.core = {
                 // Creation of 3D shape
                 gd.gl.drawElements(
                     gd.gl.TRIANGLES,
-                    this.storage.all[i].dimensionRows,
+                    this.storage.all[i].dimensionCount,
                     gd.gl.UNSIGNED_SHORT,
                     0);
             } else {
@@ -376,4 +381,4 @@ gd.core = {
         var m = Matrix.Rotation(inRadians, $V([v[0], v[1], v[2]])).ensure4x4();  
         this.multMatrix(m);  
     }  
-}
+};

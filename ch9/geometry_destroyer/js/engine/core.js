@@ -312,6 +312,8 @@ gd.core = {
             }
             
             // Clean out of browser's memory permanently
+            gd.gl.deleteBuffer(object.colorStorage);
+            gd.gl.deleteBuffer(object.shapeStorage);
             delete object;
         }
     },

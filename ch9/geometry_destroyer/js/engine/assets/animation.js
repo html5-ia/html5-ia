@@ -14,30 +14,30 @@ window.requestAnimFrame = function(){
 
 // All code below by Joe Lambert http://blog.joelambert.co.uk/2011/06/01/a-better-settimeoutsetinterval/
 window.requestInterval = function(fn, delay) {
-	if( !window.requestAnimationFrame       && 
-		!window.webkitRequestAnimationFrame && 
-		!(window.mozRequestAnimationFrame && window.mozCancelRequestAnimationFrame) && // Firefox 5 ships without cancel support
-		!window.oRequestAnimationFrame      && 
-		!window.msRequestAnimationFrame)
-			return window.setInterval(fn, delay);
+    if( !window.requestAnimationFrame && 
+    !window.webkitRequestAnimationFrame && 
+    !(window.mozRequestAnimationFrame && window.mozCancelRequestAnimationFrame) &&
+    !window.oRequestAnimationFrame && 
+    !window.msRequestAnimationFrame)
+	return window.setInterval(fn, delay);
 
-	var start = new Date().getTime(),
-		handle = new Object();
+    var start = new Date().getTime(),
+    handle = new Object();
 
-	function loop() {
-		var current = new Date().getTime(),
-			delta = current - start;
+    function loop() {
+	var current = new Date().getTime(),
+	delta = current - start;
 
-		if(delta >= delay) {
-			fn.call();
-			start = new Date().getTime();
-		}
-
-		handle.value = requestAnimFrame(loop);
-	};
+	if(delta >= delay) {
+	    fn.call();
+	    start = new Date().getTime();
+	}
 
 	handle.value = requestAnimFrame(loop);
-	return handle;
+    };
+
+    handle.value = requestAnimFrame(loop);
+    return handle;
 }
 
 /**
@@ -55,25 +55,25 @@ window.clearRequestInterval = function(handle) {
 };
 
 window.requestTimeout = function(fn, delay) {
-	if( !window.requestAnimationFrame      	&& 
-		!window.webkitRequestAnimationFrame && 
-		!(window.mozRequestAnimationFrame && window.mozCancelRequestAnimationFrame) && // Firefox 5 ships without cancel support
-		!window.oRequestAnimationFrame      && 
-		!window.msRequestAnimationFrame)
-			return window.setTimeout(fn, delay);
+    if( !window.requestAnimationFrame && 
+    !window.webkitRequestAnimationFrame && 
+    !(window.mozRequestAnimationFrame && window.mozCancelRequestAnimationFrame) && // Firefox 5 ships without cancel support
+    !window.oRequestAnimationFrame && 
+    !window.msRequestAnimationFrame)
+	return window.setTimeout(fn, delay);
 
-	var start = new Date().getTime(),
-		handle = new Object();
+    var start = new Date().getTime(),
+    handle = new Object();
 
-	function loop(){
-		var current = new Date().getTime(),
-			delta = current - start;
+    function loop(){
+	var current = new Date().getTime(),
+	delta = current - start;
 
-		delta >= delay ? fn.call() : handle.value = requestAnimFrame(loop);
-	};
+	delta >= delay ? fn.call() : handle.value = requestAnimFrame(loop);
+    };
 
-	handle.value = requestAnimFrame(loop);
-	return handle;
+    handle.value = requestAnimFrame(loop);
+    return handle;
 };
 
 /**

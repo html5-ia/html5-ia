@@ -41,7 +41,7 @@ Ctrl = {
                 Ctrl.right = true;
                 break;
             case 88:
-                Ctrl.space = true;
+                Ctrl.x = true;
                 break;
             default:
                 break;
@@ -63,7 +63,7 @@ Ctrl = {
                 Ctrl.right = false;
                 break;
             case 88:
-                Ctrl.space = false;
+                Ctrl.x = false;
                 break;
             default:
                 break;
@@ -71,10 +71,7 @@ Ctrl = {
     }
 };
 
-gd.template.Player = gd.template.Entity.extend({
-    // Name of player for searching
-    name: 'player',
-    
+gd.template.Player = gd.template.Entity.extend({    
     // Hit collision a = friendly, b = enemy
     type: 'a',
     
@@ -144,7 +141,7 @@ gd.template.Player = gd.template.Entity.extend({
         gd.game.boundaries(this, top, right, bottom, left);
         
         // Detect a player shooting
-        if (Ctrl.space && this.shoot) {
+        if (Ctrl.x && this.shoot) {
             // Spawning elements need to take new parameters
             gd.game.spawn('Bullet', this.rotate.angle, this.x, this.y);
             
@@ -174,7 +171,7 @@ Hud = {
         
         // Setup start callback
         var callback = function() {
-            if (Ctrl.space) {            
+            if (Ctrl.x) {            
                 // Remove listener
                 window.removeEventListener('keydown', callback, true);
                 
@@ -231,11 +228,7 @@ gd.template.Bullet = gd.template.Entity.extend({
             // Front face
             0.0,  0.3,  0.0,
            -0.3, -0.3,  0.3,
-            0.3, -0.3,  0.3,
-           // Right face
-            0.0,  0.3,  0.0,
-            0.3, -0.3,  0.3,
-            0.3, -0.3, -0.3
+            0.3, -0.3,  0.3
         ]);
         
         // Setup bullet color by repeating
@@ -302,7 +295,7 @@ AsteroidGen = {
         this.count = 0;
         this.delay = 7000;
     }
-}
+};
 
 gd.template.Asteroid = gd.template.Entity.extend({
     type: 'b',

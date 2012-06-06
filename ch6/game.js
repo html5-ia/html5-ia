@@ -1,5 +1,5 @@
 /*
-Name: Canvas Break
+Name: Canvas Ricochet
 Version: 1.0
 Author: Ashton Blue
 Author URL: http://blueashes.com
@@ -98,7 +98,7 @@ var Game = {
 var Screen = {
     welcome: function() {
         // Setup base values
-        this.text = 'CANVAS BREAK';
+        this.text = 'CANVAS RICOCHET';
         this.textSub = 'Click To Start';
         this.textColor = 'white';
         

@@ -14,7 +14,7 @@ svg { overflow: hidden; display: block; height: 90%; position: absolute; top: 0%
 /* Welcome screen */
 #screenWelcome text { font-size: 20px; }
 #screenWelcome #title1 { font: bold 130px arial }
-#screenWelcome #title2 { font: bold 53px arial; fill: #3f0 }
+#screenWelcome #title2 { font: bold 73px arial; fill: #0af }
 text#more { font: 28px 'Courier New', Courier, monospace }
 
 /* Game over screen */
@@ -24,8 +24,10 @@ text#more { font: 28px 'Courier New', Courier, monospace }
 .quote { font: bold 12px arial; fill: #000 }
 
 /* Game */
-.life, .player, .shield, .ship { fill: #3f0 }
-.anim1, .anim2 { fill: #ddd }
+.life, .player, .shield, .ship { fill: #0af }
+.invader .a { fill: #8C19FF }
+.invader .b { fill: #1EE861 }
+.invader .c { fill: #FFE14D }
 
 .closed .anim1, .open .anim2 { display: none }
 .open .anim1, .closed .anim2 { display: inherit }

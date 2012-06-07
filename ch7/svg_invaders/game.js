@@ -1,5 +1,5 @@
 /*
-Name: SVG Invaders
+Name: SVG Aliens
 Version: 1.0
 Author: Ashton Blue
 Author URL: http://blueashes.com
@@ -362,7 +362,7 @@ var Ship = {
     height: 15,
     speed: 3,
     // path only contains the shape, not the x and y information (limitation of SVG paths)
-    path: 'v 13 h 35 v -13 h -2 v -2 h -12 v -4 h -2 v -2 h -3 v 2 h -2 v 4 h -12 v 2 l -2 0',
+    path: 'm 0 15 l 9 5 h 17 l 9 -5 l -2 -5 l -10 3 l -6 -15 l -6 15 l -10 -3 l -2 5',
     
     init: function() {
         // Change player x and y to the default
@@ -438,7 +438,7 @@ var InvShip = {
         el.setAttribute('y', InvShip.y);
         el.setAttribute('width', InvShip.width);
         el.setAttribute('height', InvShip.height);
-        el.setAttributeNS(Game.xlink, 'xlink:href', 'redship.svg');
+        el.setAttributeNS(Game.xlink, 'xlink:href', 'mothership.svg');
         Game.svg.appendChild(el);
     },
     
@@ -471,15 +471,9 @@ var Inv = {
     row: 5,
     col: 11,
     
-    // Invader paths retrieved from Inkscape with SVG files saved from Adobe Illustrator
-    // In Inkscape use the XML DOM view to get your path data
-    // Download Inkscape now at http://inkscape.org/
-    pathA1: 'M-0.174,18.136h2.437v-2.436h-2.437V18.136z M16.575,13.307h-2.395v-2.393h4.786V6.129h-2.305V3.87h-2.481    V1.431h-2.348v-2.437h-4.83v2.437H4.612V3.87H2.261v2.259h-2.349v4.786H4.61v2.349H2.259v2.438H4.61v2.348h2.438v-2.438H4.698 v-2.26h2.349v-2.438h4.697v2.438h2.392v2.304h-2.348v2.437h2.437v-2.348h2.352L16.575,13.307L16.575,13.307z M7.049,8.962H4.612 V6.525h2.438V8.962z M13.679,8.962h-2.438V6.525h2.438V8.962z M16.575,15.745v2.437h2.437v-2.437H16.575z',
-    pathA2: 'M2.181,18.17h2.442V15.73H2.181V18.17z M2.236,13.286h-2.442v2.443h2.442V13.286z M14.275,18.215h2.44 v-2.441h-2.44V18.215L14.275,18.215z M19.018,10.932V6.136h-2.309V3.873h-2.487V1.429h-2.354V-1.01h-4.84v2.439H4.631v2.443     H2.279v2.264h-2.354v4.795h2.324v2.442h2.442v-2.441h9.525v2.441h2.354v2.397h2.438V13.33h-2.351v-2.398L19.018,10.932 L19.018,10.932z M7.073,8.973H4.631V6.534h2.442V8.973z M13.717,8.973h-2.439V6.534h2.439V8.973z',
-    pathB1: 'M3.453,17.283h2.271V15.01H3.453V17.283z M5.724-0.901v2.273h2.272v-2.273H5.724z M23.909,17.283V15.01 h-2.271v2.273H23.909z M21.636-0.901h-2.272v2.273h2.272V-0.901z M23.909,1.373v4.545h-2.271V3.645h-2.273V1.373h-2.273v2.272 h-6.817V1.373H8.001v2.272H5.728v2.272H3.458V1.373H1.183v9.09h2.274v2.273h2.271v2.272h2.273v-2.272h11.366v2.272h2.272v-2.272 h2.271v-2.273h2.271v-9.09H23.909z M10.271,8.191H7.999V5.917h2.272V8.191z M19.364,8.191h-2.274V5.917h2.274V8.191z',
-    pathB2: 'M21.636-0.901h-2.272v2.273h2.272V-0.901z M12.544,17.283V15.01H7.999v2.273H12.544z M5.724-0.901v2.273 h2.272v-2.273H5.724z M23.909,8.191V5.917h-2.271V3.645h-2.273V1.373h-2.273v2.272h-6.817V1.373H8.001v2.272H5.728v2.272H3.458     v2.274H1.183v6.817h2.274v-2.272h2.271v2.272h2.273v-2.272h11.366v2.272h2.272v-2.272h2.271v2.272h2.271V8.191H23.909z  M10.271,8.191H7.999V5.917h2.272V8.191z M19.364,8.191h-2.274V5.917h2.274V8.191z M14.817,17.283h4.546V15.01h-4.546V17.283z',
-    pathC1: 'M25.313,16.102v-2.086h-2.086v2.086H25.313z M10.705,14.016h4.174v-2.09h-4.174V14.016z M0.274,16.102 H2.36v-2.086H0.274V16.102z M25.313,9.842v-6.26h-2.086V1.496h-6.26v-2.088H8.618v2.088h-6.26v2.086H0.272v6.26h6.26v2.086H2.358  v2.088h2.088v2.086h2.086v-2.086h2.086v-2.088h2.087V9.842h4.174v2.086h2.088v2.088h2.084v2.086h2.088v-2.086h2.088v-2.088 h-4.176V9.842H25.313z M10.705,7.756H6.532V5.668h4.173V7.756z M14.879,7.756V5.668h4.172v2.088H14.879z',
-    pathC2: 'M10.705,13.994h4.174V11.91h-4.174V13.994z M25.313,9.82V3.561h-2.086V1.476h-6.26v-2.087H8.618v2.087     h-6.26v2.085H0.272V9.82h4.174v2.09H2.358v2.084h2.088v2.086h4.172v-2.086H6.532V11.91h4.173V9.82h4.174v2.09h4.172v2.084h-2.084 v2.086h4.172v-2.086h2.088V11.91h-2.088V9.82H25.313z M10.705,7.735H6.532V5.65h4.173V7.735z M19.051,7.735h-4.172V5.65h4.172 V7.735z',
+    // Invader paths retrieved from Inkscape or Illustrator via SVG save
+    pathA: 'M6.5,8.8c1.1,1.6,3.2,2.5,6.2,2.5c3.3,0,4.9-1.4,5.6-2.6c0.9-1.5,0.9-3.4,0.5-4.4c0,0,0,0,0,0 c0,0-1.9-3.4-6.5-3.4c-4.3,0-5.9,2.8-6.1,3.2l0,0C5.7,5.3,5.5,7.2,6.5,8.8z M19.2,4.4c0.4,1.2,0.4,2.9-0.4,4.6 c-0.6,1.3-2.5,3.6-6.1,3.6c-4.1,0-5.9-2.2-6.7-3.5C5.4,8,5.3,6.9,5.5,5.8C5.4,5.9,5.2,6,4.9,6C4.5,6,4.2,5.8,4.2,5.6 c0-0.2,0.3-0.3,0.7-0.3c0.3,0,0.6,0.1,0.6,0.3c0.1-0.5,0.2-0.9,0.4-1.3C2.4,5.6,0,7.4,0,10.1c0,4.2,5.5,7.6,12.4,7.6 c6.8,0,12.4-3.4,12.4-7.6C24.7,7.4,22.7,5.7,19.2,4.4z M6.9,13.9c-0.8,0-1.5-0.4-1.5-0.9c0-0.5,0.7-0.9,1.5-0.9 c0.8,0,1.5,0.4,1.5,0.9C8.4,13.5,7.7,13.9,6.9,13.9z M21.2,10.7c-0.7,0-1.3-0.3-1.3-0.7c0-0.4,0.6-0.7,1.3-0.7s1.3,0.3,1.3,0.7 C22.4,10.4,21.9,10.7,21.2,10.7z',
+    pathB: 'M6.5,8.8c1.1,1.6,3.2,2.5,6.3,2.5c3.4,0,4.9-1.4,5.7-2.6c0.9-1.5,0.9-3.4,0.5-4.4c0,0,0,0,0,0 c0,0-1.9-3.4-6.5-3.4C8.1,1,6.5,3.7,6.3,4.1l0,0C5.8,5.3,5.5,7.2,6.5,8.8z M19.3,4.4c0.4,1.2,0.4,2.9-0.4,4.6 c-0.6,1.3-2.5,3.6-6.1,3.6c-4.1,0-5.9-2.2-6.8-3.5C5,7.5,5.4,5.6,5.9,4.3C2.4,5.6,0,7.4,0,10.1c0,4.2,5.6,7.6,12.4,7.6 c6.9,0,12.4-3.4,12.4-7.6C24.8,7.4,22.8,5.7,19.3,4.4z M3.5,9.2c-0.6,0-1.1-0.3-1.1-0.6C2.4,8.2,2.9,8,3.5,8 c0.6,0,1.1,0.3,1.1,0.6C4.6,8.9,4.2,9.2,3.5,9.2z M16.5,14.6c-0.9,0-1.7-0.4-1.7-0.9c0-0.5,0.8-0.9,1.7-0.9s1.7,0.4,1.7,0.9 C18.2,14.2,17.5,14.6,16.5,14.6z M20.2,5.6c-0.4,0-0.6-0.1-0.6-0.3c0-0.2,0.3-0.3,0.6-0.3c0.4,0,0.6,0.1,0.6,0.3 C20.8,5.5,20.5,5.6,20.2,5.6z',
     
     init: function() {
         // Reset necessary values
@@ -522,14 +516,14 @@ var Inv = {
                 el.setAttribute('col', col);
                 el.setAttribute('width', this.width);
                 el.setAttribute('height', this.height);
-                el.setAttribute('viewBox', this.offset(row) + ' 0 25 19'); // Controls viewport of individual invader
+                el.setAttribute('viewBox', '0 0 25 19'); // Controls viewport of individual invader
                 
                 var imageA = document.createElementNS(Game.ns, 'path');
                 var imageB = document.createElementNS(Game.ns, 'path');
-                imageA.setAttribute('d', this.path(row + 'a'));
-                imageA.setAttribute('class','anim1');
-                imageB.setAttribute('d', this.path(row + 'b'));
-                imageB.setAttribute('class','anim2');
+                imageA.setAttribute('d', this.pathA);
+                imageA.setAttribute('class','anim1 ' + this.type(row));
+                imageB.setAttribute('d', this.pathB);
+                imageB.setAttribute('class','anim2 ' + this.type(row));
                 el.appendChild(imageA);
                 el.appendChild(imageB);
                 
@@ -544,37 +538,22 @@ var Inv = {
         this.flock = document.getElementById('flock');
     },
     
+    type: function(row) {
+        switch(row) {
+            case 0: return 'a';
+            case 1: return 'b';
+            case 2: return 'b';
+            case 3: return 'c'; 
+            case 4: return 'c';
+        }
+    },
+    
     locX: function(col) {
         return this.x + (col * this.width) + (col * this.gap);
     },
     
     locY: function(row) {
         return this.y + (row * this.height) + (row * this.gap);
-    },
-    
-    offset: function(row) {
-        // helps to fix graphical offset from animation
-        switch(row) {
-            case 0: return -3;
-            case 1: return 1;
-            case 2: return 1;
-            default: return 0;
-        }
-    },
-    
-    path: function(row) {
-        switch(row) {
-            case '0a': return this.pathA1;
-            case '0b': return this.pathA2;
-            case '1a': return this.pathB1;
-            case '1b': return this.pathB2;
-            case '2a': return this.pathB1;
-            case '2b': return this.pathB2; 
-            case '3a': return this.pathC1; 
-            case '3b': return this.pathC2; 
-            case '4a': return this.pathC1;
-            case '4b': return this.pathC2;
-        }
     },
     
     // Fired from DOM window, cannot use this

@@ -1,7 +1,7 @@
 /*-----
 Defaults and screen setup
 -----*/
-body { margin: 0; background: black; color: #999 }
+body { margin: 0; background: black; color: #999; -webkit-user-select: none; user-select: none; }
 #container { margin: auto auto; text-align: center }
 #instructions { position: absolute; display: block; bottom: 1%; width: 100%; height: 10% }
 #instructions p { font-size: 1em; margin: 0 0 5px; padding: 0 }
@@ -25,9 +25,9 @@ text#more { font: 28px 'Courier New', Courier, monospace }
 
 /* Game */
 .life, .player, .shield, .ship { fill: #0af }
-.invader .a { fill: #8C19FF }
-.invader .b { fill: #1EE861 }
-.invader .c { fill: #FFE14D }
+.ufo .a { fill: #8C19FF }
+.ufo .b { fill: #1EE861 }
+.ufo .c { fill: #FFE14D }
 
 .closed .anim1, .open .anim2 { display: none }
 .open .anim1, .closed .anim2 { display: inherit }

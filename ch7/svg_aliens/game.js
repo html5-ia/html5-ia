@@ -101,9 +101,9 @@ var Game = {
         // Setup initial objects
         Hud.init();
         Shield.init();
-        Inv.init();
+        Ufo.init();
         Ship.init();
-        InvShip.init();
+        UfoBig.init();
                 
         // Run animation
         if (! this.play)
@@ -118,7 +118,7 @@ var Game = {
     
     update: function() {
         Ship.update();
-        InvShip.update();
+        UfoBig.update();
         Laser.update();
     },
     
@@ -145,7 +145,7 @@ var Game = {
     },
     
     end: function() {
-        clearRequestInterval(InvShip.timer);
+        clearRequestInterval(UfoBig.timer);
         
         this.remove.elClass('shield player life laser');
         this.remove.elId('flock invShip textScore textLives');
@@ -318,18 +318,19 @@ var Laser = {
                         laserY + this.height >= activeY &&
                         laserY <= (activeY + activeH)) {
                         
-                        // Use active's class to determine what was hit
-                        var activeClass = active[num].getAttribute('class');
-                        if (activeClass === 'invader active') {
-                            Inv.hit(active[num]);
-                        } else if (activeClass === 'shield active') {
-                            Shield.hit(active[num]);
-                        } else { // invader ship
-                            InvShip.hit(active[num]);
-                        }
-                        
                         // Remove laser
                         this.hit(lasers[cur]);
+                        
+                        // Use active's class to determine what was hit
+                        var activeClass = active[num].getAttribute('class');
+                        if (activeClass === 'ufo active') {
+                            Ufo.hit(active[num]);
+                        } else if (activeClass === 'shield active') {
+                            Shield.hit(active[num]);
+                        } else { // ufo ship
+                            UfoBig.hit(active[num]);
+                        }
+
                     } else if ( // Separate check due to ships using paths instead of x/y
                         (laserX >= Ship.x && laserX <= (Ship.x + Ship.width) &&
                         laserY >= Ship.y &&
@@ -416,7 +417,7 @@ var Ship = {
     }
 };
 
-var InvShip = {
+var UfoBig = {
     width: 45,
     height: 20,
     x: -46,
@@ -424,20 +425,20 @@ var InvShip = {
     speed: 1,
     delay: 30000,
     init: function() {
-        // Invader ships have their own separate spawning timer
+        // ufo ships have their own separate spawning timer
         this.timer = requestInterval(this.build, this.delay);
     },
     
     // Fires from window, no this
     build: function() {
-        // create invader ship element
+        // create ufo ship element
         var el = document.createElementNS(Game.ns, 'image');
         el.setAttribute('id', 'invShip'); // Can be targeted by ID since only 1 will ever be present
         el.setAttribute('class', 'invShip active');
-        el.setAttribute('x', InvShip.x);
-        el.setAttribute('y', InvShip.y);
-        el.setAttribute('width', InvShip.width);
-        el.setAttribute('height', InvShip.height);
+        el.setAttribute('x', UfoBig.x);
+        el.setAttribute('y', UfoBig.y);
+        el.setAttribute('width', UfoBig.width);
+        el.setAttribute('height', UfoBig.height);
         el.setAttributeNS(Game.xlink, 'xlink:href', 'mothership.svg');
         Game.svg.appendChild(el);
     },
@@ -462,7 +463,7 @@ var InvShip = {
     }
 };
 
-var Inv = {
+var Ufo = {
     width: 25,
     height: 19,
     x: 64,
@@ -471,7 +472,7 @@ var Inv = {
     row: 5,
     col: 11,
     
-    // Invader paths retrieved from Inkscape or Illustrator via SVG save
+    // ufo paths retrieved from Inkscape or Illustrator via SVG save
     pathA: 'M6.5,8.8c1.1,1.6,3.2,2.5,6.2,2.5c3.3,0,4.9-1.4,5.6-2.6c0.9-1.5,0.9-3.4,0.5-4.4c0,0,0,0,0,0 c0,0-1.9-3.4-6.5-3.4c-4.3,0-5.9,2.8-6.1,3.2l0,0C5.7,5.3,5.5,7.2,6.5,8.8z M19.2,4.4c0.4,1.2,0.4,2.9-0.4,4.6 c-0.6,1.3-2.5,3.6-6.1,3.6c-4.1,0-5.9-2.2-6.7-3.5C5.4,8,5.3,6.9,5.5,5.8C5.4,5.9,5.2,6,4.9,6C4.5,6,4.2,5.8,4.2,5.6 c0-0.2,0.3-0.3,0.7-0.3c0.3,0,0.6,0.1,0.6,0.3c0.1-0.5,0.2-0.9,0.4-1.3C2.4,5.6,0,7.4,0,10.1c0,4.2,5.5,7.6,12.4,7.6 c6.8,0,12.4-3.4,12.4-7.6C24.7,7.4,22.7,5.7,19.2,4.4z M6.9,13.9c-0.8,0-1.5-0.4-1.5-0.9c0-0.5,0.7-0.9,1.5-0.9 c0.8,0,1.5,0.4,1.5,0.9C8.4,13.5,7.7,13.9,6.9,13.9z M21.2,10.7c-0.7,0-1.3-0.3-1.3-0.7c0-0.4,0.6-0.7,1.3-0.7s1.3,0.3,1.3,0.7 C22.4,10.4,21.9,10.7,21.2,10.7z',
     pathB: 'M6.5,8.8c1.1,1.6,3.2,2.5,6.3,2.5c3.4,0,4.9-1.4,5.7-2.6c0.9-1.5,0.9-3.4,0.5-4.4c0,0,0,0,0,0 c0,0-1.9-3.4-6.5-3.4C8.1,1,6.5,3.7,6.3,4.1l0,0C5.8,5.3,5.5,7.2,6.5,8.8z M19.3,4.4c0.4,1.2,0.4,2.9-0.4,4.6 c-0.6,1.3-2.5,3.6-6.1,3.6c-4.1,0-5.9-2.2-6.8-3.5C5,7.5,5.4,5.6,5.9,4.3C2.4,5.6,0,7.4,0,10.1c0,4.2,5.6,7.6,12.4,7.6 c6.9,0,12.4-3.4,12.4-7.6C24.8,7.4,22.8,5.7,19.3,4.4z M3.5,9.2c-0.6,0-1.1-0.3-1.1-0.6C2.4,8.2,2.9,8,3.5,8 c0.6,0,1.1,0.3,1.1,0.6C4.6,8.9,4.2,9.2,3.5,9.2z M16.5,14.6c-0.9,0-1.7-0.4-1.7-0.9c0-0.5,0.8-0.9,1.7-0.9s1.7,0.4,1.7,0.9 C18.2,14.2,17.5,14.6,16.5,14.6z M20.2,5.6c-0.4,0-0.6-0.1-0.6-0.3c0-0.2,0.3-0.3,0.6-0.3c0.4,0,0.6,0.1,0.6,0.3 C20.8,5.5,20.5,5.6,20.2,5.6z',
     
@@ -481,42 +482,42 @@ var Inv = {
         this.ySpeed = 0;
         this.counter = 0;
         
-        // Create invaders
+        // Create ufos
         this.build();
         
-        // Invaders run on their own separate time gauge
+        // ufos run on their own separate time gauge
         this.delay = 800 - (20 * Hud.level); // Delay dynamically changes so reset it
         
         if (this.timer)
-            clearRequestInterval(Inv.timer);
+            clearRequestInterval(Ufo.timer);
         this.timer = requestInterval(this.update, this.delay); // Must use self since it from the global scale
     },
     
     build: function() {        
-        // Create group for storing invader array output
+        // Create group for storing ufo array output
         var group = document.createElementNS(Game.ns, 'g');
         group.setAttribute('class','open');
         group.setAttribute('id','flock');
         
-        // Create the invader array
+        // Create the ufo array
         var invArray = new Array(this.row);
         for (var row = 0; row < this.row; row++) {
             invArray[row] = new Array(this.col);
         }
         
-        // Loop through invader array data you just created
+        // Loop through ufo array data you just created
         for (var row = 0; row < this.row; row++) {
             for (var col=0; col < this.col; col++) {       
-                // Setup the invader's output
+                // Setup the ufo's output
                 var el = document.createElementNS(Game.ns, 'svg');
                 el.setAttribute('x', this.locX(col));
                 el.setAttribute('y', this.locY(row));
-                el.setAttribute('class', 'invader active');
+                el.setAttribute('class', 'ufo active');
                 el.setAttribute('row', row);
                 el.setAttribute('col', col);
                 el.setAttribute('width', this.width);
                 el.setAttribute('height', this.height);
-                el.setAttribute('viewBox', '0 0 25 19'); // Controls viewport of individual invader
+                el.setAttribute('viewBox', '0 0 25 19'); // Controls viewport of individual ufo
                 
                 var imageA = document.createElementNS(Game.ns, 'path');
                 var imageB = document.createElementNS(Game.ns, 'path');
@@ -531,10 +532,10 @@ var Inv = {
             }
         }
         
-        // Add the created invader flock to the DOM
+        // Add the created ufo flock to the DOM
         Game.svg.appendChild(group);
         
-        // Store the invader flock for manipulation later
+        // Store the ufo flock for manipulation later
         this.flock = document.getElementById('flock');
     },
     
@@ -558,10 +559,10 @@ var Inv = {
     
     // Fired from DOM window, cannot use this
     update: function() {
-        var invs = document.getElementsByClassName('invader');
+        var invs = document.getElementsByClassName('ufo');
         
         if (invs.length > 0) {
-            // Find the first and last invader in the flock
+            // Find the first and last ufo in the flock
             var xFirst = Game.width;
             var xLast = 0;
             for (var count = 0; count < invs.length; count++) {
@@ -570,41 +571,41 @@ var Inv = {
                 xLast = Math.max(xLast, x);
             }
             
-            // Set speed based upon first and last invader results
-            if ((xLast >= (Game.width - 20 - Inv.width) &&
-                Inv.ySpeed === 0) ||
-                (xFirst < 21 && Inv.ySpeed === 0))
-                    Inv.ySpeed = Math.abs(Inv.speed);
-            else if ((xLast >= (Game.width - 20 - Inv.width)) ||
+            // Set speed based upon first and last ufo results
+            if ((xLast >= (Game.width - 20 - Ufo.width) &&
+                Ufo.ySpeed === 0) ||
+                (xFirst < 21 && Ufo.ySpeed === 0))
+                    Ufo.ySpeed = Math.abs(Ufo.speed);
+            else if ((xLast >= (Game.width - 20 - Ufo.width)) ||
                 (xFirst < 21) ||
-                Inv.ySpeed > 0) {
-                    Inv.speed = -Inv.speed;
-                    Inv.ySpeed = 0;
+                Ufo.ySpeed > 0) {
+                    Ufo.speed = -Ufo.speed;
+                    Ufo.ySpeed = 0;
             }
             
-            // Update invader positions
+            // Update ufo positions
             for (var count = 0; count < invs.length; count++) {
                 // Increment x and y counters
                 var x = parseInt(invs[count].getAttribute('x'));
                 var y = parseInt(invs[count].getAttribute('y'));
-                var xNew = x + Inv.speed;
-                var yNew = y + Inv.ySpeed;
+                var xNew = x + Ufo.speed;
+                var yNew = y + Ufo.ySpeed;
                 
                 // Set direction (left, right, down)
-                if (Inv.ySpeed > 0) {
+                if (Ufo.ySpeed > 0) {
                     invs[count].setAttribute('y', yNew);
                 } else {
                     invs[count].setAttribute('x', xNew);
                 }
                 
-                // Test if Invaders have pushed far enough to beat the player
-                if (y > Shield.y - 20 - Inv.height) {
+                // Test if ufos have pushed far enough to beat the player
+                if (y > Shield.y - 20 - Ufo.height) {
                     return Game.end(); // Exit everything and shut down the game
                 }
             }
             
-            Inv.animate();
-            Inv.shoot(invs);
+            Ufo.animate();
+            Ufo.shoot(invs);
         }
     },
     
@@ -618,11 +619,11 @@ var Inv = {
     },
     
     shoot: function(invs) {
-        // Test a random number to see if the Invaders fire
+        // Test a random number to see if the ufos fire
         var test = Math.floor(Math.random() * 5);
 
         if (test === 1) {
-            // Choose a random invader to fire
+            // Choose a random ufo to fire
             var invRandom = Math.floor(Math.random() * invs.length);
             var invX = parseInt(invs[invRandom].getAttribute('x'));
             var y = 0;
@@ -631,7 +632,7 @@ var Inv = {
             for (var count = 0; count < invs.length; count++) {
                 var currentX = parseInt(invs[count].getAttribute('x'));
                 
-                // If in the same column find the bottom most Invader
+                // If in the same column find the bottom most ufo
                 if (invX === currentX) {
                     var yVal = parseInt(invs[count].getAttribute('y'));
                     var y = Math.max(y, yVal);
@@ -700,28 +701,33 @@ var Hud = {
                 el.firstChild);
         },
         level: function() {
-            // count invader kills
-            Inv.counter += 1;
-            var invTotal = Inv.col * Inv.row;
+            // count ufo kills
+            Ufo.counter += 1;
+            var invTotal = Ufo.col * Ufo.row;
             
             // Test to level
-            if (Inv.counter === invTotal) {
+            if (Ufo.counter === invTotal) {                
                 Hud.level += 1;
-                Inv.counter = 0;
-                                
-                clearRequestInterval(Inv.timer);
-                Game.svg.removeChild(Inv.flock);
-                Inv.init();
-            } else if (Inv.counter === Math.round(invTotal / 2)) { // Increase invader speed
-                Inv.delay -= 250;
+                Ufo.counter = 0;
                 
-                clearRequestInterval(Inv.timer);
-                Inv.timer = requestInterval(Inv.update, Inv.delay);
-            } else if (Inv.counter === (Inv.col * Inv.row) - 3) {
-                Inv.delay -= 300;
+                clearRequestInterval(Ufo.timer);
+                Game.svg.removeChild(Ufo.flock);
                 
-                clearRequestInterval(Inv.timer);
-                Inv.timer = requestInterval(Inv.update, Inv.delay);
+                // Wait a brief moment to spawn next wave
+                window.setTimeout(function() {
+                    Ufo.init();
+                }, 300);
+                
+            } else if (Ufo.counter === Math.round(invTotal / 2)) { // Increase ufo speed
+                Ufo.delay -= 250;
+                
+                clearRequestInterval(Ufo.timer);
+                Ufo.timer = requestInterval(Ufo.update, Ufo.delay);
+            } else if (Ufo.counter === (Ufo.col * Ufo.row) - 3) {
+                Ufo.delay -= 300;
+                
+                clearRequestInterval(Ufo.timer);
+                Ufo.timer = requestInterval(Ufo.update, Ufo.delay);
             }
         }
     },
@@ -801,7 +807,6 @@ var Ctrl = {
         var player = document.getElementsByClassName('player');
         
         if (event.button === 0 &&
-            ! laser.length &&
             player.length)
             Laser.build(Ship.x + (Ship.width / 2), Ship.y, true);
     }

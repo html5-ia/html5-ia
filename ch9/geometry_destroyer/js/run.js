@@ -157,7 +157,7 @@ gd.template.Player = gd.template.Entity.extend({
         this._super();
         
         // Clear timeout for leveling
-        AsteroidGen.clear();
+        PolygonGen.clear();
         
         // End game screen
         Hud.end();
@@ -175,8 +175,8 @@ Hud = {
                 // Remove listener
                 window.removeEventListener('keydown', callback, true);
                 
-                // Create asteroid generator
-                AsteroidGen.init();
+                // Create polygon generator
+                PolygonGen.init();
                 
                 // Hide text
                 self.el.start.style.display = 'none';
@@ -262,16 +262,16 @@ gd.template.Bullet = gd.template.Entity.extend({
     }
 });
     
-AsteroidGen = {
+PolygonGen = {
     delay: 7000,
     limit: 9,
     
     init: function() {
         var self = this;
         
-        // Spawn first asteroid
+        // Spawn first polygon
         this.count = 1;
-        gd.game.spawn('Asteroid');
+        gd.game.spawn('Polygon');
         
         // Setup spawn timer
         this.create = window.requestInterval(function() {
@@ -281,7 +281,7 @@ AsteroidGen = {
                     self.count++;
                 
                 for (var c = self.count; c--;) {
-                    gd.game.spawn('Asteroid');
+                    gd.game.spawn('Polygon');
                 }   
             }
         }, self.delay);
@@ -297,7 +297,7 @@ AsteroidGen = {
     }
 };
 
-gd.template.Asteroid = gd.template.Entity.extend({
+gd.template.Polygon = gd.template.Entity.extend({
     type: 'b',
     width: 7,
     height: 9,
@@ -478,8 +478,8 @@ gd.template.Asteroid = gd.template.Entity.extend({
     collide: function() {            
         // Generate a number of particles spawned at current center
         // But only if the game has enough memory to support it
-        if (gd.core.storage.all.length < 20) {
-            for ( var p = 3; p--; ) {
+        if (gd.core.storage.all.length < 50) {
+            for ( var p = 15; p--; ) {
                 gd.game.spawn('Particle', this.x, this.y);
             }
         }

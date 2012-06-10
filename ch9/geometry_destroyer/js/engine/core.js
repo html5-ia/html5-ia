@@ -261,10 +261,10 @@ gd.core = {
                     }
                 }
             }
-            
-            // Clean out killed items
-            this.graveyard.purge();
         }
+        
+        // Clean out killed items
+        this.graveyard.purge();
     },
     
     // Used to destroy entities when necessary instead of doing it during the loop and potentially blowing
@@ -314,6 +314,7 @@ gd.core = {
             // Clean out of browser's memory permanently
             gd.gl.deleteBuffer(object.colorStorage);
             gd.gl.deleteBuffer(object.shapeStorage);
+                
             delete object;
         }
     },

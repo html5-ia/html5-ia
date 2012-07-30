@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>Registration Form</title>
+		<link rel="stylesheet" href="style.css">
+		<script src="app.js"></script>
+	</head>
+	<body>
+		<h1>Awesome HTML5 Registration Form</h1>
+		<form name="register">
+			<fieldset>
+				<legend>Account Information</legend>
+				<ul>
+					<li>
+						<label for="username">Username*</label>
+						<input name="username" id="username" autofocus required>
+					</li>
+					<li>
+						<label for="password">Password*</label>
+						<input type="password" name="password" id="password" required>
+						<meter id="password_strength" value="0" min="0" max="5" low="3" high="4" optimum="5"></meter>
+					</li>
+					<li>
+						<label for="confirm_password">Confirm Password*</label>
+						<input type="password" name="confirm_password" id="confirm_password" required>
+					</li>
+					<li>
+						<label for="credit_card">Credit Card No*</label>
+						<input name="credit_card" id="credit_card" pattern="[0-9]{13,16}" title="13-16 digits, no spaces" required>
+					</li>
+				</ul>
+			</fieldset>
+			<fieldset>
+				<legend>Personal Information</legend>
+				<ul>
+					<li>
+						<label for="name">Name*</label>
+						<input name="name" id="name" required>
+					</li>
+					<li>
+						<label for="date_of_birth">Date of Birth*</label>
+						<input type="date" name="date_of_birth" id="date_of_birth" required>					
+					</li>
+					<li>
+						<label for="color">Favorite Color</label>
+						<input type="color" name="color" id="color" value="#0000FF">
+					</li>
+					<li>
+						<label for="photo">Profile Photo(s)</label>
+						<input type="file" name="photo" id="photo" multiple>
+					</li>
+					<li>
+						<label for="browser">Favorite Browser</label>
+						<input list="browsers" name="browser" id="browser">
+						<datalist id="browsers">
+							<option value="Chrome"></option>
+							<option value="Firefox"></option>
+							<option value="Internet Explorer"></option>
+							<option value="Opera"></option>							
+							<option value="Safari"></option>
+						</datalist>
+					</li>
+				</ul>
+			</fieldset>
+			<fieldset>
+				<legend>Company Information</legend>
+				<ul>
+					<li>
+						<label for="employees">No. of Employees</label>
+						<input type="number" name="employees" id="employees" min="0" max="100000" step="100">
+					</li>
+					<li>						
+						<label for="revenue">Estimated Revenue</label>
+						<input type="range" name="revenue" id="revenue" min="0" max="1000" step="1" value="0">
+						<output for="revenue" name="revenue_display">$0 million</output>
+					</li>
+				</ul>
+			</fieldset>
+			<fieldset>
+				<legend>Contact Information</legend>
+				<ul>
+					<li>
+						<label for="email">Email Address(es)*</label>
+						<input type="email" name="email" id="email" placeholder="me1@me.com, me2@me.com" required multiple>
+					</li>
+					<li>
+						<label for="phone_number">Phone Number</label>
+						<input type="tel" name="phone_number" id="phone_number" placeholder="(555) 123-4567">
+					</li>
+					<li>
+						<label for="website">Website URL</label>
+						<input type="url" name="website" id="website" placeholder="http://example.com">
+					</li>
+				</ul>
+			</fieldset>
+			<fieldset>
+				<input type="submit" name="submit" value="Submit Registration">
+				<input type="submit" name="submit" value="Submit without Validation" formnovalidate>
+			</fieldset>
+		</form>
+	</body>
+</html>

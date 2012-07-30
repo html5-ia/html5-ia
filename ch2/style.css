@@ -1,0 +1,109 @@
+/* CSS Styles for Registration Form */
+html, body, h1, form, fieldset, legend, ul, li {
+	margin: 0; padding: 0;
+}
+
+body {
+	background: #eee; color: #111;
+	font-family: Helvetica, Arial, sans-serif;
+	padding: 20px;
+}
+
+h1 {
+	margin: 0 0 15px 0; color: #333;
+	text-shadow: 0 1px 1px #eee;
+}
+
+form {
+	background: #ccc;
+	-moz-border-radius: 5px; border-radius: 5px;
+	padding: 20px; width: 510px;
+	box-shadow: 10px 10px 20px #666;
+}
+
+fieldset {
+	border: none; margin: 0 0 10px 0;
+}
+
+fieldset:last-of-type {
+	margin: 0;
+}
+
+legend {
+	color: #333;
+	font-size: 16px; font-weight: bold;
+	padding: 0 0 10px 0;
+	text-shadow: 0 1px 1px #fff;
+}
+
+ul {
+	margin: 0 0 20px 0;
+	box-shadow: 5px 5px 10px #666;
+	border-radius: 5px;
+}
+
+li {
+	background: #aaa;
+	line-height: 30px; list-style: none;
+	padding: 3px 10px;
+}
+
+li:first-child {
+	-moz-border-radius-topleft: 5px; -moz-border-radius-topright: 5px;
+	border-top-left-radius: 5px; border-top-right-radius: 5px;
+}
+
+li:last-child {
+	-moz-border-radius-bottomleft: 5px; -moz-border-radius-bottomright: 5px;
+	border-bottom-left-radius: 5px; border-bottom-right-radius: 5px;
+}
+
+label {
+	float: left; font-size: 14px; width: 230px;
+	color: #333; font-weight: bold;
+	text-shadow: 0 1px 1px #fff;
+}
+
+input:not([type=submit]) {
+	border: 1px solid #666;
+	-moz-border-radius: 3px; -webkit-border-radius: 3px; border-radius: 3px;
+	font: 15px Helvetica, Arial, sans-serif;
+	outline: none;
+	padding: 5px; width: 240px;
+}
+
+input:not([type=submit]):not([type=range]):focus:valid {
+	background: lightgreen;
+}
+
+input:not([type=submit]):not([type=range]):focus:invalid {
+	background: pink;
+}
+
+input[type=range] {
+	outline: none; padding: 5px;width: 240px; border: none;
+}
+
+output {
+	display: block; 
+	margin: -15px 0 0 230px;
+	font-size: 13px; color: #333;
+	text-shadow: 0 1px 1px #fff; text-align: center;
+}
+
+meter {
+	display: block; width: 240px;
+	margin: 0 0 0 230px;
+}
+
+input[type=submit], input[type=reset] {
+	padding: 8px 15px;
+	font-size: 14px; font-weight: bold;
+	border-radius: 6px;
+	color: #fff; border: 1px solid #111;
+	background: #555;
+}
+
+input[type=submit]:hover, input[type=reset]:hover {
+	background: #333; cursor: pointer;
+}

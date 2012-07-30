@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Super HTML5 Editor</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="app.js"></script>
+</head>
+<body class="list">
+    <header><h1>Super HTML5 Editor</h1></header>
+    <section id="list">
+        <h1>File Browser</h1>        
+            <details open id="filedrop">
+                <summary>Create File</summary>
+                <form name="create">
+                    <div>
+                        <h2>Create an empty file</h2>
+                        <input type="text" name="name" placeholder="Filename, e.g. index.html">
+                        <input type="submit" value="Create">
+                    </div>
+                </form>
+                <div class="spacer">OR</div>
+                <form name="import">
+                    <div>
+                        <h2>Import existing file(s)</h2>
+                        <input type="file" name="files" multiple accept="text/html">
+                        <input type="submit" value="Import">
+                    </div>
+                </form>
+    
+                <div class="note">
+                    <strong>Note</strong>: 
+                    You can drag files from your computer and drop them anywhere in this box
+                    to import them into the application.
+                </div>
+            </details>
+
+            <details open>
+                <summary>My Files</summary>            
+                <div class="note top">
+                    You currently have <span id="file_count">0</span> file(s):
+                </div>
+                <ul id="files"></ul>
+                <div class="note">
+                    <strong>Note</strong>: 
+                    You can drag any of the files in the list above to your computer to
+                    export them from the application.
+                </div>
+            </details>
+    </section>
+    
+    <section id="editor">
+        <h1>Editing <span id="file_name"></span><a href="#list">Back to File Browser</a></h1>
+        <div class="mode-toolbar">
+            <div class="left">
+                <div>Edit Mode:</div>
+                <button id="edit_visual" class="split_left active">Visual</button>
+                <button id="edit_html" class="split_right">HTML</button>
+            </div>
+            <div class="right">
+                <button id="file_save" class="green">Save File</button>
+                <button id="file_preview">Save &amp; Preview</button>
+            </div>
+        </div>
+        
+        <details open>
+            <summary>File Contents</summary>
+            <div id="file_contents">
+                <div id="file_contents_visual">
+                    <div id="file_contents_visual_toolbar">
+                        <button data-command="bold"><strong>B</strong></button>
+                        <button data-command="italic"><em>I</em></button>
+                        <button data-command="underline"><u>U</u></button>
+                        <button data-command="strikethrough"><strike>S</strike></button>
+                        <button data-command="insertUnorderedList">List</button>
+                        <button data-command="createLink">Link</button>
+                        <button data-command="unlink">Unlink</button>
+                        <button data-command="insertImage">Image</button>
+                        <button data-command="insertMap">Location Map</button>
+                    </div>
+                    <iframe id="file_contents_visual_editor"></iframe>
+                </div>
+                <div id="file_contents_html">
+                    <textarea id="file_contents_html_editor"></textarea>
+                </div>
+            </div>
+        </details>
+    </section>
+</body>
+</html>

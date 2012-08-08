@@ -7,38 +7,44 @@ Publisher: Manning
 */
 
 // Immediately executes the data inside and prevents global namespace issues
-(function () {
+(function() {
     // How to figure out what a user's computer can handle for frames with fallbacks
     // Original by Paul Irish: http://paulirish.com/2011/requestanimationframe-for-smart-animating/
-    // Clear interval version here created by Jerome Etienne http://notes.jetienne.com/2011/05/18/cancelRequestAnimFrame-for-paul-irish-requestAnimFrame.html
-    window.requestAnimFrame = ( function() {
+    window.requestAnimFrame = (function() {
         return  window.requestAnimationFrame        ||
         window.webkitRequestAnimationFrame          ||
         window.mozRequestAnimationFrame             ||
         window.oRequestAnimationFrame               ||
         window.msRequestAnimationFrame              ||
-        function(/* function */ callback, /* DOMElement */ element){
-            return window.setTimeout(callback, 1000 / 60);
+        function(callback) {
+            window.setTimeout(callback, 1000 / 60);
         };
     })();
+
+    // Residing place for our Canvas' context
+    var ctx = null;
 
     var Game = {
         // Setup configuration
         canvas: document.getElementById('canvas'),
         setup: function() {
-            if (this.canvas.getContext){
+            if (this.canvas.getContext) {
                 // Setup variables
-                this.ctx = this.canvas.getContext('2d');
+                ctx = this.canvas.getContext('2d');
+
+                // Cache width and height of the Canvas to save processing power
+                this.width = this.canvas.width;
+                this.height = this.canvas.height;
 
                 // Run the game
                 Screen.welcome();
-                this.canvas.addEventListener('click', this.listen.run, false);
+                this.canvas.addEventListener('click', this.runGame, false);
                 Ctrl.init();
             }
         },
 
+        // Setup initial objects
         init: function() {
-            // Setup initial objects
             Background.init();
             Hud.init();
             Bricks.init();
@@ -46,14 +52,14 @@ Publisher: Manning
             Paddle.init();
         },
 
+        // Run from the global space, so you must use Game instead of this to prevent a crash
         animate: function() {
-            // Run from the global space, so you must use Game instead of this to prevent a crash
-            Game.draw();
             Game.play = requestAnimFrame(Game.animate);
+            Game.draw();
         },
 
         draw: function() {
-            this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            ctx.clearRect(0, 0, this.width, this.height);
 
             // Draw objects
             Background.draw();
@@ -63,38 +69,32 @@ Publisher: Manning
             Ball.draw();
         },
 
+        // Must reference as Game isntead of this due to when the listener is fired (outside of the object)
+        runGame: function() {
+            Game.canvas.removeEventListener('click', Game.runGame, false);
+            Game.init();
+
+            // Run animation
+            Game.animate();
+        },
 
         // Must reference as Game isntead of this due to when the listener is fired (outside of the object)
-        listen: {
-            run: function() {
-                Game.canvas.removeEventListener('click', Game.listen.run, false);
-                Game.init();
-
-                // Run animation
-                Game.animate();
-            },
-            restart: function() {
-                Game.canvas.removeEventListener('click', Game.listen.restart, false);
-                Game.init();
-            }
+        restartGame: function() {
+            Game.canvas.removeEventListener('click', Game.restartGame, false);
+            Game.init();
         },
 
         // Leveling
-        level: {
-            up: function() {
-                Hud.lv += 1;
-                Bricks.init();
-                Ball.init();
-                Paddle.init();
-            },
-            limit: function(lv) {
-                if (lv > 5) {
-                    return 5;
-                } else {
-                    return lv;
-                }
-            }
+        levelUp: function() {
+            Hud.lv += 1;
+            Bricks.init();
+            Ball.init();
+            Paddle.init();
         },
+
+        levelLimit: function(lv) {
+            return lv > 5 ? 5 : lv;
+        }
     };
 
     var Screen = {
@@ -117,25 +117,20 @@ Publisher: Manning
         },
 
         create: function() {
-            // Cache variables
-            var ctx = Game.ctx;
-            var width = Game.canvas.width;
-            var height = Game.canvas.height;
-
             // Background
             ctx.fillStyle = 'black';
-            ctx.fillRect(0, 0, width, height);
+            ctx.fillRect(0, 0, Game.width, Game.height);
 
             // Main text
             ctx.fillStyle = this.textColor;
             ctx.textAlign = 'center';
             ctx.font = '40px helvetica, arial';
-            ctx.fillText(this.text, width/2, height/2);
+            ctx.fillText(this.text, Game.width / 2, Game.height / 2);
 
             // Sub text
             ctx.fillStyle = '#999999';
             ctx.font = '20px helvetica, arial';
-            ctx.fillText(this.textSub, width/2, height/2 + 30);
+            ctx.fillText(this.textSub, Game.width / 2, Game.height / 2 + 30);
         }
     };
 
@@ -144,17 +139,20 @@ Publisher: Manning
     ***************************/
     var Background = {
         init: function() {
+            // Makes sure nothing is drawn until the image is fully loaded
             this.ready = false;
 
+            // Createa a background image
             this.img = new Image();
             this.img.src = 'background.jpg';
             this.img.onload = function() {
                 Background.ready = true;
-            }
+            };
         },
         draw: function() {
-            if (this.ready)
-                Game.ctx.drawImage(this.img,0,0);
+            if (this.ready) {
+                ctx.drawImage(this.img, 0, 0);
+            }
         }
     };
 
@@ -163,8 +161,8 @@ Publisher: Manning
         init: function() {
             this.x = 120;
             this.y = 120;
-            this.sx = 1 + (.4 * Hud.lv);
-            this.sy = -1.5 - (.4 * Hud.lv);
+            this.sx = 1 + (0.4 * Hud.lv);
+            this.sy = -1.5 - (0.4 * Hud.lv);
         },
 
         draw: function() {
@@ -173,14 +171,11 @@ Publisher: Manning
             this.collide();
             this.move();
 
-            // Cache game's context since its used multiple times
-            var ctx = Game.ctx;
-
             // Create ball
             ctx.beginPath();
             ctx.arc(this.x, this.y, this.r, 0, 2 * Math.PI);
             ctx.closePath();
-            this.gradient();
+            ctx.fillStyle = this.gradient();
             ctx.fill();
         },
 
@@ -191,53 +186,49 @@ Publisher: Manning
 
         // Edge dectection
         edges: function() {
-            // Cache Game's canvas for quicker reference
-            var canvas = Game.canvas;
-
             // Top
             if (this.y < 1) {
                 this.y = 1; // Prevents the ball from getting stuck at fast speeds
                 this.sy = -this.sy;
-            } else if (this.y > canvas.height) { // Bottom
+            } else if (this.y > Game.height) { // Bottom
                 // Stop the ball and hide it
-                // Note: You could use a clear animation frame request,
-                // but its very unstable in all browsers.
                 this.sy = this.sx = 0;
                 this.y = this.x = 1000;
 
                 // Shut down
                 Screen.gameover();
-                canvas.addEventListener('click', Game.listen.restart, false);
+                Game.canvas.addEventListener('click', Game.restartGame, false);
+                return;
             }
 
             // Left
             if (this.x < 1) {
-                    this.x = 1; // Prevents the ball from getting stuck at fast speeds
-                    this.sx = - this.sx;
-            } else if (this.x > canvas.width) { // Right
-                    this.x = canvas.width - 1; // Prevents the ball from getting stuck at fast speeds
-                    this.sx = - this.sx;
+                this.x = 1; // Prevents the ball from getting stuck at fast speeds
+                this.sx = -this.sx;
+            } else if (this.x > Game.width) { // Right
+                this.x = Game.width - 1; // Prevents the ball from getting stuck at fast speeds
+                this.sx = -this.sx;
             }
         },
 
         // Paddle to ball collision detection
         collide: function() {
-            var padX = Paddle.x;
-            var padY = Paddle.y;
-            var padW = Paddle.w;
-
-            if (this.x >= padX && this.x <= (padX + padW) && this.y >= padY && this.y <= (padY + padW)) {
-                this.sx = 7 * ((this.x - (padX + padW / 2)) / padW);
+            if (this.x >= Paddle.x &&
+                this.x <= (Paddle.x + Paddle.w) &&
+                this.y >= Paddle.y &&
+                this.y <= (Paddle.y + Paddle.w)) {
+                this.sx = 7 * ((this.x - (Paddle.x + Paddle.w / 2)) / Paddle.w);
                 this.sy = -this.sy;
             }
         },
 
         // Gradient for the ball
         gradient: function() {
-            var grad = Game.ctx.createRadialGradient(this.x, this.y, 2, this.x - 4, this.y - 3, 10);
+            var grad = ctx.createRadialGradient(this.x, this.y, 2, this.x - 4, this.y - 3, 10);
             grad.addColorStop(0, '#eee');
             grad.addColorStop(1, '#999');
-            return Game.ctx.fillStyle = grad;
+
+            return grad;
         }
     };
 
@@ -254,9 +245,6 @@ Publisher: Manning
         draw: function() {
             this.move();
 
-            // Cache drawing tool
-            var ctx = Game.ctx;
-
             // Create paddle
             ctx.beginPath();
             ctx.moveTo(this.x, this.y);
@@ -265,7 +253,7 @@ Publisher: Manning
             ctx.arcTo(this.x, this.y + this.h, this.x, this.y + this.h - this.r, this.r);
             ctx.arcTo(this.x, this.y, this.x + this.r, this.y, this.r);
             ctx.closePath();
-            this.gradient();
+            ctx.fillStyle = this.gradient();
             ctx.fill();
         },
 
@@ -279,10 +267,11 @@ Publisher: Manning
         },
 
         gradient: function() {
-            var grad = Game.ctx.createLinearGradient(this.x, this.y, this.x, this.y + 20);
+            var grad = ctx.createLinearGradient(this.x, this.y, this.x, this.y + 20);
             grad.addColorStop(0, '#eee');
             grad.addColorStop(1, '#999');
-            return Game.ctx.fillStyle = grad;
+
+            return grad;
         }
     };
 
@@ -292,46 +281,42 @@ Publisher: Manning
         w: 80,
         h: 15,
         init: function() {
-            this.row = 2 + Game.level.limit(Hud.lv);
+            this.row = 2 + Game.levelLimit(Hud.lv);
             this.total = 0;
 
             // Create an updatable brick array = number of bricks
-            this.count = new Array(this.row);
-            for (i=0; i < this.row; i++) {
-                this.count[i] = new Array(this.col);
+            this.count = [this.row];
+            for (var i = this.row; i--;) {
+                this.count[i] = [this.col];
             }
         },
 
         draw: function() {
-            // Never declare variables inside a loop
-            var ballX, ballY, brickX, brickY;
-
-            for (i=0; i < this.row; i++) {
-                for (j=0; j < this.col; j++) {
+            var i, j;
+            for (i = this.row; i--;) {
+                for (j = this.col; j--;) {
                     // Test in case we shouldn't draw a brick
                     if (this.count[i][j] !== false) {
-                        // Cache needed information
-                        ballX = Ball.x;
-                        ballY = Ball.y;
-                        brickX = this.x(j);
-                        brickY = this.y(i);
-
                         // Delete overlapping bricks if present
-                        if (ballX >= brickX && ballX <= (brickX + this.w) && ballY >= brickY && ballY <= (brickY + this.h)) {
+                        if (Ball.x >= this.x(j) &&
+                            Ball.x <= (this.x(j) + this.w) &&
+                            Ball.y >= this.y(i) &&
+                            Ball.y <= (this.y(i) + this.h)) {
                             Hud.score += 1;
                             this.total += 1;
                             this.count[i][j] = false;
                             Ball.sy = -Ball.sy;
                         }
 
-                        this.gradient(i);
-                        Game.ctx.fillRect(brickX, brickY, this.w, this.h);
+                        ctx.fillStyle = this.gradient(i);
+
+                        ctx.fillRect(this.x(j), this.y(i), this.w, this.h);
                     }
                 }
             }
 
             if (this.total === (this.row * this.col)) {
-                Game.level.up();
+                Game.levelUp();
             }
         },
 
@@ -345,7 +330,7 @@ Publisher: Manning
 
         gradient: function(row) {
             var y = this.y(row);
-            var grad = Game.ctx.createLinearGradient(0, y, 0, y + this.h);
+            var grad = ctx.createLinearGradient(0, y, 0, y + this.h);
             switch(row) {
                 case 0: grad.addColorStop(0,'#bd06f9');
                     grad.addColorStop(1,'#9604c7'); break;
@@ -359,7 +344,8 @@ Publisher: Manning
                 default: grad.addColorStop(0,'#faa105');
                     grad.addColorStop(1,'#c77f04'); break;
             }
-            return Game.ctx.fillStyle = grad;
+
+            return grad;
         }
     };
 
@@ -370,15 +356,12 @@ Publisher: Manning
         },
 
         draw: function() {
-            var ctx = Game.ctx;
-            var canvasH = Game.canvas.height;
-
             ctx.font = '12px helvetica, arial';
             ctx.fillStyle = 'white';
             ctx.textAlign = 'left';
-            ctx.fillText('Score: ' + Hud.score, 5, canvasH - 5);
+            ctx.fillText('Score: ' + this.score, 5, Game.height - 5);
             ctx.textAlign = 'right';
-            ctx.fillText('Lv: ' + Hud.lv, Game.canvas.width - 5, canvasH - 5);
+            ctx.fillText('Lv: ' + this.lv, Game.width - 5, Game.height - 5);
         }
     };
 
@@ -424,7 +407,8 @@ Publisher: Manning
             var canvasX = canvas.offsetLeft;
             var paddleMid = Paddle.w / 2;
 
-            if (mouseX - paddleMid > canvasX && mouseX + paddleMid < canvasX + canvas.width) {
+            if (mouseX - paddleMid > canvasX &&
+                mouseX + paddleMid < canvasX + canvas.width) {
                 var newX = mouseX - canvasX;
                 newX -= paddleMid;
                 Paddle.x = newX;
@@ -438,5 +422,4 @@ Publisher: Manning
     window.onload = function() {
         Game.setup();
     };
-
 }());

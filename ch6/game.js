@@ -175,7 +175,9 @@ Publisher: Manning
             ctx.beginPath();
             ctx.arc(this.x, this.y, this.r, 0, 2 * Math.PI);
             ctx.closePath();
-            ctx.fillStyle = this.gradient();
+
+            //ctx.fillStyle = '#eee';
+            ctx.fillStyle = '#eee';
             ctx.fill();
         },
 
@@ -186,7 +188,7 @@ Publisher: Manning
 
         // Edge dectection
         edges: function() {
-            // Top
+            // Top / bottom
             if (this.y < 1) {
                 this.y = 1; // Prevents the ball from getting stuck at fast speeds
                 this.sy = -this.sy;
@@ -201,7 +203,7 @@ Publisher: Manning
                 return;
             }
 
-            // Left
+            // Sides
             if (this.x < 1) {
                 this.x = 1; // Prevents the ball from getting stuck at fast speeds
                 this.sx = -this.sx;
@@ -220,15 +222,6 @@ Publisher: Manning
                 this.sx = 7 * ((this.x - (Paddle.x + Paddle.w / 2)) / Paddle.w);
                 this.sy = -this.sy;
             }
-        },
-
-        // Gradient for the ball
-        gradient: function() {
-            var grad = ctx.createRadialGradient(this.x, this.y, 2, this.x - 4, this.y - 3, 10);
-            grad.addColorStop(0, '#eee');
-            grad.addColorStop(1, '#999');
-
-            return grad;
         }
     };
 
@@ -245,14 +238,29 @@ Publisher: Manning
         draw: function() {
             this.move();
 
-            // Create paddle
+            // Can be written much easier in newer browsers like this
+            //ctx.beginPath();
+            //ctx.moveTo(this.x, this.y);
+            //ctx.arcTo(this.x + this.w, this.y, this.x + this.w, this.y + this.r, this.r);
+            //ctx.arcTo(this.x + this.w, this.y + this.h, this.x + this.w - this.r, this.y + this.h, this.r);
+            //ctx.arcTo(this.x, this.y + this.h, this.x, this.y + this.h - this.r, this.r);
+            //ctx.arcTo(this.x, this.y, this.x + this.r, this.y, this.r);
+            //ctx.closePath();
+            //ctx.fillStyle = this.gradient();
+            //ctx.fill();
+
+            // Create paddle (only works in modern implementations of the Canvas W3C draft)
             ctx.beginPath();
             ctx.moveTo(this.x, this.y);
             ctx.arcTo(this.x + this.w, this.y, this.x + this.w, this.y + this.r, this.r);
+            ctx.lineTo(this.x + this.w, this.y + this.h - this.r);
             ctx.arcTo(this.x + this.w, this.y + this.h, this.x + this.w - this.r, this.y + this.h, this.r);
+            ctx.lineTo(this.x + this.r, this.y + this.h);
             ctx.arcTo(this.x, this.y + this.h, this.x, this.y + this.h - this.r, this.r);
+            ctx.lineTo(this.x, this.y + this.r);
             ctx.arcTo(this.x, this.y, this.x + this.r, this.y, this.r);
             ctx.closePath();
+
             ctx.fillStyle = this.gradient();
             ctx.fill();
         },
@@ -267,11 +275,15 @@ Publisher: Manning
         },
 
         gradient: function() {
-            var grad = ctx.createLinearGradient(this.x, this.y, this.x, this.y + 20);
-            grad.addColorStop(0, '#eee');
-            grad.addColorStop(1, '#999');
+            if (this.gradientCache) {
+                return this.gradientCache;
+            }
 
-            return grad;
+            this.gradientCache = ctx.createLinearGradient(this.x, this.y, this.x, this.y + 20);
+            this.gradientCache.addColorStop(0, '#eee');
+            this.gradientCache.addColorStop(1, '#999');
+
+            return this.gradientCache;
         }
     };
 
@@ -306,10 +318,11 @@ Publisher: Manning
                             this.total += 1;
                             this.count[i][j] = false;
                             Ball.sy = -Ball.sy;
+
+                            continue;
                         }
 
                         ctx.fillStyle = this.gradient(i);
-
                         ctx.fillRect(this.x(j), this.y(i), this.w, this.h);
                     }
                 }
@@ -329,21 +342,23 @@ Publisher: Manning
         },
 
         gradient: function(row) {
+            switch(row) {
+                case 0: // purple
+                    return this.gradientPurple ? this.gradientPurple : this.gradientPurple = this.makeGradient(row, '#bd06f9', '#9604c7');
+                case 1: // red
+                    return this.gradientRed ? this.gradientRed : this.gradientRed = this.makeGradient(row, '#F9064A', '#c7043b');
+                case 2: // green
+                    return this.gradientGreen ? this.gradientGreen : this.gradientGreen = this.makeGradient(row, '#05fa15', '#04c711');
+                default: // orange
+                    return this.gradientOrange ? this.gradientOrange : this.gradientOrange = this.makeGradient(row, '#faa105', '#c77f04');
+            }
+        },
+
+        makeGradient: function(row, color1, color2) {
             var y = this.y(row);
             var grad = ctx.createLinearGradient(0, y, 0, y + this.h);
-            switch(row) {
-                case 0: grad.addColorStop(0,'#bd06f9');
-                    grad.addColorStop(1,'#9604c7'); break;
-
-                case 1: grad.addColorStop(0,'#F9064A');
-                    grad.addColorStop(1,'#c7043b'); break;
-
-                case 2: grad.addColorStop(0,'#05fa15');
-                    grad.addColorStop(1,'#04c711'); break;
-
-                default: grad.addColorStop(0,'#faa105');
-                    grad.addColorStop(1,'#c77f04'); break;
-            }
+            grad.addColorStop(0, color1);
+            grad.addColorStop(1, color2);
 
             return grad;
         }

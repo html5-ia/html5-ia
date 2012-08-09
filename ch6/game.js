@@ -259,9 +259,10 @@ Publisher: Manning
 
         move: function() {
             // Detect controller input
-            if (Ctrl.left && (this.x < (Game.canvas.width - this.w))) {
+            if (Ctrl.left && (this.x < Game.canvas.width - (this.w / 2))) {
                 this.x += this.speed;
-            } else if (Ctrl.right && this.x > 0) {
+            //} else if (Ctrl.right && this.x > 0) {
+            } else if (Ctrl.right && this.x > -this.w / 2) {
                 this.x += -this.speed;
             }
         },
@@ -370,9 +371,17 @@ Publisher: Manning
     ***************************/
     var Ctrl = {
         init: function() {
+            // Browser based events
             window.addEventListener('keydown', this.keyDown, true);
             window.addEventListener('keyup', this.keyUp, true);
-            window.addEventListener('mousemove', this.mouse, true);
+            window.addEventListener('mousemove', this.movePaddle, true);
+
+            // Events exclusive to touch devices
+            Game.canvas.addEventListener('touchstart', this.movePaddle, false);
+            Game.canvas.addEventListener('touchmove', this.movePaddle, false);
+
+            // Disable scrolling on touch devices for the Canvas element, but still keep click event emulation
+            Game.canvas.addEventListener('touchmove', this.stopTouchScroll, false);
         },
 
         keyDown: function(event) {
@@ -401,14 +410,19 @@ Publisher: Manning
             }
         },
 
-        mouse: function(event) {
+        // Prevents default scrolling on touch devices
+        stopTouchScroll: function(event) {
+            event.preventDefault();
+        },
+
+        movePaddle: function(event) {
             var canvas = Game.canvas;
             var mouseX = event.pageX;
             var canvasX = canvas.offsetLeft;
             var paddleMid = Paddle.w / 2;
 
-            if (mouseX - paddleMid > canvasX &&
-                mouseX + paddleMid < canvasX + canvas.width) {
+            if (mouseX > canvasX &&
+                mouseX < canvasX + canvas.width) {
                 var newX = mouseX - canvasX;
                 newX -= paddleMid;
                 Paddle.x = newX;

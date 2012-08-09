@@ -261,7 +261,6 @@ Publisher: Manning
             // Detect controller input
             if (Ctrl.left && (this.x < Game.canvas.width - (this.w / 2))) {
                 this.x += this.speed;
-            //} else if (Ctrl.right && this.x > 0) {
             } else if (Ctrl.right && this.x > -this.w / 2) {
                 this.x += -this.speed;
             }

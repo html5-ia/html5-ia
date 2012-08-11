@@ -176,7 +176,6 @@ Publisher: Manning
             ctx.arc(this.x, this.y, this.r, 0, 2 * Math.PI);
             ctx.closePath();
 
-            //ctx.fillStyle = '#eee';
             ctx.fillStyle = '#eee';
             ctx.fill();
         },
@@ -267,7 +266,7 @@ Publisher: Manning
 
         move: function() {
             // Detect controller input
-            if (Ctrl.left && (this.x < Game.canvas.width - (this.w / 2))) {
+            if (Ctrl.left && (this.x < Game.width - (this.w / 2))) {
                 this.x += this.speed;
             } else if (Ctrl.right && this.x > -this.w / 2) {
                 this.x += -this.speed;
@@ -314,11 +313,7 @@ Publisher: Manning
                             Ball.x <= (this.x(j) + this.w) &&
                             Ball.y >= this.y(i) &&
                             Ball.y <= (this.y(i) + this.h)) {
-                            Hud.score += 1;
-                            this.total += 1;
-                            this.count[i][j] = false;
-                            Ball.sy = -Ball.sy;
-
+                            this.collide(i, j);
                             continue;
                         }
 
@@ -341,16 +336,31 @@ Publisher: Manning
             return (col * this.h) + (col * this.gap);
         },
 
+        collide: function(i, j) {
+            Hud.score += 1;
+            this.total += 1;
+            this.count[i][j] = false;
+            Ball.sy = -Ball.sy;
+        },
+
         gradient: function(row) {
             switch(row) {
                 case 0: // purple
-                    return this.gradientPurple ? this.gradientPurple : this.gradientPurple = this.makeGradient(row, '#bd06f9', '#9604c7');
+                    return this.gradientPurple ?
+                        this.gradientPurple :
+                        this.gradientPurple = this.makeGradient(row, '#bd06f9', '#9604c7');
                 case 1: // red
-                    return this.gradientRed ? this.gradientRed : this.gradientRed = this.makeGradient(row, '#F9064A', '#c7043b');
+                    return this.gradientRed ?
+                        this.gradientRed :
+                        this.gradientRed = this.makeGradient(row, '#F9064A', '#c7043b');
                 case 2: // green
-                    return this.gradientGreen ? this.gradientGreen : this.gradientGreen = this.makeGradient(row, '#05fa15', '#04c711');
+                    return this.gradientGreen ?
+                        this.gradientGreen :
+                        this.gradientGreen = this.makeGradient(row, '#05fa15', '#04c711');
                 default: // orange
-                    return this.gradientOrange ? this.gradientOrange : this.gradientOrange = this.makeGradient(row, '#faa105', '#c77f04');
+                    return this.gradientOrange ?
+                        this.gradientOrange :
+                        this.gradientOrange = this.makeGradient(row, '#faa105', '#c77f04');
             }
         },
 
@@ -430,13 +440,12 @@ Publisher: Manning
         },
 
         movePaddle: function(event) {
-            var canvas = Game.canvas;
             var mouseX = event.pageX;
-            var canvasX = canvas.offsetLeft;
+            var canvasX = Game.canvas.offsetLeft;
             var paddleMid = Paddle.w / 2;
 
             if (mouseX > canvasX &&
-                mouseX < canvasX + canvas.width) {
+                mouseX < canvasX + Game.width) {
                 var newX = mouseX - canvasX;
                 newX -= paddleMid;
                 Paddle.x = newX;

@@ -6,10 +6,7 @@ Author URL: http://blueashes.com
 Publisher: Manning
 */
 
-/**
- * @todo Re-enable self-executing function
- */
-//(function() {
+(function() {
     /********
     Animation Functions
     ********/
@@ -148,7 +145,7 @@ Publisher: Manning
         endGame: function() {
             clearRequestInterval(UfoBig.timer);
 
-            this.elRemove('.shield .player .life .laser #flock #invShip #textScore #textLives');
+            this.elRemove('.shield .player .life .laser #flock #ufoShip #textScore #textLives');
 
             this.restart.setAttribute('style', 'display: inline');
             this.svg.addEventListener('click', this.restartGame, false);
@@ -329,7 +326,7 @@ Publisher: Manning
                                 Ufo.collide(active[num]);
                             } else if (activeClass === 'shield active') { // shield
                                 Shield.collide(active[num]);
-                            } else if (activeClass === 'invShip active') { // big ufo ship
+                            } else if (activeClass === 'ufoShip active') { // big ufo ship
                                 UfoBig.collide(active[num]);
                             } else if (Ship.player[0]) { // Ship
                                 Ship.collide();
@@ -423,15 +420,12 @@ Publisher: Manning
             this.timer = requestInterval(this.build, this.delay);
         },
 
-        /**
-         * @todo Change class name to something more accurate
-         */
         // Fires from window, no this
         build: function() {
             // create ufo ship element
             var el = document.createElementNS(Game.ns, 'image');
-            el.setAttribute('id', 'invShip'); // Can be targeted by ID since only 1 will ever be present
-            el.setAttribute('class', 'invShip active');
+            el.setAttribute('id', 'ufoShip'); // Can be targeted by ID since only 1 will ever be present
+            el.setAttribute('class', 'ufoShip active');
             el.setAttribute('x', UfoBig.x);
             el.setAttribute('y', UfoBig.y);
             el.setAttribute('width', UfoBig.width);
@@ -440,11 +434,8 @@ Publisher: Manning
             Game.svg.appendChild(el);
         },
 
-        /**
-         * @todo Logic kind of crappy re-write
-         */
         update: function() {
-            var el = document.getElementById('invShip');
+            var el = document.getElementById('ufoShip');
             if (el) {
                 var x = parseInt(el.getAttribute('x'), 10);
 
@@ -457,14 +448,11 @@ Publisher: Manning
         },
 
         collide: function(el) {
-            Hud.update.score(30);
+            Hud.updateScore(30);
             Game.svg.removeChild(el);
         }
     };
 
-    /**
-     * @todo Left off here
-     */
     var Ufo = {
         width: 25,
         height: 19,
@@ -479,24 +467,20 @@ Publisher: Manning
         pathB: 'M6.5,8.8c1.1,1.6,3.2,2.5,6.3,2.5c3.4,0,4.9-1.4,5.7-2.6c0.9-1.5,0.9-3.4,0.5-4.4c0,0,0,0,0,0 c0,0-1.9-3.4-6.5-3.4C8.1,1,6.5,3.7,6.3,4.1l0,0C5.8,5.3,5.5,7.2,6.5,8.8z M19.3,4.4c0.4,1.2,0.4,2.9-0.4,4.6 c-0.6,1.3-2.5,3.6-6.1,3.6c-4.1,0-5.9-2.2-6.8-3.5C5,7.5,5.4,5.6,5.9,4.3C2.4,5.6,0,7.4,0,10.1c0,4.2,5.6,7.6,12.4,7.6 c6.9,0,12.4-3.4,12.4-7.6C24.8,7.4,22.8,5.7,19.3,4.4z M3.5,9.2c-0.6,0-1.1-0.3-1.1-0.6C2.4,8.2,2.9,8,3.5,8 c0.6,0,1.1,0.3,1.1,0.6C4.6,8.9,4.2,9.2,3.5,9.2z M16.5,14.6c-0.9,0-1.7-0.4-1.7-0.9c0-0.5,0.8-0.9,1.7-0.9s1.7,0.4,1.7,0.9 C18.2,14.2,17.5,14.6,16.5,14.6z M20.2,5.6c-0.4,0-0.6-0.1-0.6-0.3c0-0.2,0.3-0.3,0.6-0.3c0.4,0,0.6,0.1,0.6,0.3 C20.8,5.5,20.5,5.6,20.2,5.6z',
 
         init: function() {
-            /**
-             * @todo ySpeed probably doesn't need to be set/reset like this or a param, just local to where its used
-             */
             // Reset necessary values
             this.speed = 10;
-            this.ySpeed = 0;
             this.counter = 0;
 
             // Create ufos
             this.build();
 
             // ufos run on their own separate time gauge
-            // Delay dynamically changes so reset it
             this.delay = 800 - (20 * Hud.level);
 
             if (this.timer)
                 clearRequestInterval(Ufo.timer);
-            this.timer = requestInterval(this.update, this.delay); // Must use self since it fires from the global scale
+
+            this.timer = requestInterval(this.update, this.delay);
         },
 
         build: function() {
@@ -505,24 +489,12 @@ Publisher: Manning
             group.setAttribute('class', 'open');
             group.setAttribute('id', 'flock');
 
-            // Create the ufo array
-            /**
-             * @todo Reverse loop, fucked up arrays need fixing
-             */
-            var invArray = [this.row];
-            for (var row = 0; row < this.row; row++) {
-                invArray[row] = new Array(this.col);
-            }
-
             // Loop through ufo array data you just created
-            /**
-             * @todo Fix vars in loop
-             * @todo Reverse loops
-             */
-            for (var row = 0; row < this.row; row++) {
-                for (var col=0; col < this.col; col++) {
+            var col, el, imageA, imageB;
+            for (var row = this.row; row--;) {
+                for (col = this.col; col--;) {
                     // Setup the ufo's output
-                    var el = document.createElementNS(Game.ns, 'svg');
+                    el = document.createElementNS(Game.ns, 'svg');
                     el.setAttribute('x', this.locX(col));
                     el.setAttribute('y', this.locY(row));
                     el.setAttribute('class', 'ufo active');
@@ -532,11 +504,11 @@ Publisher: Manning
                     el.setAttribute('height', this.height);
                     el.setAttribute('viewBox', '0 0 25 19'); // Controls viewport of individual ufo
 
-                    var imageA = document.createElementNS(Game.ns, 'path');
-                    var imageB = document.createElementNS(Game.ns, 'path');
+                    imageA = document.createElementNS(Game.ns, 'path');
+                    imageB = document.createElementNS(Game.ns, 'path');
                     imageA.setAttribute('d', this.pathA);
-                    imageA.setAttribute('class','anim1 ' + this.type(row));
                     imageB.setAttribute('d', this.pathB);
+                    imageA.setAttribute('class','anim1 ' + this.type(row));
                     imageB.setAttribute('class','anim2 ' + this.type(row));
                     el.appendChild(imageA);
                     el.appendChild(imageB);
@@ -574,106 +546,74 @@ Publisher: Manning
         update: function() {
             var invs = document.getElementsByClassName('ufo');
 
-            /**
-             * @todo this whole thing is a mess re-write it better
-             */
-            if (invs.length > 0) {
-                // Find the first and last ufo in the flock
-                var xFirst = Game.width;
-                var xLast = 0;
-                for (var count = 0; count < invs.length; count++) {
-                    var x = parseInt(invs[count].getAttribute('x'));
-                    xFirst = Math.min(xFirst, x);
-                    xLast = Math.max(xLast, x);
-                }
+            if (invs.length === 0) return;
 
-                // Set speed based upon first and last ufo results
-                if ((xLast >= (Game.width - 20 - Ufo.width) &&
-                    Ufo.ySpeed === 0) ||
-                    (xFirst < 21 && Ufo.ySpeed === 0))
-                        Ufo.ySpeed = Math.abs(Ufo.speed);
-                else if ((xLast >= (Game.width - 20 - Ufo.width)) ||
-                    (xFirst < 21) ||
-                    Ufo.ySpeed > 0) {
-                        Ufo.speed = -Ufo.speed;
-                        Ufo.ySpeed = 0;
-                }
+            // Get the current flock data and set variables as necesasry
+            var flockData = this.flock.getBBox(),
+            flockWidth = Math.round(flockData.width),
+            flockHeight = Math.round(flockData.height),
+            flockX = Math.round(flockData.x),
+            flockY = Math.round(flockData.y),
+            moveX = 0,
+            moveY = 0;
 
-                // Update ufo positions
-                for (var count = 0; count < invs.length; count++) {
-                    // Increment x and y counters
-                    var x = parseInt(invs[count].getAttribute('x'));
-                    var y = parseInt(invs[count].getAttribute('y'));
-                    var xNew = x + Ufo.speed;
-                    var yNew = y + Ufo.ySpeed;
-
-                    // Set direction (left, right, down)
-                    if (Ufo.ySpeed > 0) {
-                        invs[count].setAttribute('y', yNew);
-                    } else {
-                        invs[count].setAttribute('x', xNew);
-                    }
-
-                    // Test if ufos have pushed far enough to beat the player
-                    if (y > Shield.y - 20 - Ufo.height) {
-                        return Game.endGame(); // Exit everything and shut down the game
-                    }
-                }
-
-                Ufo.animate();
-                Ufo.shoot(invs);
+            // Decide direction based upon current Ufo flock position
+            if (flockWidth + flockX + Ufo.speed >= Game.width ||
+                flockX + Ufo.speed <= 0) {
+                moveY = Math.abs(Ufo.speed);
+                Ufo.speed = Ufo.speed * -1; // reverse speed
+            } else {
+                moveX = Ufo.speed;
             }
+
+            // Update all UFOs
+            var newX, newY;
+            for (var i = invs.length; i--;) {
+                newX = parseInt(invs[i].getAttribute('x'), 10) + moveX;
+                newY = parseInt(invs[i].getAttribute('y'), 10) + moveY;
+
+                invs[i].setAttribute('x', newX);
+                invs[i].setAttribute('y', newY);
+            }
+
+            // Return immediately if UFOs have pushed too far
+            if (flockY + flockHeight >= Shield.y) {
+                return Game.endGame(); // Exit everything and shut down the game
+            }
+
+            Ufo.animate();
+            Ufo.shoot(invs, flockY + flockHeight - Ufo.height);
         },
 
-        /**
-         * @todo Why var c? Seems useless
-         */
         animate: function() {
-            var c = this.flock.getAttribute('class');
-            if (c == 'open') {
+            if (this.flock.getAttribute('class') === 'open') {
                 this.flock.setAttribute('class','closed');
             } else {
                 this.flock.setAttribute('class','open');
             }
         },
 
-        /**
-         * @todo Another mess, can this be made better
-         */
-        shoot: function(invs) {
+        shoot: function(invs, lastRowY) {
             // Test a random number to see if the ufos fire
-            var test = Math.floor(Math.random() * 5);
+            if (Math.floor(Math.random() * 5) !== 1) return;
 
-            if (test === 1) {
-                // Choose a random ufo to fire
-                var invRandom = Math.floor(Math.random() * invs.length);
-                var invX = parseInt(invs[invRandom].getAttribute('x'));
-                var y = 0;
-
-                // Find current column and shoot with it
-                for (var count = 0; count < invs.length; count++) {
-                    var currentX = parseInt(invs[count].getAttribute('x'));
-
-                    // If in the same column find the bottom most ufo
-                    if (invX === currentX) {
-                        var yVal = parseInt(invs[count].getAttribute('y'));
-                        var y = Math.max(y, yVal);
-                    }
-                }
-
-                // Shoot from bottom column
-                Laser.build(invX + (this.width / 2), y + 20, false);
+            // Get invaders only from the last row
+            var stack = [], currentY;
+            for (var i = invs.length; i--;) {
+                currentY = parseInt(invs[i].getAttribute('y'), 10);
+                if (currentY >= lastRowY)
+                    stack.push(invs[i]);
             }
+
+            // Choose a random invader from the stack and shoot from it
+            var invRandom = Math.floor(Math.random() * stack.length);
+            Laser.build(parseInt(stack[invRandom].getAttribute('x'), 10) + (this.width / 2), lastRowY + this.height + 10, false);
         },
 
-        /**
-         * @todo why is it returning?
-         */
         collide: function(el) {
-            Hud.update.score(1);
-            Hud.update.level();
-            // Must call from parent due to flock structure
-            return el.parentNode.removeChild(el);
+            Hud.updateScore(1);
+            Hud.levelUp();
+            el.parentNode.removeChild(el);
         }
     };
 
@@ -688,11 +628,9 @@ Publisher: Manning
             this.level = 1;
 
             // Create life counter
-            /**
-             * @todo Reverse loop, or maybe not...
-             */
+            var x;
             for (var life = 0; life < Hud.lives; life++) {
-                var x = this.livesX + (Ship.width * life) + (this.livesGap * life);
+                x = this.livesX + (Ship.width * life) + (this.livesGap * life);
                 Ship.build(x, this.livesY, 'life');
             }
 
@@ -700,7 +638,7 @@ Publisher: Manning
             this.build('Lives:', 310, 30, 'textLives');
             this.build('Score: 0', 20, 30, 'textScore');
 
-            // Store lives (throw them back into the ship to prevent confusion with naming)
+            // Store lives
             Ship.lives = document.getElementsByClassName('life');
         },
 
@@ -714,74 +652,53 @@ Publisher: Manning
             Game.svg.appendChild(el);
         },
 
-        /**
-         * @todo Update should be update.score and update.level should just be levelUp
-         */
-        update: {
-            /**
-             * @todo Include lifePlus logic where its reference here
-             */
-            score: function(pts) {
-                // Update scores
-                Hud.score += pts;
-                Hud.bonus += pts;
+        updateScore: function(pts) {
+            // Update scores
+            this.score += pts;
+            this.bonus += pts;
 
-                Hud.lifePlus();
+            // Inject new score text
+            var el = document.getElementById('textScore');
+            el.replaceChild(document.createTextNode('Score: ' + this.score), el.firstChild);
 
-                // Inject new score text
-                el = document.getElementById('textScore');
-                el.replaceChild(
-                    document.createTextNode('Score: ' + Hud.score),
-                    el.firstChild);
-            },
+            // Add new life if necessary
+            if (this.bonus < 100 || this.lives === 3) return;
 
-            level: function() {
-                // count ufo kills
-                Ufo.counter += 1;
-                var invTotal = Ufo.col * Ufo.row;
-
-                // Test to level
-                if (Ufo.counter === invTotal) {
-                    Hud.level += 1;
-                    Ufo.counter = 0;
-
-                    clearRequestInterval(Ufo.timer);
-                    Game.svg.removeChild(Ufo.flock);
-
-                    // Wait a brief moment to spawn next wave
-                    setTimeout(function() {
-                        Ufo.init();
-                    }, 300);
-
-                } else if (Ufo.counter === Math.round(invTotal / 2)) { // Increase ufo speed
-                    Ufo.delay -= 250;
-
-                    clearRequestInterval(Ufo.timer);
-                    Ufo.timer = requestInterval(Ufo.update, Ufo.delay);
-                } else if (Ufo.counter === (Ufo.col * Ufo.row) - 3) {
-                    Ufo.delay -= 300;
-
-                    clearRequestInterval(Ufo.timer);
-                    Ufo.timer = requestInterval(Ufo.update, Ufo.delay);
-                }
-            }
+            // Add an extra life
+            var x = this.livesX + (Ship.width * this.lives) + (this.livesGap * this.lives);
+            Ship.build(x, this.livesY, 'life');
+            this.lives += 1;
+            this.bonus = 0;
         },
 
-        /**
-         * @todo Remove else surrounding this.bonus = 0
-         */
-        lifePlus: function() {
-            if (this.bonus >= 100) {
-                // Add an extra life
-                if (this.lives < 3) {
-                    var x = this.livesX + (Ship.width * this.lives) + (this.livesGap * this.lives);
-                    Ship.build(x, this.livesY, 'life');
+        levelUp: function() {
+            // count ufo kills
+            Ufo.counter += 1;
+            var invTotal = Ufo.col * Ufo.row;
 
-                    this.lives += 1;
-                    this.bonus = 0;
-                } else { // Incase 3 lives are already present set the counter to 0
-                    this.bonus = 0;
-                }
+            // Test to level
+            if (Ufo.counter === invTotal) {
+                this.level += 1;
+                Ufo.counter = 0;
+
+                clearRequestInterval(Ufo.timer);
+                Game.svg.removeChild(Ufo.flock);
+
+                // Wait a brief moment to spawn next wave
+                setTimeout(function() {
+                    Ufo.init();
+                }, 300);
+
+            } else if (Ufo.counter === Math.round(invTotal / 2)) { // Increase ufo speed
+                Ufo.delay -= 250;
+
+                clearRequestInterval(Ufo.timer);
+                Ufo.timer = requestInterval(Ufo.update, Ufo.delay);
+            } else if (Ufo.counter === (Ufo.col * Ufo.row) - 3) {
+                Ufo.delay -= 300;
+
+                clearRequestInterval(Ufo.timer);
+                Ufo.timer = requestInterval(Ufo.update, Ufo.delay);
             }
         }
     };
@@ -857,4 +774,4 @@ Publisher: Manning
     window.onload = function() {
         Game.run();
     };
-//}());
+}());

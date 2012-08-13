@@ -158,6 +158,7 @@ Publisher: Manning
 
     var Ball = {
         r: 10,
+        
         init: function() {
             this.x = 120;
             this.y = 120;

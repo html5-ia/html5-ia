@@ -13,22 +13,22 @@ Publisher: Manning
     // How to figure out what a user's computer can handle for frames with fallbacks
     // Original by Paul Irish: http://paulirish.com/2011/requestanimationframe-for-smart-animating/
     // Clear interval version here created by Jerome Etienne http://notes.jetienne.com/2011/05/18/cancelRequestAnimFrame-for-paul-irish-requestAnimFrame.html
-    window.cancelRequestAnimFrame = ( function() {
+    window.cancelRequestAnimFrame = (function() {
         return window.cancelAnimationFrame          ||
         window.webkitCancelRequestAnimationFrame    ||
         window.mozCancelAnimationFrame              ||
         window.oCancelRequestAnimationFrame         ||
         window.msCancelRequestAnimationFrame        ||
-        clearTimeout
+        clearTimeout;
     })();
 
-    window.requestAnimFrame = (function(){
+    window.requestAnimFrame = (function() {
         return window.requestAnimationFrame         ||
         window.webkitRequestAnimationFrame          ||
         window.mozRequestAnimationFrame             ||
         window.oRequestAnimationFrame               ||
         window.msRequestAnimationFrame              ||
-        function(/* function */ callback, /* DOMElement */ element){
+        function(callback, element) {
             return window.setTimeout(callback, 1000 / 60);
         };
     })();
@@ -37,7 +37,7 @@ Publisher: Manning
     // Makes intervals run in unison with request anmation frame
     // http://blog.joelambert.co.uk/2011/06/01/a-better-settimeoutsetinterval/
     window.requestInterval = function(fn, delay) {
-        if( !window.requestAnimationFrame   &&
+        if (!window.requestAnimationFrame   &&
         !window.webkitRequestAnimationFrame &&
         !window.mozRequestAnimationFrame    &&
         !window.oRequestAnimationFrame      &&
@@ -48,20 +48,19 @@ Publisher: Manning
         handle = new Object();
 
         function loop() {
-                var current = new Date().getTime(),
-                delta = current - start;
+            var current = new Date().getTime(), delta = current - start;
 
-                if(delta >= delay) {
-                        fn.call();
-                        start = new Date().getTime();
-                }
+            if (delta >= delay) {
+                fn.call();
+                start = new Date().getTime();
+            }
 
-                handle.value = requestAnimFrame(loop);
-        };
+            handle.value = window.requestAnimFrame(loop);
+        }
 
-        handle.value = requestAnimFrame(loop);
+        handle.value = window.requestAnimFrame(loop);
         return handle;
-    }
+    };
 
     window.clearRequestInterval = function(handle) {
         window.cancelAnimationFrame ? window.cancelAnimationFrame(handle.value) :
@@ -112,7 +111,7 @@ Publisher: Manning
         animate: function() {
             // Self-referring object, so you must use Game instead of this to prevent a crash
             Game.update();
-            Game.play = requestAnimFrame(Game.animate);
+            Game.play = window.requestAnimFrame(Game.animate);
         },
 
         update: function() {
@@ -143,7 +142,8 @@ Publisher: Manning
         },
 
         endGame: function() {
-            clearRequestInterval(UfoBig.timer);
+            window.clearRequestInterval(UfoBig.timer);
+            window.clearRequestInterval(Ufo.timer);
 
             this.elRemove('.shield .player .life .laser #flock #ufoShip #textScore #textLives');
 
@@ -152,12 +152,8 @@ Publisher: Manning
         },
 
         elRemove: function(name) {
-            var items = name.split(' '),
-            type,
-            string,
-            el;
-
             // Loop through exploded string
+            var items = name.split(' '), type, string, el;
             for (var i = items.length; i--;) {
                 type = items[i].charAt(0);
                 string = items[i].slice(1);
@@ -265,9 +261,11 @@ Publisher: Manning
             var el = document.createElementNS(Game.ns,'rect');
 
             // Determine laser direction
-            negative ?
-                el.setAttribute('class', 'laser negative') :
+            if (negative) {
+                el.setAttribute('class', 'laser negative');
+            } else {
                 el.setAttribute('class', 'laser');
+            }
 
             el.setAttribute('x', x);
             el.setAttribute('y', y);
@@ -417,7 +415,7 @@ Publisher: Manning
         delay: 30000,
         init: function() {
             // ufo ships have their own separate spawning timer
-            this.timer = requestInterval(this.build, this.delay);
+            this.timer = window.requestInterval(this.build, this.delay);
         },
 
         // Fires from window, no this
@@ -478,9 +476,9 @@ Publisher: Manning
             this.delay = 800 - (20 * Hud.level);
 
             if (this.timer)
-                clearRequestInterval(Ufo.timer);
+                window.clearRequestInterval(Ufo.timer);
 
-            this.timer = requestInterval(this.update, this.delay);
+            this.timer = window.requestInterval(this.update, this.delay);
         },
 
         build: function() {
@@ -542,14 +540,13 @@ Publisher: Manning
             return this.y + (row * this.height) + (row * this.gap);
         },
 
-        // Fired from DOM window, cannot use this
         update: function() {
             var invs = document.getElementsByClassName('ufo');
 
             if (invs.length === 0) return;
 
             // Get the current flock data and set variables as necesasry
-            var flockData = this.flock.getBBox(),
+            var flockData = Ufo.flock.getBBox(),
             flockWidth = Math.round(flockData.width),
             flockHeight = Math.round(flockData.height),
             flockX = Math.round(flockData.x),
@@ -681,7 +678,7 @@ Publisher: Manning
                 this.level += 1;
                 Ufo.counter = 0;
 
-                clearRequestInterval(Ufo.timer);
+                window.clearRequestInterval(Ufo.timer);
                 Game.svg.removeChild(Ufo.flock);
 
                 // Wait a brief moment to spawn next wave
@@ -692,13 +689,13 @@ Publisher: Manning
             } else if (Ufo.counter === Math.round(invTotal / 2)) { // Increase ufo speed
                 Ufo.delay -= 250;
 
-                clearRequestInterval(Ufo.timer);
-                Ufo.timer = requestInterval(Ufo.update, Ufo.delay);
+                window.clearRequestInterval(Ufo.timer);
+                Ufo.timer = window.requestInterval(Ufo.update, Ufo.delay);
             } else if (Ufo.counter === (Ufo.col * Ufo.row) - 3) {
                 Ufo.delay -= 300;
 
-                clearRequestInterval(Ufo.timer);
-                Ufo.timer = requestInterval(Ufo.update, Ufo.delay);
+                window.clearRequestInterval(Ufo.timer);
+                Ufo.timer = window.requestInterval(Ufo.update, Ufo.delay);
             }
         }
     };

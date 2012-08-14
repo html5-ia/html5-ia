@@ -7,73 +7,6 @@ Publisher: Manning
 */
 
 (function() {
-    /********
-    Animation Functions
-    ********/
-    // How to figure out what a user's computer can handle for frames with fallbacks
-    // Original by Paul Irish: http://paulirish.com/2011/requestanimationframe-for-smart-animating/
-    // Clear interval version here created by Jerome Etienne http://notes.jetienne.com/2011/05/18/cancelRequestAnimFrame-for-paul-irish-requestAnimFrame.html
-    window.cancelRequestAnimFrame = (function() {
-        return window.cancelAnimationFrame          ||
-        window.webkitCancelRequestAnimationFrame    ||
-        window.mozCancelAnimationFrame              ||
-        window.oCancelRequestAnimationFrame         ||
-        window.msCancelRequestAnimationFrame        ||
-        clearTimeout;
-    })();
-
-    window.requestAnimFrame = (function() {
-        return window.requestAnimationFrame         ||
-        window.webkitRequestAnimationFrame          ||
-        window.mozRequestAnimationFrame             ||
-        window.oRequestAnimationFrame               ||
-        window.msRequestAnimationFrame              ||
-        function(callback, element) {
-            return window.setTimeout(callback, 1000 / 60);
-        };
-    })();
-
-    // From "A better setTimeout() / setInterval()" by Joe Lambert
-    // Makes intervals run in unison with request anmation frame
-    // http://blog.joelambert.co.uk/2011/06/01/a-better-settimeoutsetinterval/
-    window.requestInterval = function(fn, delay) {
-        if (!window.requestAnimationFrame   &&
-        !window.webkitRequestAnimationFrame &&
-        !window.mozRequestAnimationFrame    &&
-        !window.oRequestAnimationFrame      &&
-        !window.msRequestAnimationFrame)
-        return window.setInterval(fn, delay);
-
-        var start = new Date().getTime(),
-        handle = new Object();
-
-        function loop() {
-            var current = new Date().getTime(), delta = current - start;
-
-            if (delta >= delay) {
-                fn.call();
-                start = new Date().getTime();
-            }
-
-            handle.value = window.requestAnimFrame(loop);
-        }
-
-        handle.value = window.requestAnimFrame(loop);
-        return handle;
-    };
-
-    window.clearRequestInterval = function(handle) {
-        window.cancelAnimationFrame ? window.cancelAnimationFrame(handle.value) :
-        window.webkitCancelRequestAnimationFrame ? window.webkitCancelRequestAnimationFrame(handle.value) :
-        window.mozCancelRequestAnimationFrame ? window.mozCancelRequestAnimationFrame(handle.value) :
-        window.oCancelRequestAnimationFrame ? window.oCancelRequestAnimationFrame(handle.value) :
-        window.msCancelRequestAnimationFrame ? msCancelRequestAnimationFrame(handle.value) :
-        clearInterval(handle);
-    };
-
-    /********
-    Setup
-    ********/
     var Game = {
         // organize random vars a bit better
         svg: document.getElementById('svg'),
@@ -86,14 +19,7 @@ Publisher: Manning
         xlink: 'http://www.w3.org/1999/xlink',
 
         run: function() {
-            if (this.support && Boolean(window.chrome)) {
-                this.svg.addEventListener('click', this.runGame, false);
-            } else if (this.support) {
-                alert('This game is specifically designed for the latest version of Google Chrome. You may proceed, but no gurantee that everything will run smoothly.');
-                this.svg.addEventListener('click', this.runGame, false);
-            } else {
-                alert('Your browser doesn\'t support SVG, please download Google Chrome on a desktop.');
-            }
+            this.svg.addEventListener('click', this.runGame, false);
         },
 
         init: function() {
@@ -104,14 +30,11 @@ Publisher: Manning
             Ship.init();
             UfoBig.init();
 
-            // Run animation only if this.play isn't set
-            if (!this.play) this.animate();
-        },
-
-        animate: function() {
-            // Self-referring object, so you must use Game instead of this to prevent a crash
-            Game.update();
-            Game.play = window.requestAnimFrame(Game.animate);
+            if (!this.play) {
+                // NOTE: Don't use requestAnimationFrame, its meant for data that refreshes
+                // the system's window such as Canvas
+                this.play = window.setInterval(Game.update, 20);
+            }
         },
 
         update: function() {
@@ -142,8 +65,8 @@ Publisher: Manning
         },
 
         endGame: function() {
-            window.clearRequestInterval(UfoBig.timer);
-            window.clearRequestInterval(Ufo.timer);
+            window.clearInterval(UfoBig.timer);
+            window.clearInterval(Ufo.timer);
 
             this.elRemove('.shield .player .life .laser #flock #ufoShip #textScore #textLives');
 
@@ -253,7 +176,7 @@ Publisher: Manning
     };
 
     var Laser = {
-        speed: 6,
+        speed: 8,
         width: 2,
         height: 10,
 
@@ -415,7 +338,7 @@ Publisher: Manning
         delay: 30000,
         init: function() {
             // ufo ships have their own separate spawning timer
-            this.timer = window.requestInterval(this.build, this.delay);
+            this.timer = window.setInterval(this.build, this.delay);
         },
 
         // Fires from window, no this
@@ -476,9 +399,9 @@ Publisher: Manning
             this.delay = 800 - (20 * Hud.level);
 
             if (this.timer)
-                window.clearRequestInterval(Ufo.timer);
+                window.clearInterval(Ufo.timer);
 
-            this.timer = window.requestInterval(this.update, this.delay);
+            this.timer = window.setInterval(this.update, this.delay);
         },
 
         build: function() {
@@ -678,7 +601,7 @@ Publisher: Manning
                 this.level += 1;
                 Ufo.counter = 0;
 
-                window.clearRequestInterval(Ufo.timer);
+                window.clearInterval(Ufo.timer);
                 Game.svg.removeChild(Ufo.flock);
 
                 // Wait a brief moment to spawn next wave
@@ -689,13 +612,13 @@ Publisher: Manning
             } else if (Ufo.counter === Math.round(invTotal / 2)) { // Increase ufo speed
                 Ufo.delay -= 250;
 
-                window.clearRequestInterval(Ufo.timer);
-                Ufo.timer = window.requestInterval(Ufo.update, Ufo.delay);
+                window.clearInterval(Ufo.timer);
+                Ufo.timer = window.setInterval(Ufo.update, Ufo.delay);
             } else if (Ufo.counter === (Ufo.col * Ufo.row) - 3) {
                 Ufo.delay -= 300;
 
-                window.clearRequestInterval(Ufo.timer);
-                Ufo.timer = window.requestInterval(Ufo.update, Ufo.delay);
+                window.clearInterval(Ufo.timer);
+                Ufo.timer = window.setInterval(Ufo.update, Ufo.delay);
             }
         }
     };

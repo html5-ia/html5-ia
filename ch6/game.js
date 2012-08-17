@@ -158,7 +158,7 @@ Publisher: Manning
 
     var Ball = {
         r: 10,
-        
+
         init: function() {
             this.x = 120;
             this.y = 120;
@@ -218,7 +218,7 @@ Publisher: Manning
             if (this.x >= Paddle.x &&
                 this.x <= (Paddle.x + Paddle.w) &&
                 this.y >= Paddle.y &&
-                this.y <= (Paddle.y + Paddle.w)) {
+                this.y <= (Paddle.y + Paddle.h)) {
                 this.sx = 7 * ((this.x - (Paddle.x + Paddle.w / 2)) / Paddle.w);
                 this.sy = -this.sy;
             }

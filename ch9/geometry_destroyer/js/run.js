@@ -118,8 +118,8 @@ Desc: All templates, objects, and other code connected to running the game.
 
         boundaryTop: function() { this.y = gd.game.size.height; },
         boundaryRight: function() { this.x = gd.game.size.width; },
-        boundaryBottom: function() { this.y = - gd.game.size.height; },
-        boundaryLeft: function() { this.x = - gd.game.size.width; },
+        boundaryBottom: function() { this.y = -gd.game.size.height; },
+        boundaryLeft: function () { this.x = -gd.game.size.width; },
 
         update: function() {
             var self = this;
@@ -256,7 +256,6 @@ Desc: All templates, objects, and other code connected to running the game.
 
         collide: function() {
             this._super();
-
             Hud.score.update();
         }
     });
@@ -274,7 +273,6 @@ Desc: All templates, objects, and other code connected to running the game.
 
             // Setup spawn timer
             this.create = window.setInterval(function() {
-                console.log('set interval fired');
                 if (gd.core.storage.b.length < self.limit) {
                     // Increase count
                     if (self.count < 3)
@@ -381,7 +379,7 @@ Desc: All templates, objects, and other code connected to running the game.
             // Triangle is 36 vertics
             // Square is 72
             var stack = [];
-            for (var v = 0; v < this.shapeRows * this.shapeColumns; v += 3 ) {
+            for (var v = 0; v < this.shapeRows * this.shapeColumns; v += 3) {
                 // Triangle coloring
                 if (v > 108 || v <= 36) {
                     stack.push(this.colorData.pyramid[0], this.colorData.pyramid[1], this.colorData.pyramid[2], 1);
@@ -476,7 +474,7 @@ Desc: All templates, objects, and other code connected to running the game.
             // Generate a number of particles spawned at current center
             // But only if the game has enough memory to support it
             if (gd.core.storage.all.length < 50) {
-                for ( var p = 15; p--; ) {
+                for (var p = 15; p--;) {
                     gd.game.spawn('Particle', this.x, this.y);
                 }
             }

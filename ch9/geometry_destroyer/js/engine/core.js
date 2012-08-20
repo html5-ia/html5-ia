@@ -19,10 +19,6 @@ gd.core = {
 
     // Width and height of the gameplay area
     size: function(width, height) {
-        // Apply Engine's width to the Canvas
-        this.canvas.width = width;
-        this.canvas.height = height;
-
         // Set WebGL viewport ratio to prevent distortion
         this.horizAspect = width / height;
     },
@@ -45,6 +41,7 @@ gd.core = {
     init: function(width, height, run) {
         this.size(width, height);
 
+        if (!this.canvas.getContext) return alert('Please download a browser that supports Canvas like Google Chrome to proceed.');
         gd.gl = this.canvas.getContext("experimental-webgl");
 
         // Manually check for WebGL support, some browsers return null and some undefined if getContext fails

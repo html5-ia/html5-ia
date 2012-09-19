@@ -1,7 +1,7 @@
 /*-----
 Defaults and screen setup
 -----*/
-body { margin: 0; background: black; color: #999; -webkit-user-select: none; user-select: none; }
+body { margin: 0; background: black; color: #999; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }
 #container { margin: auto auto; text-align: center }
 #instructions { position: absolute; display: block; bottom: 1%; width: 100%; height: 10% }
 #instructions p { font-size: 1em; margin: 0 0 5px; padding: 0 }
@@ -9,7 +9,7 @@ body { margin: 0; background: black; color: #999; -webkit-user-select: none; use
 /*-----
 SVG
 -----*/
-svg { overflow: hidden; display: block; height: 90%; position: absolute; top: 0%; width: 100%; min-height: 500px; min-width: 500px; cursor: url(cursor.png), default; fill: #ddd; font: bold 14px arial }
+svg { overflow: hidden; display: block; height: 90%; position: absolute; top: 0%; width: 100%; min-height: 500px; min-width: 500px; cursor: url('cursor.png'), default; cursor: none; fill: #ddd; font: bold 14px arial }
 
 /* Welcome screen */
 #screenWelcome text { font-size: 20px; }

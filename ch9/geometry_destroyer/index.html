@@ -1,5 +1,5 @@
-<!DOCTYPE html>   
-<html> 
+<!DOCTYPE html>
+<html>
 <head>
     <title>Geometry Destroyer</title>
     <link rel="stylesheet" type="text/css" href="style.css" />
@@ -7,47 +7,47 @@
 
 <body>
     <div id="container">
-        <canvas id="canvas">
+        <canvas id="canvas" width="800" height="600">
             Download Chrome to experience the demo!
         </canvas>
-        
+
         <span id="score">Score: <span id="count">0</span></span>
-        
+
         <p id="title" class="strong screen">Geometry Destroyer</p>
         <p id="start" class="screen">Push <span class="strong">X</span> to Start</p>
-        
+
         <p id="end" class="screen hide">
             <span class="strong">Game Over</span>
         </p>
-        
+
         <p id="ctrls">Move: Arrow Keys | Shoot: Hold X</p>
     </div>
-        
+
     <!-- Color fragments -->
     <script id="shader-fragment" type="x-shader/x-fragment">
         varying lowp vec4 vColor;
-    
+
         void main(void) {
             gl_FragColor = vColor;
         }
     </script>
-        
+
     <!-- Vertex position and shape -->
-    <script id="shader-vertex" type="x-shader/x-vertex">  
+    <script id="shader-vertex" type="x-shader/x-vertex">
         attribute vec3 aVertexPosition;
         attribute vec4 aVertexColor;
-        
+
         uniform mat4 uMVMatrix;
         uniform mat4 uPMatrix;
-        
+
         varying lowp vec4 vColor;
-              
+
         void main(void) {
             gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
             vColor = aVertexColor;
-        }    
+        }
     </script>
-    
+
     <!-- Script loading -->
     <script type="text/javascript" src="js/engine/assets/sylvester.js"></script>
     <script type="text/javascript" src="js/engine/assets/webgl_util.js"></script>

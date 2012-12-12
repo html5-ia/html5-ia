@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Canvas Composition Types</title>
+    <script>
+        var compositeTypes = [
+            'source-over','source-in','source-out','source-atop',
+            'destination-over','destination-in','destination-out','destination-atop',
+            'lighter','darker','copy','xor'
+        ];
+        function draw(){
+            var l = create_list();
+            for (i=0;i<compositeTypes.length;i++) {
+                var li = document.createElement('li');
+                var c = create_canvas();
+                var ctx = c.getContext('2d');
+                
+                draw_destination(ctx);
+            
+                // set composite property
+                ctx.globalCompositeOperation = compositeTypes[i];
+                
+                draw_source(ctx);
+
+                ctx.globalCompositeOperation = 'source-over';                
+                draw_caption(ctx, compositeTypes[i]);
+                
+                li.appendChild(c);
+                l.appendChild(li);
+            }
+            document.body.appendChild(l);
+        }
+        function create_list() {
+            var list = document.createElement('ul');
+            var destination_li = document.createElement('li');
+            var destination_canvas = create_canvas();
+            var destination_ctx = destination_canvas.getContext('2d');
+            
+            draw_destination(destination_ctx);
+            draw_caption(destination_ctx, 'Destination');
+            
+            destination_li.appendChild(destination_canvas)
+            //list.appendChild(destination_li);
+            
+            var source_li = document.createElement('li');
+            var source_canvas = create_canvas();
+            var source_ctx = source_canvas.getContext('2d');
+            
+            draw_source(source_ctx);
+            draw_caption(source_ctx, 'Source');
+            
+            source_li.appendChild(source_canvas)
+            //list.appendChild(source_li);
+            
+            return list;
+        }
+        function create_canvas() {
+            var c = document.createElement('canvas');
+            c.width = 240;
+            c.height = 240;
+            return c;
+        }
+        function draw_destination(ctx) {
+            // draw rectangle
+            ctx.fillStyle = "#003";
+            ctx.fillRect(15,15,120,120);
+        }
+        function draw_source(ctx) {
+            // draw circle
+            ctx.fillStyle = "#cc6";
+            ctx.beginPath();
+            ctx.arc(135,135,60,0,Math.PI*2,true);
+            ctx.fill();
+        }
+        function draw_caption(ctx, text) {
+            ctx.beginPath();
+            ctx.fillStyle = "#000";
+            ctx.font = "20pt sans-serif";
+            ctx.fillText(text,5,230);
+        }
+        
+        window.addEventListener('load', draw);
+    </script>
+    <style>
+        canvas { outline: 1px solid #ccc; margin: 5px; }
+        ul { list-style: none; }
+        li { display: inline-block; }
+    </style>
+</head>
+<body>
+    
+</body>
+</html>

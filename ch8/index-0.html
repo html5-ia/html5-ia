@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Video Telestrator Jukebox</title>
+    <script src="jquery-1.8.2.min.js"></script>
+    <script src="raf-polyfill.js"></script>
+    <style>
+        body {
+            font-family:  sans-serif;
+            border: 0;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            text-align: center;
+        }
+        #player {
+            display: table;
+            width: 100%;
+            padding: 4px;
+        }
+        #player > div, #player > nav {
+            display: table-cell;
+            vertical-align: top;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>HTML5 Video Telestrator Jukebox</h1>
+    </header>
+    <section id="player">
+        <div>
+            <!-- The video will appear here-->
+        </div>
+        <nav>
+            <h2>Playlist</h2>
+            <ul>
+                <!-- The video playlist will appear here-->
+            </ul>
+        </nav>
+    </section>
+</body>
+</html>

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Hello, HTML5!</title>				
+    <link rel="stylesheet" href="style.css">
+    <script src="app.js"></script>
+</head>
+<body>
+    <div itemscope itemtype="http://data-vocabulary.org/Event">
+        <a href="http://example.com/event/1" itemprop="url">
+            <span itemprop="summary">John's 40th Birthday Party</span>
+        </a>
+        <span itemprop="description">To celebrate John turning 40,
+        we're throwing a BBQ party in his honour this Friday evening
+        at close of business. Please come and bring your friends and
+        family!</span>
+    
+        Location:
+        <span itemprop="location" itemscope itemtype="http://data-vocabulary.org/Address">
+            <span itemprop="street-address">500 Market Way</span>
+            <span itemprop="locality">Ballincollig</span>
+            <span itemprop="region">Cork</span>
+        </span>
+        
+        Date and Time:
+        <time itemprop="startDate" datetime="2011-05-06T18:00+00:00">
+            Fri, May 6th @ 6pm
+        </time>
+    </div>
+</body>
+</html>

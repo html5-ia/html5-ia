@@ -1,103 +1,195 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="utf-8">
-		<title>Registration Form</title>
-		<link rel="stylesheet" href="style.css">
-		<script src="app.js"></script>
-	</head>
-	<body>
-		<h1>Awesome HTML5 Registration Form</h1>
-		<form name="register">
-			<fieldset>
-				<legend>Account Information</legend>
-				<ul>
-					<li>
-						<label for="username">Username*</label>
-						<input name="username" id="username" autofocus required>
-					</li>
-					<li>
-						<label for="password">Password*</label>
-						<input type="password" name="password" id="password" required>
-						<meter id="password_strength" value="0" min="0" max="5" low="3" high="4" optimum="5"></meter>
-					</li>
-					<li>
-						<label for="confirm_password">Confirm Password*</label>
-						<input type="password" name="confirm_password" id="confirm_password" required>
-					</li>
-					<li>
-						<label for="credit_card">Credit Card No*</label>
-						<input name="credit_card" id="credit_card" pattern="[0-9]{13,16}" title="13-16 digits, no spaces" required>
-					</li>
-				</ul>
-			</fieldset>
-			<fieldset>
-				<legend>Personal Information</legend>
-				<ul>
-					<li>
-						<label for="name">Name*</label>
-						<input name="name" id="name" required>
-					</li>
-					<li>
-						<label for="date_of_birth">Date of Birth*</label>
-						<input type="date" name="date_of_birth" id="date_of_birth" required>					
-					</li>
-					<li>
-						<label for="color">Favorite Color</label>
-						<input type="color" name="color" id="color" value="#0000FF">
-					</li>
-					<li>
-						<label for="photo">Profile Photo(s)</label>
-						<input type="file" name="photo" id="photo" multiple>
-					</li>
-					<li>
-						<label for="browser">Favorite Browser</label>
-						<input list="browsers" name="browser" id="browser">
-						<datalist id="browsers">
-							<option value="Chrome"></option>
-							<option value="Firefox"></option>
-							<option value="Internet Explorer"></option>
-							<option value="Opera"></option>							
-							<option value="Safari"></option>
-						</datalist>
-					</li>
-				</ul>
-			</fieldset>
-			<fieldset>
-				<legend>Company Information</legend>
-				<ul>
-					<li>
-						<label for="employees">No. of Employees</label>
-						<input type="number" name="employees" id="employees" min="0" max="100000" step="100">
-					</li>
-					<li>						
-						<label for="revenue">Estimated Revenue</label>
-						<input type="range" name="revenue" id="revenue" min="0" max="1000" step="1" value="0">
-						<output for="revenue" name="revenue_display">$0 million</output>
-					</li>
-				</ul>
-			</fieldset>
-			<fieldset>
-				<legend>Contact Information</legend>
-				<ul>
-					<li>
-						<label for="email">Email Address(es)*</label>
-						<input type="email" name="email" id="email" placeholder="me1@me.com, me2@me.com" required multiple>
-					</li>
-					<li>
-						<label for="phone_number">Phone Number</label>
-						<input type="tel" name="phone_number" id="phone_number" placeholder="(555) 123-4567">
-					</li>
-					<li>
-						<label for="website">Website URL</label>
-						<input type="url" name="website" id="website" placeholder="http://example.com">
-					</li>
-				</ul>
-			</fieldset>
-			<fieldset>
-				<input type="submit" name="submit" value="Submit Registration">
-				<input type="submit" name="submit" value="Submit without Validation" formnovalidate>
-			</fieldset>
-		</form>
-	</body>
+<head>
+    <meta charset="utf-8">
+    <title>Order Form</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="modernizr.js"></script>					
+    <script src="app.js"></script>
+</head>
+<body>
+    <form name="order" method="post" action="/submit">
+        <h1>Order Form</h1>
+            <fieldset>
+                <legend>Contact Details</legend>
+                <ul>
+                    <li>
+                        <label class="required">
+                            <div>Full Name</div>
+                            <input name="name" required autofocus>			
+                        </label>
+                    </li>
+                    <li>
+                        <label class="required">
+                            <div>Email Address</div>
+                            <input type="email" name="email" required>		
+                        </label>
+                    </li>
+                    <li>
+                        <label>
+                            <div>Postal Address</div>
+                            <input name="address1" placeholder="Address Line 1">	
+                        </label>
+                        <div>&nbsp;</div>
+                        <input name="address2" placeholder="Address Line 2">		
+                        <div>&nbsp;</div>                    
+                        <input name="city" class="city" placeholder="Town/City">	
+                        <input name="state" class="state" placeholder="State">	
+                        <input name="zip" class="zip" placeholder="Zip Code">	
+                        <div>&nbsp;</div>
+                        <select name="country">
+                            <option value="0">Country</option>
+                            <option value="US">United States</option>
+                            <option value="CA">Canada</option>
+                        </select>
+                    </li>
+                    <li>
+                        <label>
+                            <div>Home Phone No.</div>
+                            <input type="tel" name="homephone">
+                        </label>
+                    </li>
+                    <li>
+                        <label>
+                            <div>Cell Phone No.</div>
+                            <input type="tel" name="cellphone">			
+                        </label>            
+                    </li>
+                    <li>
+                        <label>
+                            <div>Skype Name</div>
+                            <input name="skype">
+                        </label>
+                    </li>
+                    <li>
+                        <label>
+                            <div>Twitter</div>
+                            <span class="twitter_prefix">@</span>
+                            <input name="twitter" class="twitter">
+                        </label>
+                    </li>
+                </ul>    
+            </fieldset>
+            <fieldset>
+                <legend>Login Details</legend>
+                <ul>
+                    <li>
+                        <label class="required">
+                            <div>Password</div>
+                            <input type="password" name="password" required>		
+                        </label>
+                    </li>
+                    <li>
+                        <label class="required">
+                            <div>Confirm Password</div>
+                            <input type="password" name="confirm_password" required>	
+                        </label>
+                    </li>
+                </ul>
+            </fieldset>
+            <fieldset>
+                <legend>Order Details</legend>
+                <table>
+                    <thead>
+                    <tr>                    
+                        <th>Product Code</th><th>Description</th><th>Qty</th>
+                        <th>Price</th><th>Total</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>                    
+                        <td>
+                            COMP001
+                            <input type="hidden" name="product_code" value="COMP001">
+                        </td>
+                        <td>The Ultimate Smartphone</td>
+                        <td>
+                            <input type="number" data-price="399.99" name="quantity" 
+                              value="0" min="0" max="99" maxlength="2">		
+                        </td>
+                        <td>$399.99</td>
+                        <td>
+                            <output name="item_total" class="item_total">$0.00</output>	
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            COMP002
+                            <input type="hidden" name="product_code" value="COMP002">
+                        </td>
+                        <td>The Ultimate Tablet</td>
+                        <td>
+                            <input type="number" data-price="499.99" name="quantity" 
+                              value="0" min="0" max="99" maxlength="2">		
+                        </td>
+                        <td>$499.99</td>
+                        <td>
+                            <output name="item_total" class="item_total">$0.00</output>	
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            COMP003
+                            <input type="hidden" name="product_code" value="COMP003">
+                        </td>
+                        <td>The Ultimate Netbook</td>
+                        <td>
+                            <input type="number" data-price="299.99" name="quantity" 
+                              value="0" min="0" max="99" maxlength="2">		
+                        </td>
+                        <td>$299.99</td>
+                        <td>
+                            <output name="item_total" class="item_total">$0.00</output>	
+                        </td>
+                    </tr>
+                    </tbody>
+                    <tfoot>
+                    <tr>
+                        <td colspan="4">Order Total</td>
+                        <td>
+                            <output name="order_total" id="order_total">$0.00</output>	
+                        </td>
+                    </tr>
+                    </tfoot>
+                </table>
+            </fieldset>
+            <fieldset>
+                <legend>Payment Details</legend>
+                <ul>
+                    <li>
+                        <label class="required">
+                            <div>Name on Card</div>
+                            <input name="card_name" required>
+                        </label>
+                    </li>
+                    <li>
+                        <label class="required">
+                            <div>Credit Card No.</div>
+                            <input name="card_number" pattern="[0-9]{13,16}" 	
+                              maxlength="16" required title="13-16 digits, no spaces">
+                        </label>
+                    </li>
+                    <li>
+                        <label class="required">
+                            <div>Expiry Date</div>
+                            <input type="month" name="card_expiry" maxlength="7" 	
+                              placeholder="YYYY-MM" required value="2015-06">
+                        </label>
+                    </li>
+                    <li>
+                        <label class="required">
+                            <div>CVV2 No.</div>
+                            <input name="card_cvv2" class="cvv" maxlength="3" 	
+                              pattern="[0-9]{3}" required title="exactly 3 digits"> 
+                            <span>(Three digit code at back of card)</span>
+                        </label>
+                    </li>
+                </ul>
+            </fieldset>		
+        <div class="buttons">
+            <input type="submit" value="Submit Order">
+            <input type="submit" id="saveOrder" value="Save Order" formnovalidate       formaction="/save">
+        </div>
+    </form>
+</body>
 </html>

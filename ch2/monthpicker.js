@@ -1,4 +1,5 @@
 (function() {
+
     var els = document.getElementsByTagName('input'),
         i = 0, ln = els.length, j = 0,
         monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];

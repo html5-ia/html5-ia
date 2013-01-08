@@ -18,7 +18,7 @@ header h1 {
 section { padding: 0px 10px; display: none; }
 
 /* Display active section */
-body.list section#list, body.editor section#editor { display: block; }
+body.browser-view section#list, body.editor-view section#editor { display: block; } /*gw*/
 
 /* Section header */
 section h1 {

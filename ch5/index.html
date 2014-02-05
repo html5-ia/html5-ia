@@ -1,60 +1,64 @@
 <!DOCTYPE html>
 <html lang="en" class="blue" manifest="tasks.appcache">
-<head>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-	<title>My Tasks</title>
-	<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Carter+One">
-	<link rel="stylesheet" href="style.css">
-	<script src="app.js"></script>
-</head>
-<body class="list">
-	<header>
-		<h1><span id="user_name">My</span> Tasks</h1>
-		<nav>
-			<ul>
-				<li><a href="#list" class="list">Task List</a></li>
-				<li><a href="#add" class="add">Add Task</a></li>
-				<li><a href="#settings" class="settings">Settings</a></li>
-			</ul>
-		</nav>
-	</header>
-	<section class="list">
-		<form name="search">
-			<input type="search" name="query" placeholder="Search tasks...">
-		</form>
-		<ul id="list"></ul>
-	</section>
-	<section class="add">
-		<form name="add">
-			<label>
-				Task Description
-				<textarea name="desc"></textarea>
-			</label>			
-			<label>
-				Due Date (YYYY-MM-DD)
-				<input type="date" name="due_date">
-			</label>
-			<input type="submit" value="Add Task">
-		</form>
-	</section>
-	<section class="settings">
-		<form name="settings">
-			<label>
-				Your Name
-				<input type="text" name="name">
-			</label>
-			<label>
-				Color Scheme
-				<select name="color_scheme">
-					<option>Blue</option>
-					<option>Red</option>
-					<option>Green</option>
-				</select>
-			</label>
-			<input type="submit" value="Save Settings">
-			<input type="reset" value="Reset All Data">
-		</form>
-	</section>
-</body>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width,
+                                       initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+        <title>My Tasks</title>
+        <link rel="stylesheet"
+              href="http://fonts.googleapis.com/css?family=Carter+One">
+        <link rel="stylesheet" href="style.css">
+        <script src="app.js"></script>
+    </head>
+    <body class="list">
+        <header>
+            <h1><span id="user_name">My</span> Tasks</h1>
+            <nav>
+                <ul>
+                    <li><a href="#list" class="list">Task List</a></li>
+                    <li><a href="#add" class="add">Add Task</a></li>
+                    <li><a href="#settings" class="settings">Settings</a></li>
+                </ul>
+            </nav>
+        </header>
+        <section class="list">
+            <form name="search">
+                <input type="search" name="query" placeholder="Search tasks...">
+            </form>
+            <ul id="task_list"></ul>
+        </section>
+        <section class="add">
+            <form name="add">
+                <label>
+                    Task Description
+                    <textarea name="desc"></textarea>
+                </label>
+                <label>
+                    Due Date (MM/DD/YYYY)
+                    <input type="date" name="due_date">
+                </label>
+                <input type="submit" value="Add Task">
+            </form>
+        </section>
+        <section class="settings">
+            <form name="settings">
+                <label>
+                    Your Name
+                    <input type="text" name="name">
+                </label>
+                <label>
+                    Color Scheme
+                    <select name="color_scheme">
+                        <option>Blue</option>
+                        <option>Red</option>
+                        <option>Green</option>
+                    </select>
+                </label>
+                <input type="submit" value="Save Settings">
+                <input type="reset" value="Reset All Data">
+            </form>
+        </section>
+
+
+    </body>
 </html>

@@ -1,8 +1,9 @@
-CACHE MANIFEST
+CACHE MANIFEST 
 # Rev 1
+CACHE:
 index.html
 style.css
 app.js
 
-NETWORK:
-*
+NETWORK: 
+* 

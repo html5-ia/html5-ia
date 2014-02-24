@@ -1,0 +1,52 @@
+body {
+    max-width: 480px;
+    font-family: sans-serif;
+}
+.chatwindow {
+    position: relative;
+    overflow-x: hidden;
+    overflow-y: auto;
+    height: 200px;
+    border: 0.05em solid rgba(0,0,0,0.25);
+}
+ul.chatlog {
+    display: table;
+    list-style: none;
+    padding: 0;
+    margin: 0.1em;
+    position: absolute;
+    bottom: 0;
+}
+.chatlog li {
+    display: table-row;
+}
+.chatlog li:nth-child(even) {
+    background: rgba(0,0,0,0.25);
+}
+.chatlog li time, .chatlog li b, .chatlog li span {
+    display: table-cell;
+    padding: 0.05em 0.5em;
+}
+
+ul.chatusers {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 0.5em 0;
+}
+ul.chatusers li {
+    display: inline-block;
+    padding: 0.25em;
+    margin-right: 0.25em;
+    background: rgba(0,0,0,0.25);
+    border-radius: 0.25em;
+}
+label, input {
+    display: block;
+    width: 100%;
+    padding: 0;
+    margin: 0.1em;
+    box-sizing: content-box;
+}
+input[type="submit"] {
+    width: 101.5%;
+}

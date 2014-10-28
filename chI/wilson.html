@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Canvas with HTML5 new features</title>
+    <script>
+    window.requestAnimFrame = (function(){
+        return  window.requestAnimationFrame       || 
+                window.webkitRequestAnimationFrame || 
+                window.mozRequestAnimationFrame    || 
+                window.oRequestAnimationFrame      || 
+                window.msRequestAnimationFrame     || 
+                function(callback, element){
+                  window.setTimeout(function(){
+                      callback(+new Date);
+                  }, 1000 / 60);
+                };
+    })();
+    function go() {
+        var canvas = document.getElementById('canvas');
+        canvas.width--;
+        canvas.width++;
+        if (canvas.getContext) {
+            var context = canvas.getContext('2d');
+            wilson.x = canvas.width/2;
+            wilson.y = canvas.height/2;
+            wilson.draw(canvas);
+        }
+    }
+    var wilson = {
+        x: 0,
+        y: 0,
+        draw: function (canvas) {
+            var tl_x = wilson.x - 70;
+            var tl_y = wilson.y - 70;
+            if (canvas.getContext){
+                var context = canvas.getContext('2d');
+                
+                context.beginPath();                                                 
+                context.arc(tl_x + 70, tl_y + 70, 70, 0, 2 * Math.PI, false);
+                context.fillStyle = 'yellow';                                         
+                context.fill();
+                    
+                context.beginPath();                                                 
+                context.arc(tl_x + 45, tl_y + 57, 7, 0, 1 * Math.PI, true);                        
+                context.moveTo(tl_x + 100,tl_y + 57);
+                context.arc(tl_x + 95,tl_y + 57, 7, 0, 1 * Math.PI, true);
+                context.fillStyle = '#777777';
+                context.fill();
+                    
+                context.beginPath();                                                 
+                context.arc(tl_x + 70,tl_y + 90, 30, 0, 1 * Math.PI, false);
+                context.lineTo(tl_x + 100,tl_y + 90);
+                context.fillStyle = '#ffffff';
+                context.fill();
+                context.stroke();
+                    
+                context.fillStyle = 'black';                                         
+                context.lineWidth = 3;
+                context.lineJoin = 'round';                                          
+                context.lineCap = 'round';                                           
+                context.beginPath();
+                context.moveTo(tl_x + 30,tl_y + 40);
+                context.lineTo(tl_x + 30,tl_y + 70); 
+                context.lineTo(tl_x + 60,tl_y + 70); 
+                context.lineTo(tl_x + 60,tl_y + 40); 
+                context.lineTo(tl_x + 30,tl_y + 40); 
+                context.moveTo(tl_x + 60,tl_y + 60); 
+                context.lineTo(tl_x + 80,tl_y + 60);
+                context.moveTo(tl_x + 80,tl_y + 40); 
+                context.lineTo(tl_x + 80,tl_y + 70);
+                context.lineTo(tl_x + 110,tl_y + 70);
+                context.lineTo(tl_x + 110,tl_y + 40);
+                context.lineTo(tl_x + 80,tl_y + 40);
+                context.stroke();
+            }
+        }
+    }
+    function draw_welcome(){
+        var canvas = document.getElementById('canvas');
+        canvas.width = 400;
+        canvas.height = 300;
+        if (canvas.getContext) {
+            var ctx = canvas.getContext('2d');
+            ctx.font = "24pt sans-serif";
+            ctx.fillText('Click to start ',canvas.width/2-120,canvas.height/2);
+        }
+    }
+    window.addEventListener("load", draw_welcome, false);
+    </script>
+    <style>
+        body {
+            font-family: sans-serif;
+        }
+        canvas {
+            display: block;
+            outline: 1px solid #999;
+        }
+    </style>
+</head>
+<body>
+    <h1>Gaming and mobile testbed</h1>
+    <canvas id="canvas" onclick="go()"></canvas>
+    <script>
+        //Write click to start message
+    </script>
+</body>
+</html>

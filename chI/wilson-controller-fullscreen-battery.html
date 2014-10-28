@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Canvas with HTML5 new features</title>
+    <script>
+    window.requestAnimFrame = (function(){
+        return  window.requestAnimationFrame       || 
+                window.webkitRequestAnimationFrame || 
+                window.mozRequestAnimationFrame    || 
+                window.oRequestAnimationFrame      || 
+                window.msRequestAnimationFrame     || 
+                function(callback, element){
+                  window.setTimeout(function(){
+                      callback(+new Date);
+                  }, 1000 / 60);
+                };
+    })();
+    function go() {
+        var canvas = document.getElementById("canvas");
+        if (canvas.requestFullScreen) {
+            canvas.requestFullScreen();
+        } else if (canvas.mozRequestFullScreen) {
+            canvas.mozRequestFullScreen();
+        } else if (canvas.webkitRequestFullScreen) {
+            canvas.webkitRequestFullScreen();
+        }
+        document.addEventListener("fullscreenchange", function () {
+            console.log(document.fullscreen);
+        }, false);
+        document.addEventListener("mozfullscreenchange", function () {
+            console.log(document.mozFullScreen);
+        }, false);
+        document.addEventListener("webkitfullscreenchange", function () {
+            console.log(document.webkitIsFullScreen);
+        }, false);
+        if (canvas.getContext) {
+            var context = canvas.getContext('2d');
+            canvas.width = window.screen.width;
+            canvas.height = window.screen.height;
+            wilson.x = canvas.width/2;
+            wilson.y = canvas.height/2;
+            wilson.target_x = wilson.x;
+            wilson.target_y = wilson.y;
+            var battery = navigator.battery || navigator.mozBattery || navigator.webkitBattery;
+            wilson.draw(canvas, battery);
+            follow_mouse();
+            var frame = 0;
+            (function animloop(){
+                requestAnimFrame(animloop);
+                canvas.width--;
+                canvas.width++;
+                wilson.update_xy();
+                var message = "Battery level:" + battery.level * 100 + "%";
+                if (battery.charging) { message += " (charging)"; }
+                message += " Wilson position: " + wilson.x + "," + wilson.y + " Mouse position: " + wilson.target_x + "," + wilson.target_y + " Direction: " + wilson.v_x + "," + wilson.v_y;
+                write_message(canvas, message);
+                wilson.draw(canvas, battery);
+            })();
+        }
+    }
+    var wilson = {
+        x: 0,
+        y: 0,
+        target_x: 0,
+        target_y: 0,
+        v_x: 0,
+        v_y: 0,
+        get_v: function(t,c) {
+            var v = Math.floor(Math.sqrt(t*2) - Math.sqrt(c*2));
+            if (isNaN(v)) { v = 0; }
+            if (v == 0 && c != t) {
+                v = (t - c) / Math.abs(t - c);
+            }
+            return v;
+        },
+        update_xy: function() {
+            wilson.v_x = wilson.get_v(wilson.target_x,wilson.x);
+            wilson.v_y = wilson.get_v(wilson.target_y,wilson.y);
+            wilson.x += wilson.v_x;
+            wilson.y += wilson.v_y;
+            if (isNaN(wilson.x) || wilson.x < 0) { wilson.x = 0; }
+            if (isNaN(wilson.y) || wilson.y < 0) { wilson.y = 0; }
+        },
+        draw: function (canvas, battery) {
+            var tl_x = wilson.x - 70;
+            var tl_y = wilson.y - 70;
+            if (canvas.getContext){
+                var context = canvas.getContext('2d');
+                
+                context.beginPath();                                                 
+                context.arc(tl_x + 70, tl_y + 70, 70, 0, 2 * Math.PI, false);
+                context.fillStyle = 'yellow';                                         
+                context.fill();
+
+                if (battery.charging || (!battery.charging && (battery.level > 0.5))) {
+                    context.beginPath();                                                 
+                    context.arc(tl_x + 45, tl_y + 57, 7, 0, 1 * Math.PI, true);                        
+                    context.moveTo(tl_x + 100,tl_y + 57);
+                    context.arc(tl_x + 95,tl_y + 57, 7, 0, 1 * Math.PI, true);
+                    context.fillStyle = '#777777';
+                    context.fill();
+                        
+                    context.beginPath();                                                 
+                    context.arc(tl_x + 70,tl_y + 90, 30, 0, 1 * Math.PI, false);
+                    context.lineTo(tl_x + 100,tl_y + 90);
+                    context.fillStyle = '#ffffff';
+                    context.fill();
+                    context.stroke();
+                }
+                if (battery.charging) {
+                    context.fillStyle = 'black';                                         
+                    context.lineWidth = 3;
+                    context.lineJoin = 'round';                                          
+                    context.lineCap = 'round';                                           
+                    context.beginPath();
+                    context.moveTo(tl_x + 30,tl_y + 40);
+                    context.lineTo(tl_x + 30,tl_y + 70); 
+                    context.lineTo(tl_x + 60,tl_y + 70); 
+                    context.lineTo(tl_x + 60,tl_y + 40); 
+                    context.lineTo(tl_x + 30,tl_y + 40); 
+                    context.moveTo(tl_x + 60,tl_y + 60); 
+                    context.lineTo(tl_x + 80,tl_y + 60);
+                    context.moveTo(tl_x + 80,tl_y + 40); 
+                    context.lineTo(tl_x + 80,tl_y + 70);
+                    context.lineTo(tl_x + 110,tl_y + 70);
+                    context.lineTo(tl_x + 110,tl_y + 40);
+                    context.lineTo(tl_x + 80,tl_y + 40);
+                    context.stroke();
+                }
+            }
+        }
+    }
+    function draw_welcome(){
+        var canvas = document.getElementById('canvas');
+        canvas.width = 400;
+        canvas.height = 300;
+        if (canvas.getContext) {
+            var ctx = canvas.getContext('2d');
+            ctx.font = "24pt sans-serif";
+            ctx.fillText('Click to start ',canvas.width/2-120,canvas.height/2);
+        }
+        if (canvas.requestFullScreen) {
+            document.addEventListener("fullscreenchange", function () {
+                if(!document.fullscreen) {
+                    canvas.width = 400;
+                    canvas.height = 300;
+                }
+            }, false);
+        } else if (canvas.mozRequestFullScreen) {
+            document.addEventListener("mozfullscreenchange", function () {
+                if(!document.mozFullScreen) {
+                    canvas.width = 400;
+                    canvas.height = 300;
+                }
+            }, false);
+        } else if (canvas.webkitRequestFullScreen) {
+            document.addEventListener("webkitfullscreenchange", function () {
+                if(!document.webkitIsFullScreen) {
+                    canvas.width = 400;
+                    canvas.height = 300;
+                }
+            }, false);
+        }
+    }
+    function get_mouse_pos(canvas, evt){
+        // get canvas position
+        var obj = canvas;
+        var top = 0;
+        var left = 0;
+        while (obj && obj.tagName != 'BODY') {
+            top += obj.offsetTop;
+            left += obj.offsetLeft;
+            obj = obj.offsetParent;
+        }
+     
+        // return relative mouse position
+        var mouseX = evt.clientX - left + window.pageXOffset;
+        var mouseY = evt.clientY - top + window.pageYOffset;
+        return {
+            x: mouseX,
+            y: mouseY
+        };
+    }
+    function write_message(canvas, message){
+        var context = canvas.getContext('2d');
+        context.font = '18pt sans-serif';
+        context.fillStyle = '#fff';
+        context.strokeStyle = '#000';
+        context.strokeText(message, 10, 25);
+        context.fillText(message, 10, 25);
+    }
+    function follow_mouse() {
+        var canvas = document.getElementById('canvas');
+        var context = canvas.getContext('2d');
+     
+        canvas.addEventListener('mousemove', function(evt){
+            var mousePos = get_mouse_pos(canvas, evt);
+            wilson.target_x = mousePos.x;
+            wilson.target_y = mousePos.y;
+        }, false);
+    }
+    window.addEventListener("load", draw_welcome, false);
+    </script>
+    <style>
+        body {
+            font-family: sans-serif;
+        }
+        canvas {
+            display: block;
+            outline: 1px solid #999;
+        }
+        canvas:-moz-full-screen {
+            background: #006;
+            outline: none;
+        }
+        canvas:-webkit-full-screen {
+            background: #006;
+            outline: none;
+        }
+        canvas:fullscreen {
+            background: #006;
+            outline: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Gaming and mobile testbed</h1>
+    <canvas id="canvas" onclick="go()"></canvas>
+</body>
+</html>
